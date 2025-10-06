@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$#" -ne 1 ]; then
-    echo "Usage: bash $0 MODEL"
+    echo "Usage: bash $0 MODEL CSC IMEI"
     exit 1
 fi
 
@@ -11,30 +11,25 @@ BIN_DIR="bin"
 WORK_DIR="work"
 OUT_DIR="out"
 
-
-# --- Setup Directories ---
-chmod +x ./scripts/setup_directories.sh
-bash ./scripts/setup_directories.sh "FW_DIR" "WORK_DIR" "OUT_DIR"
-
-
-# --- Extract Firmware ---
+echo "--- Extracting Firmware ---"
 chmod +x ./scripts/extract_firmware.sh
 bash ./scripts/extract_firmware.sh "$(pwd)/${FW_DIR}/${MODEL}" "${MODEL}.zip"
 
-
-# --- Run IMG Unpack cmd ---
+echo "--- Unpacking images ---"
 chmod +x ./scripts/extract_ext4.sh
 bash ./scripts/extract_ext4.sh "$(pwd)/${FW_DIR}/${MODEL}"
 
-
-# --- Run Debloat cmd ---
+echo "--- Debloating ---"
 chmod +x ./QuantumROM/mods/debloater.sh
 bash ./QuantumROM/mods/debloater.sh "$(pwd)/${FW_DIR}/${MODEL}"
 
-
-# --- Run Security Disabler cmd ---
+echo "--- Disabling Security ---"
 chmod +x ./QuantumROM/mods/security_disabler.sh
 chmod +x ./QuantumROM/mods/musti_disabler.sh
 bash ./QuantumROM/mods/security_disabler.sh "$(pwd)/${FW_DIR}/${MODEL}"
 bash ./QuantumROM/mods/musti_disabler.sh "$(pwd)/${FW_DIR}/${MODEL}"
 
+echo "--- Packing .img ---"
+chmod +x ./bin/make_ext4fs
+chmod +x ./scripts/pack_ext4.sh
+bash ./scripts/pack_ext4.sh "$(pwd)/${FW_DIR}/${MODEL}" "$(pwd)/${BIN_DIR}" "$(pwd)/${OUT_DIR}"
