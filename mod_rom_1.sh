@@ -12,49 +12,56 @@ FW_DIR="fw_download"
 BIN_DIR="bin"
 WORK_DIR="work"
 OUT_DIR="out"
+GIT_SUPPORT_SIZE=2147483648
 
-# --- Install required packages ---
-chmod +x ./scripts/install_packages.sh 
-bash ./scripts/install_packages.sh
+
+echo " --- Installing required packages ---"
+chmod +x ./scripts/install_packages.sh > /dev/null 2>&1
+bash ./scripts/install_packages.sh > /dev/null 2>&1
 
 # --- Setup Directories ---
 chmod +x ./scripts/setup_directories.sh
 bash ./scripts/setup_directories.sh "FW_DIR" "WORK_DIR" "OUT_DIR"
 
-
-# --- Start firmware download ---
+echo "--- Downloading $DEVICE_MODEL $CSC firmware ---"
 chmod +x ./scripts/download_firmware.sh
 bash ./scripts/download_firmware.sh "$MODEL" "$CSC" "$IMEI" "$FW_DIR" "$MODEL"
 
-
-# --- Extract Firmware ---
+echo "--- Extract Firmware ---"
 chmod +x ./scripts/extract_firmware.sh
 bash ./scripts/extract_firmware.sh "$(pwd)/${FW_DIR}/${MODEL}" "${MODEL}.zip"
 
-
-# --- Run IMG Unpack cmd ---
+echo "--- Unpacking images ---"
 chmod +x ./scripts/extract_ext4.sh
 bash ./scripts/extract_ext4.sh "$(pwd)/${FW_DIR}/${MODEL}"
 
-
-# --- Run Debloat cmd ---
+echo "--- Debloating ---"
 chmod +x ./QuantumROM/mods/debloater.sh
 bash ./QuantumROM/mods/debloater.sh "$(pwd)/${FW_DIR}/${MODEL}"
 
-
-# --- Run Security Disabler cmd ---
+echo "--- Disabling Security ---"
 chmod +x ./QuantumROM/mods/security_disabler.sh
 chmod +x ./QuantumROM/mods/musti_disabler.sh
 bash ./QuantumROM/mods/security_disabler.sh "$(pwd)/${FW_DIR}/${MODEL}"
 bash ./QuantumROM/mods/musti_disabler.sh "$(pwd)/${FW_DIR}/${MODEL}"
 
-
-# --- Run IMG Pack cmd ---
+echo "--- Packing .img ---:
 chmod +x ./bin/make_ext4fs
 chmod +x ./scripts/pack_ext4.sh
 bash ./scripts/pack_ext4.sh "$(pwd)/${FW_DIR}/${MODEL}" "$(pwd)/${BIN_DIR}" "$(pwd)/${OUT_DIR}"
 
-# --- Compresse all img files to xz format ---
-echo "Compressing .img files in $OUT_DIR..."
+echo "--- Compressing .img files in $OUT_DIR ---"
 #for i in "$OUT_DIR"/*.img; do [ -e "$i" ] && 7z a -mx9 "${i%.*}.img.xz" "$i"; done
 #rm -rf "$OUT_DIR"/*.img
+
+echo "--- Splitting file if need ---"
+for file in "$OUT_DIR"/*; do
+  [ -f "$file" ] || continue
+
+  FILE_SIZE=$(stat -c%s "$file")
+  if [ "$FILE_SIZE" -gt "$GIT_SUPPORT_SIZE" ]; then
+    echo "📤 Splitting: $file (Size: $FILE_SIZE bytes)"
+    split -b "$GIT_SUPPORT_SIZE" -d -a 3 "$file" "${file}."
+    rm -f "$file"
+  fi
+done
