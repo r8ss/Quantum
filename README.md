@@ -40,7 +40,7 @@ In the command line, use the firmware file name without the .zip extension as ``
 
 ```bash
 sudo chmod +x ./scripts/setup_directories.sh &&
-sudo bash ./scripts/setup_directories.sh
+sudo bash ./scripts/setup_directories.sh fw_download work out
 ```
 
 ```bash
