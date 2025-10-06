@@ -14,20 +14,19 @@ WORK_DIR="work"
 OUT_DIR="out"
 GIT_SUPPORT_SIZE=2147483648
 
-
-echo " --- Installing required packages ---"
+echo "--- Installing required packages ---"
 chmod +x ./scripts/install_packages.sh > /dev/null 2>&1
 bash ./scripts/install_packages.sh > /dev/null 2>&1
 
 # --- Setup Directories ---
 chmod +x ./scripts/setup_directories.sh
-bash ./scripts/setup_directories.sh "FW_DIR" "WORK_DIR" "OUT_DIR"
+bash ./scripts/setup_directories.sh "$FW_DIR" "$WORK_DIR" "$OUT_DIR"
 
 echo "--- Downloading $MODEL $CSC firmware ---"
 chmod +x ./scripts/download_firmware.sh
 bash ./scripts/download_firmware.sh "$MODEL" "$CSC" "$IMEI" "$FW_DIR" "$MODEL"
 
-echo "--- Extract Firmware ---"
+echo "--- Extracting Firmware ---"
 chmod +x ./scripts/extract_firmware.sh
 bash ./scripts/extract_firmware.sh "$(pwd)/${FW_DIR}/${MODEL}" "${MODEL}.zip"
 
@@ -45,7 +44,7 @@ chmod +x ./QuantumROM/mods/musti_disabler.sh
 bash ./QuantumROM/mods/security_disabler.sh "$(pwd)/${FW_DIR}/${MODEL}"
 bash ./QuantumROM/mods/musti_disabler.sh "$(pwd)/${FW_DIR}/${MODEL}"
 
-echo "--- Packing .img ---:
+echo "--- Packing .img ---"
 chmod +x ./bin/make_ext4fs
 chmod +x ./scripts/pack_ext4.sh
 bash ./scripts/pack_ext4.sh "$(pwd)/${FW_DIR}/${MODEL}" "$(pwd)/${BIN_DIR}" "$(pwd)/${OUT_DIR}"
@@ -54,7 +53,7 @@ echo "--- Compressing .img files in $OUT_DIR ---"
 #for i in "$OUT_DIR"/*.img; do [ -e "$i" ] && 7z a -mx9 "${i%.*}.img.xz" "$i"; done
 #rm -rf "$OUT_DIR"/*.img
 
-echo "--- Splitting files if need ---"
+echo "--- Splitting files if needed ---"
 for file in "$OUT_DIR"/*; do
   [ -f "$file" ] || continue
 
@@ -65,4 +64,3 @@ for file in "$OUT_DIR"/*; do
     rm -f "$file"
   fi
 done
-
