@@ -13,6 +13,9 @@ BIN_DIR="bin"
 WORK_DIR="work"
 OUT_DIR="out"
 
+# --- Install required packages ---
+chmod +x ./scripts/install_packages.sh 
+bash ./scripts/install_packages.sh
 
 # --- Setup Directories ---
 chmod +x ./scripts/setup_directories.sh
