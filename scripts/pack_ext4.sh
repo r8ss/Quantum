@@ -1,7 +1,5 @@
 #!/bin/bash
 
-echo "Running script: $(basename "$0")"
-
 if [ -z "$3" ]; then
     echo "Usage: $0 <ROM_DIR> <BIN_DIR> <OUT_DIR>"
     exit 1
