@@ -46,7 +46,3 @@ jobs:
       - name: Clean everything.
         run: |
           sudo rm -rf *
-
-      - name: Clean everything.
-        run: |
-          sudo rm -rf *
