@@ -28,3 +28,17 @@ jobs:
         run: |
           chmod +x ./mod_rom_1.sh
           sudo bash ./mod_rom_1.sh "${{ github.event.inputs.DEVICE_MODEL }}" "${{ github.event.inputs.CSC }}" "${{ github.event.inputs.IMEI }}"
+
+      - name: Uploading all xz file to Release.
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "*.xz"
+          name: "${{ env.BUILD_VERSION }}.zip"
+          tag_name: "${{ github.run_id }}"
+          body: |
+            DEVICE_MODEL: ${{ env.DEVICE_MODEL }}
+            CSC: ${{ env.ANDROID_VERSION }}
+            img files size:
+            ${{ env.IMG_INFO }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
