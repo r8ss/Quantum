@@ -35,11 +35,11 @@ jobs:
           tag_name: "build-${{ github.run_id }}"
           name: "QuantumROM Build: ${{ github.run_id }}"
           body: |
-            **Build Information**
+            ***Build Information***
             - Device Model: ${{ github.event.inputs.DEVICE_MODEL }}
             - CSC: ${{ github.event.inputs.CSC }}
           files: |
-            ./out/*.xz
+            ./out/*
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
 
