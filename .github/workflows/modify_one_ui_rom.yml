@@ -42,3 +42,7 @@ jobs:
             ./out/*.xz
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+
+      - name: Clean everything.
+        run: |
+          sudo rm -rf *
