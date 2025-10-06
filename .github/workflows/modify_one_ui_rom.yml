@@ -24,6 +24,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      
+      - name: Installing required packages
+        run: |
+          chmod +x ./scripts/install_packages.sh
+          sudo bash ./scripts/install_packages.sh
+          
       - name: Start rom download and modify Process
         run: |
           chmod +x ./mod_rom_1.sh
