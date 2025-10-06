@@ -10,11 +10,11 @@ on:
       CSC:
         description: "Enter the CSC (Country Specific Code)"
         required: true
-        default: "CSC_CODE"
+        default: "BKD"
       IMEI:
         description: "Enter the device IMEI number"
         required: true
-        default: "123456789012345"
+        default: "350167020473859"
 
 jobs:
   build:
