@@ -24,40 +24,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Display captured inputs (for debugging)
-        run: |
-          echo "DEVICE_MODEL: ${{ github.event.inputs.DEVICE_MODEL }}"
-          echo "CSC: ${{ github.event.inputs.CSC }}"
-          echo "IMEI: ${{ github.event.inputs.IMEI }}"
-        
       - name: Installing required packages
         run: |
-          chmod +x ./scripts/install_packages.sh
-          sudo bash ./scripts/install_packages.sh
-
-      - name: Downloading firmware for ${{ github.event.inputs.DEVICE_MODEL }}
-        run: |
-          chmod +x ./scripts/download_firmware.sh
-          sudo bash ./scripts/download_firmware.sh \
-            "${{ github.event.inputs.DEVICE_MODEL }}" \
-            "${{ github.event.inputs.CSC }}" \
-            "${{ github.event.inputs.IMEI }}" \
-            "fw_download" \
-            "${{ github.event.inputs.DEVICE_MODEL }}"
-
-      - name: Extracting firmware for ${{ github.event.inputs.DEVICE_MODEL }}
-        run: |
-          chmod +x ./scripts/extract_firmware.sh
-          sudo bash ./scripts/extract_firmware.sh \
-            "fw_download/${{ github.event.inputs.DEVICE_MODEL }}" \
-            "${{ github.event.inputs.DEVICE_MODEL }}.zip"
-
-      - name: Run IMG Pack cmd
-        run: |
-          pwd
-          chmod +x ./bin/make_ext4fs
-          chmod +x ./scripts/pack_ext4.sh
-          sudo bash ./scripts/pack_ext4.sh \
-            "$(pwd)/fw_download/${{ github.event.inputs.DEVICE_MODEL }}" \
-            "$(pwd)/bin" \
-            "$(pwd)/out"
+          chmod +x ./mod_rom.sh_1.sh
+          sudo bash ./mod_rom.sh_1.sh "${{ github.event.inputs.DEVICE_MODEL }}" "${{ github.event.inputs.CSC }}" "${{ github.event.inputs.IMEI }}"
