@@ -35,13 +35,19 @@ jobs:
         chmod +x ./scripts/install_packages.sh
         sudo bash ./scripts/install_packages.sh
 
-    - name: Downloading and extracting ${{ github.event.inputs.DEVICE_MODEL }} firmware.
+    - name: Downloading ${{ github.event.inputs.DEVICE_MODEL }} firmware.
       run: |
         chmod +x ./scripts/download_firmware.sh
         sudo bash ./scripts/download_firmware.sh ${{ GITHUB.EVENT.INPUTS.DEVICE_MODEL }} ${{ github.event.inputs.CSC }} ${{ github.event.inputs.IMEI }} fw_download ${{ GITHUB.EVENT.INPUTS.DEVICE_MODEL }} 
 
+    - name: Extracting ${{ github.event.inputs.DEVICE_MODEL }} firmware.
+      run: |
+        chmod +x ./scripts/extract_firmware.sh
+        sudo bash ./scripts/extract_firmware.sh ${{ GITHUB.EVENT.INPUTS.DEVICE_MODEL }} fw_download ${{ GITHUB.EVENT.INPUTS.DEVICE_MODEL }}.zip
+
     - name: Run IMG Pack cmd
       run: |
+        pwd
         chmod +x ./bin/make_ext4fs
         chmod +x ./scripts/pack_ext4.sh
         sudo bash ./scripts/pack_ext4.sh "fw_download/${{ GITHUB.EVENT.INPUTS.DEVICE_MODEL }}" bin out
