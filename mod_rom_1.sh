@@ -23,7 +23,7 @@ bash ./scripts/install_packages.sh > /dev/null 2>&1
 chmod +x ./scripts/setup_directories.sh
 bash ./scripts/setup_directories.sh "FW_DIR" "WORK_DIR" "OUT_DIR"
 
-echo "--- Downloading $DEVICE_MODEL $CSC firmware ---"
+echo "--- Downloading $MODEL $CSC firmware ---"
 chmod +x ./scripts/download_firmware.sh
 bash ./scripts/download_firmware.sh "$MODEL" "$CSC" "$IMEI" "$FW_DIR" "$MODEL"
 
