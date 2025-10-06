@@ -53,15 +53,3 @@ echo "--- Compressing .img files in $OUT_DIR ---"
 for i in "$OUT_DIR"/*.img; do [ -e "$i" ] && 7z a -mx9 "${i%.*}.img.xz" "$i"; done
 rm -rf "$OUT_DIR"/*.img
 
-echo "--- Splitting files if needed ---"
-for file in "$OUT_DIR"/*; do
-  [ -f "$file" ] || continue
-
-  FILE_SIZE=$(stat -c%s "$file")
-  if [ "$FILE_SIZE" -gt "$GIT_SUPPORT_SIZE" ]; then
-    echo "📤 Splitting: $file (Size: $FILE_SIZE bytes)"
-    split -b "$GIT_SUPPORT_SIZE" -d -a 3 "$file" "${file}."
-    rm -f "$file"
-  fi
-done
-
