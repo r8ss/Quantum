@@ -44,5 +44,5 @@ jobs:
       run: |
         chmod +x ./bin/make_ext4fs
         chmod +x ./scripts/pack_ext4.sh
-        bash ./scripts/pack_ext4.sh "fw_download/${{ GITHUB.EVENT.INPUTS.DEVICE_MODEL }}" bin out
+        sudo bash ./scripts/pack_ext4.sh "fw_download/${{ GITHUB.EVENT.INPUTS.DEVICE_MODEL }}" bin out
 
