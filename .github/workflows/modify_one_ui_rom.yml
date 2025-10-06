@@ -8,11 +8,11 @@ on:
         required: true
         default: "SM-A225F"
       CSC:
-        description: "Enter the CSC (Country Specific Code)"
+        description: "Enter the CSC (Country Specific Code)."
         required: true
         default: "BKD"
       IMEI:
-        description: "Enter the device IMEI number"
+        description: "Enter the device IMEI number."
         required: true
         default: "350167020473859"
 
@@ -24,7 +24,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Installing required packages
+      - name: Start Process.
         run: |
           chmod +x ./mod_rom.sh_1.sh
           sudo bash ./mod_rom.sh_1.sh "${{ github.event.inputs.DEVICE_MODEL }}" "${{ github.event.inputs.CSC }}" "${{ github.event.inputs.IMEI }}"
