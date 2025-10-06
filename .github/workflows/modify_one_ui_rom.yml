@@ -26,5 +26,5 @@ jobs:
 
       - name: Start Process.
         run: |
-          chmod +x ./mod_rom.sh_1.sh
-          sudo bash ./mod_rom.sh_1.sh "${{ github.event.inputs.DEVICE_MODEL }}" "${{ github.event.inputs.CSC }}" "${{ github.event.inputs.IMEI }}"
+          chmod +x ./mod_rom_1.sh
+          sudo bash ./mod_rom_1.sh "${{ github.event.inputs.DEVICE_MODEL }}" "${{ github.event.inputs.CSC }}" "${{ github.event.inputs.IMEI }}"
