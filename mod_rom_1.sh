@@ -15,8 +15,8 @@ OUT_DIR="out"
 GIT_SUPPORT_SIZE=2147483648
 
 echo "--- Installing required packages ---"
-chmod +x ./scripts/install_packages.sh > /dev/null 2>&1
-bash ./scripts/install_packages.sh > /dev/null 2>&1
+chmod +x ./scripts/install_packages.sh
+bash ./scripts/install_packages.sh
 
 # --- Setup Directories ---
 chmod +x ./scripts/setup_directories.sh
