@@ -43,7 +43,7 @@ jobs:
     - name: Extracting ${{ github.event.inputs.DEVICE_MODEL }} firmware.
       run: |
         chmod +x ./scripts/extract_firmware.sh
-        sudo bash ./scripts/extract_firmware.sh ${{ GITHUB.EVENT.INPUTS.DEVICE_MODEL }} fw_download ${{ GITHUB.EVENT.INPUTS.DEVICE_MODEL }}.zip
+        sudo bash ./scripts/extract_firmware.sh fw_download/${{ GITHUB.EVENT.INPUTS.DEVICE_MODEL }} ${{ GITHUB.EVENT.INPUTS.DEVICE_MODEL.zip
 
     - name: Run IMG Pack cmd
       run: |
