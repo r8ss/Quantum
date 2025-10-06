@@ -5,7 +5,6 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-echo "Running script: $(basename "$0")"
 ROM_DIR="$1"
 
 for imgfile in $ROM_DIR/*.img; do
