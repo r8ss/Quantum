@@ -52,7 +52,7 @@ for file in "$OUT_DIR"/*; do
   FILE_SIZE=$(stat -c%s "$file")
   if [ "$FILE_SIZE" -gt "$GIT_SUPPORT_SIZE" ]; then
     echo "📤 Splitting: $file (Size: $FILE_SIZE bytes)"
-    split -b "$GIT_SUPPORT_SIZE" -d -a 3 "$file" "${file}."
+    split -b "$GIT_SUPPORT_SIZE" -d -a 3 "$file" "${file}.part"
     rm -f "$file"
   fi
 done
