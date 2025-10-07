@@ -40,7 +40,14 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11'
-          cache: 'gradle'
+        
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          arguments: build
+
+      - name: Build with Gradle
+        run: ./gradlew build --refresh-dependencies
 
       - name: Start ROM download and modify process
         run: |
