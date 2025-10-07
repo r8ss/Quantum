@@ -40,7 +40,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11'
-          cache: 'gradle'
+          cache: 'maven'
 
       - name: Start ROM download and modify process
         run: |
