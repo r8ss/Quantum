@@ -36,7 +36,7 @@ bash ./scripts/extract_ext4.sh "$(pwd)/${FW_DIR}/${MODEL}"
 echo ""
 echo "--- Debloating ---"
 chmod +x ./QuantumROM/mods/debloater.sh
-# bash ./QuantumROM/mods/debloater.sh "$(pwd)/${FW_DIR}/${MODEL}"
+bash ./QuantumROM/mods/debloater.sh "$(pwd)/${FW_DIR}/${MODEL}"
 
 echo ""
 echo "--- Disabling Security ---"
