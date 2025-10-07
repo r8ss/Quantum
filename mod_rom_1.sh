@@ -12,7 +12,6 @@ FW_DIR="fw_download"
 BIN_DIR="bin"
 WORK_DIR="work"
 OUT_DIR="out"
-GIT_SUPPORT_SIZE=2000000000
 
 echo ""
 # --- Setup Directories ---
@@ -51,16 +50,3 @@ echo "--- Packing .img ---"
 chmod +x ./bin/make_ext4fs
 chmod +x ./scripts/pack_ext4.sh
 bash ./scripts/pack_ext4.sh "$(pwd)/${FW_DIR}/${MODEL}" "$(pwd)/${BIN_DIR}" "$(pwd)/${OUT_DIR}"
-
-echo ""
-echo "--- Splitting files if needed ---"
-for file in "$OUT_DIR"/*; do
-  [ -f "$file" ] || continue
-
-  FILE_SIZE=$(stat -c%s "$file")
-  if [ "$FILE_SIZE" -gt "$GIT_SUPPORT_SIZE" ]; then
-    echo "📤 Splitting: $file (Size: $FILE_SIZE bytes)"
-    split -b "$GIT_SUPPORT_SIZE" -d -a 3 "$file" "${file}.part"
-    rm -f "$file"
-  fi
-done
