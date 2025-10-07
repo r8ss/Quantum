@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Linux setup.
-
 sudo apt update && \
 DEBIAN_FRONTEND=noninteractive sudo apt install -yq \
   attr ccache clang ffmpeg golang \
