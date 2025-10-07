@@ -12,7 +12,7 @@ FW_DIR="fw_download"
 BIN_DIR="bin"
 WORK_DIR="work"
 OUT_DIR="out"
-GIT_SUPPORT_SIZE=2147483648
+GIT_SUPPORT_SIZE=2000000000
 
 echo ""
 # --- Setup Directories ---
