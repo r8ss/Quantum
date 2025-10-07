@@ -24,18 +24,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      
       - name: Installing required packages
         run: |
           chmod +x ./scripts/install_packages.sh
           sudo bash ./scripts/install_packages.sh
           
-      - name: Start rom download and modify Process
+      - name: Start ROM download and modify process
         run: |
           chmod +x ./mod_rom_1.sh
           sudo bash ./mod_rom_1.sh "${{ github.event.inputs.DEVICE_MODEL }}" "${{ github.event.inputs.CSC }}" "${{ github.event.inputs.IMEI }}"
 
-      - name: Upload all compressed img files to GitHub Release.
+      - name: Upload all files to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: "build-${{ github.run_id }}"
@@ -46,9 +45,10 @@ jobs:
             - CSC: ${{ github.event.inputs.CSC }}
           files: |
             ./out/*
+            ./out/*.part*
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
 
-      - name: Clean everything.
+      - name: Clean everything
         run: |
           sudo rm -rf *
