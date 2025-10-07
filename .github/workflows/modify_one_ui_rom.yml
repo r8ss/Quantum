@@ -36,7 +36,7 @@ jobs:
 
       - name: Split files before uploading if need
         run: |
-          GIT_SUPPORT_SIZE=214700000
+          GIT_SUPPORT_SIZE=2147000000
           OUT_DIR="./out"
           echo "--- Checking for large files in $OUT_DIR ---"
 
@@ -59,7 +59,8 @@ jobs:
             ***Build Information***
             - Device Model: ${{ github.event.inputs.DEVICE_MODEL }}
             - CSC: ${{ github.event.inputs.CSC }}
-          files: ./out/*
+          files: |
+            ./out/*
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
 
