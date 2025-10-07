@@ -49,3 +49,8 @@ sudo chmod +x mod_rom_2.sh
 ```bash
 sudo bash mod_rom_2.sh DEVICE_MODEL
 ```
+
+# Credits:
+Salvo Giangreco: https://github.com/salvogiangri
+
+
