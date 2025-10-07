@@ -50,3 +50,8 @@ echo "--- Packing .img ---"
 chmod +x ./bin/make_ext4fs
 chmod +x ./scripts/pack_ext4.sh
 bash ./scripts/pack_ext4.sh "$(pwd)/${FW_DIR}/${MODEL}" "$(pwd)/${BIN_DIR}" "$(pwd)/${OUT_DIR}"
+
+echo ""
+echo "--- Compressing .img files in $OUT_DIR ---"
+for i in "$OUT_DIR"/*.img; do [ -e "$i" ] && 7z a -mx9 "${i%.*}.img.xz" "$i"; done
+rm -rf "$OUT_DIR"/*.img
