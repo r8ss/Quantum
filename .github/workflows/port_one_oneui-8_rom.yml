@@ -3,16 +3,20 @@ name: QuantumROM Tools
 on:
   workflow_dispatch:
     inputs:
-      DEVICE_MODEL:
-        description: "Enter the DEVICE_MODEL."
+      STOCK_DEVICE_MODEL:
+        description: "Enter the STOCK_DEVICE_MODEL."
+        required: true
+        default: "SM-A225F"
+      TARGET_DEVICE_MODEL:
+        description: "Enter the TARGET_DEVICE_MODEL."
         required: true
         default: "SM-A245F"
-      CSC:
-        description: "Enter the CSC (Country Specific Code)."
+      TARGET_DEVICE_CSC:
+        description: "Enter the TARGET_DEVICE_CSC (Country Specific Code)."
         required: true
         default: "BKD"
-      IMEI:
-        description: "Enter the device IMEI number."
+      TARGET_DEVICE_IMEI:
+        description: "Enter the TARGET_DEVICE_IMEI number."
         required: true
         default: "357181567907875"
 
@@ -35,10 +39,10 @@ jobs:
           chmod +x ./scripts/install_packages.sh
           sudo bash ./scripts/install_packages.sh
 
-      - name: Starting ROM download and modification process.
+      - name: Starting stock firmware download.
         run: |
-          chmod +x ./mod_rom_1.sh
-          sudo bash ./mod_rom_1.sh "${{ github.event.inputs.DEVICE_MODEL }}" "${{ github.event.inputs.CSC }}" "${{ github.event.inputs.IMEI }}"
+          chmod +x ./QuantumROM/Devices/${{ github.event.inputs.DEVICE_MODEL }}/${{ github.event.inputs.DEVICE_MODEL }}.sh
+          sudo bash ././QuantumROM/Devices/${{ github.event.inputs.DEVICE_MODEL }}/${{ github.event.inputs.DEVICE_MODEL }}.sh
 
       - name: Splitting files before uploading if need.
         run: |
