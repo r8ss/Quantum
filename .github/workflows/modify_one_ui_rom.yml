@@ -6,7 +6,7 @@ on:
       DEVICE_MODEL:
         description: "Enter the DEVICE_MODEL."
         required: true
-        default: "SM-A225F"
+        default: "SM-A245F"
       CSC:
         description: "Enter the CSC (Country Specific Code)."
         required: true
@@ -14,7 +14,7 @@ on:
       IMEI:
         description: "Enter the device IMEI number."
         required: true
-        default: "350167020473859"
+        default: "357181567907875"
 
 jobs:
   build:
