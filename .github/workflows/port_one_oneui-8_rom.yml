@@ -39,10 +39,15 @@ jobs:
           chmod +x ./scripts/install_packages.sh
           sudo bash ./scripts/install_packages.sh
 
+      - name: Setup directories.
+        run: |
+          chmod +x ./scripts/setup_directories.sh
+          sudo bash ./scripts/setup_directories.sh fw_download work out
+          
       - name: Starting stock firmware download.
         run: |
           chmod +x ./QuantumROM/Devices/${{ github.event.inputs.DEVICE_MODEL }}/${{ github.event.inputs.DEVICE_MODEL }}.sh
-          sudo bash ././QuantumROM/Devices/${{ github.event.inputs.DEVICE_MODEL }}/${{ github.event.inputs.DEVICE_MODEL }}.sh
+          sudo bash ./QuantumROM/Devices/${{ github.event.inputs.DEVICE_MODEL }}/${{ github.event.inputs.DEVICE_MODEL }}.sh
 
       - name: Splitting files before uploading if need.
         run: |
