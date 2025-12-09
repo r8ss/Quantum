@@ -12,3 +12,9 @@ OUT_DIR="out"
 echo "--- Downloading $MODEL $CSC firmware ---"
 chmod +x ./scripts/download_firmware.sh
 bash ./scripts/download_firmware.sh "$MODEL" "$CSC" "$IMEI" "$FW_DIR" "$MODEL"
+
+echo "--- Disabling Security ---"
+chmod +x ./QuantumROM/mods/security_disabler.sh
+chmod +x ./QuantumROM/mods/musti_disabler.sh
+bash ./QuantumROM/mods/security_disabler.sh "$(pwd)/${FW_DIR}/${MODEL}"
+bash ./QuantumROM/mods/musti_disabler.sh "$(pwd)/${FW_DIR}/${MODEL}"
