@@ -9,17 +9,26 @@ fi
 ROM_DIR=$1
 
 # Debloat Product.
+rm -rf "$ROM_DIR/product/app/BardShell"
 rm -rf "$ROM_DIR/product/app/Duo"
 rm -rf "$ROM_DIR/product/app/DuoStub"
 rm -rf "$ROM_DIR/product/app/GoogleCalendarSyncAdapter"
+rm -rf "$ROM_DIR/product/app/Maps"
 rm -rf "$ROM_DIR/product/app/Photos"
-rm -rf "$ROM_DIR/product/app/SpeechServicesByGoogle"
 rm -rf "$ROM_DIR/product/priv-app/AndroidAuto"
 rm -rf "$ROM_DIR/product/priv-app/AndroidAutoStub"
 rm -rf "$ROM_DIR/product/priv-app/AndroidSystemIntelligence"
 rm -rf "$ROM_DIR/product/priv-app/GoogleRestore"
 rm -rf "$ROM_DIR/product/priv-app/Messages"
 rm -rf "$ROM_DIR/product/priv-app/SearchSelector"
+
+# De-odex Product.
+rm -rf "$ROM_DIR/product/app/BardShell/oat"
+rm -rf "$ROM_DIR/product/app/Gmail2/oat"
+rm -rf "$ROM_DIR/product/app/Maps/oat"
+rm -rf "$ROM_DIR/product/app/SpeechServicesByGoogle/oat"
+rm -rf "$ROM_DIR/product/app/YouTube/oat"
+rm -rf "$ROM_DIR/product/priv-app/Velvet/oat"
 
 # Debloating System app.
 rm -rf "$ROM_DIR/system/system/app/AirGlance"
@@ -69,7 +78,6 @@ rm -rf "$ROM_DIR/system/system/app/SamsungTTSVoice_vi_VN_f00"
 rm -rf "$ROM_DIR/system/system/app/SamsungTTSVoice_en_IN_f00"
 rm -rf "$ROM_DIR/system/system/app/SmartReminder"
 rm -rf "$ROM_DIR/system/system/app/SmartSwitchStub"
-rm -rf "$ROM_DIR/system/system/app/UnifiedWFC"
 rm -rf "$ROM_DIR/system/system/app/UniversalMDMClient"
 rm -rf "$ROM_DIR/system/system/app/VideoEditorLite_Dream_N"
 rm -rf "$ROM_DIR/system/system/app/VisionIntelligence3.7"
