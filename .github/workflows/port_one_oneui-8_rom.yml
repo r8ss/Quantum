@@ -46,8 +46,8 @@ jobs:
           
       - name: Starting stock firmware download.
         run: |
-          chmod +x ./QuantumROM/Devices/${{ github.event.inputs.DEVICE_MODEL }}/${{ github.event.inputs.DEVICE_MODEL }}.sh
-          sudo bash ./QuantumROM/Devices/${{ github.event.inputs.DEVICE_MODEL }}/${{ github.event.inputs.DEVICE_MODEL }}.sh
+          chmod +x ./QuantumROM/Devices/${{ github.event.inputs.STOCK_DEVICE_MODEL }}/${{ github.event.inputs.STOCK_DEVICE_MODEL }}.sh
+          sudo bash ./QuantumROM/Devices/${{ github.event.inputs.STOCK_DEVICE_MODEL }}/${{ github.event.inputs.STOCK_DEVICE_MODEL }}.sh
 
       - name: Splitting files before uploading if need.
         run: |
