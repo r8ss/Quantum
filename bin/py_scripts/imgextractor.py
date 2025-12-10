@@ -127,20 +127,23 @@ class Extractor(object):
     def __ext4extractor(self):
         import ext4, string, struct
         #2021/04/25 -->
-        config_dir = os.path.dirname(self.EXTRACT_DIR) + os.sep+ 'config' + os.sep + self.FileName + os.sep
+        # config_dir = os.path.dirname(self.EXTRACT_DIR) + os.sep+ 'config' + os.sep + self.FileName + os.sep
+        # Now all img config file will stote in same config folder
+        config_dir = os.path.dirname(self.EXTRACT_DIR) + os.sep+ 'config' + os.sep + os.sep
         if not os.path.isdir(config_dir):
             os.makedirs(config_dir)
         fs_config_file = config_dir  + self.FileName + "_fs_config"
         contexts = config_dir  + self.FileName + "_file_contexts"
-        pack_sh = config_dir  + self.FileName + "_pack.sh"
-        pack_sparse_sh = config_dir  + self.FileName + "_pack_sparse.sh"
-        size = config_dir  + self.FileName + "_size.txt"
-        name = config_dir  + self.FileName + "_name.txt"
-        spaces_file = config_dir  + self.FileName + "_space.txt"
-        self.__appendf('make_ext4fs -J -T -1 -S ./file_contexts -C ./fs_config -l ' +str(os.path.getsize(self.OUTPUT_IMAGE_FILE))+ ' -a /'+self.FileName+' "$outdir"/'+self.FileName+'.new.img '+self.FileName+'', pack_sh)
-        self.__appendf('make_ext4fs -s -J -T -1 -S ./file_contexts -C ./fs_config -l ' +str(os.path.getsize(self.OUTPUT_IMAGE_FILE))+ ' -a /'+self.FileName+' "$outdir"/'+self.FileName+'.new.img '+self.FileName+'', pack_sparse_sh)
-        self.__appendf(os.path.getsize(self.OUTPUT_IMAGE_FILE), size)
-        self.__appendf(os.path.basename(self.OUTPUT_IMAGE_FILE).rsplit('.',1)[0], name)
+        # No need those files
+        # pack_sh = config_dir  + self.FileName + "_pack.sh"
+        # pack_sparse_sh = config_dir  + self.FileName + "_pack_sparse.sh"
+        # size = config_dir  + self.FileName + "_size.txt"
+        # name = config_dir  + self.FileName + "_name.txt"
+        # spaces_file = config_dir  + self.FileName + "_space.txt"
+        # self.__appendf('make_ext4fs -J -T -1 -S ./file_contexts -C ./fs_config -l ' +str(os.path.getsize(self.OUTPUT_IMAGE_FILE))+ ' -a /'+self.FileName+' "$outdir"/'+self.FileName+'.new.img '+self.FileName+'', pack_sh)
+        # self.__appendf('make_ext4fs -s -J -T -1 -S ./file_contexts -C ./fs_config -l ' +str(os.path.getsize(self.OUTPUT_IMAGE_FILE))+ ' -a /'+self.FileName+' "$outdir"/'+self.FileName+'.new.img '+self.FileName+'', pack_sparse_sh)
+        # self.__appendf(os.path.getsize(self.OUTPUT_IMAGE_FILE), size)
+        # self.__appendf(os.path.basename(self.OUTPUT_IMAGE_FILE).rsplit('.',1)[0], name)
         #<--2021/04/25
         #fs_config_file = self.FileName + '_fs_config'
         fuking_symbols='\\^$.|?*+(){}[]'
