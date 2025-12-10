@@ -63,4 +63,5 @@ echo "Unpacking all img..."
 chmod +x ./scripts/extract_ext4.sh
 bash ./scripts/extract_ext4.sh "${FW_FILE_DIR}"
 
+echo ""
 echo "✅ Firmware extraction complete in ${FW_FILE_DIR}"
