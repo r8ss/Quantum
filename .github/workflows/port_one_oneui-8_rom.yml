@@ -16,7 +16,7 @@ on:
         required: true
         default: "BKD"
       TARGET_DEVICE_IMEI:
-        description: "Ent0er the TARGET_DEVICE_IMEI number."
+        description: "Enter the TARGET_DEVICE_IMEI number."
         required: true
         default: "357181567907875"
 
