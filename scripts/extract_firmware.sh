@@ -60,6 +60,7 @@ rm -f "${FW_FILE_DIR}/*_dlkm.img"
 rm -f "${FW_FILE_DIR}/boot.img"
 
 echo "Unpacking all img..."
-bash ./extract_ext4.sh "${FW_FILE_DIR}"
+chmod +x ./scripts/extract_ext4.sh
+bash ./scripts/extract_ext4.sh "${FW_FILE_DIR}"
 
 echo "✅ Firmware extraction complete in ${FW_FILE_DIR}"
