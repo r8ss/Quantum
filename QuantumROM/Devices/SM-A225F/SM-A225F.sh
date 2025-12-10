@@ -17,7 +17,7 @@ bash ./scripts/download_firmware.sh "$MODEL" "$CSC" "$IMEI" "$FW_DIR" "$MODEL"
 echo ""
 echo "--- Extracting $MODEL $CSC firmware ---"
 chmod +x ./scripts/extract_firmware.sh
-bash ./scripts/extract_firmware.sh "$(pwd)/${FW_DIR}/${MODEL}"
+bash ./scripts/extract_firmware.sh "$(pwd)/${FW_DIR}/${MODEL}" "${MODEL}.zip"
 
 echo ""
 echo "--- Disabling $MODEL Security ---"
