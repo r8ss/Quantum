@@ -16,7 +16,7 @@ on:
         required: true
         default: "BKD"
       TARGET_DEVICE_IMEI:
-        description: "Enter the TARGET_DEVICE_IMEI number."
+        description: "Ent0er the TARGET_DEVICE_IMEI number."
         required: true
         default: "357181567907875"
 
@@ -47,7 +47,7 @@ jobs:
       - name: Starting target device firmware download.
         run: |
           chmod +x ./scripts/download_firmware.sh
-          sudo bash ./scripts/download_firmware.sh "${{ github.event.inputs.TARGET_DEVICE_MODEL }}" "${{ github.event.inputs.TARGET_DEVICE_CSC }}" "${{ github.event.inputs.TARGET_DEVICE_IMEI }}" "fw_download" "${{ github.event.inputs.TARGET_DEVICE_MODEL }}"
+          sudo bash ./QuantumROM/Devices/Source_Rom.sh "${{ github.event.inputs.TARGET_DEVICE_MODEL }}" "${{ github.event.inputs.TARGET_DEVICE_CSC }}" "${{ github.event.inputs.TARGET_DEVICE_IMEI }}"
 
       - name: Starting stock device firmware download.
         run: |
