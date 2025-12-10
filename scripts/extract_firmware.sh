@@ -56,6 +56,10 @@ mv "${FW_FILE_DIR}/super_raw.img" "${FW_FILE_DIR}/super.img"
 echo "Unpacking super.img..."
 lpunpack -o "${FW_FILE_DIR}" "${FW_FILE_DIR}/super.img"
 rm -f "${FW_FILE_DIR}/super.img"
-rm -f "${FW_FILE_DIR}/vendor_dlkm.img"
+rm -f "${FW_FILE_DIR}/*_dlkm.img"
+rm -f "${FW_FILE_DIR}/boot.img"
+
+echo "Unpacking all img..."
+bash ./extract_ext4.sh "${FW_FILE_DIR}"
 
 echo "✅ Firmware extraction complete in ${FW_FILE_DIR}"
