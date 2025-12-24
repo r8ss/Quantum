@@ -13,6 +13,7 @@ echo "Running script: $(basename "$0")"
 FW_FILE_DIR="$1"
 FW_FILE_NAME="$2"
 
+echo ""
 echo "Extracting firmware from ${FW_FILE_NAME}..."
 7z x "${FW_FILE_DIR}/${FW_FILE_NAME}" -o"${FW_FILE_DIR}" > /dev/null
 
@@ -25,6 +26,8 @@ for file in "${FW_FILE_DIR}"/*.md5; do
     [ -f "$file" ] && mv -- "$file" "${file%.md5}"
 done
 
+
+echo ""
 echo "Extracting tar files..."
 for file in "${FW_FILE_DIR}"/*.tar; do
     if [ -f "$file" ]; then
@@ -39,6 +42,7 @@ find "${FW_FILE_DIR}" -type f \
     ! -name 'boot.img.lz4' \
     -delete
 
+echo ""
 echo "Decompressing .lz4 files..."
 for file in "${FW_FILE_DIR}"/*.lz4; do
     [ -f "$file" ] && lz4 -d "$file" "${file%.lz4}" > /dev/null
@@ -53,12 +57,14 @@ simg2img "${FW_FILE_DIR}/super.img" "${FW_FILE_DIR}/super_raw.img"
 rm -f "${FW_FILE_DIR}/super.img"
 mv "${FW_FILE_DIR}/super_raw.img" "${FW_FILE_DIR}/super.img"
 
+echo ""
 echo "Unpacking super.img..."
 lpunpack -o "${FW_FILE_DIR}" "${FW_FILE_DIR}/super.img"
 rm -f "${FW_FILE_DIR}/super.img"
 rm -f "${FW_FILE_DIR}/*_dlkm.img"
 rm -f "${FW_FILE_DIR}/boot.img"
 
+echo ""
 echo "Unpacking all img..."
 chmod +x ./scripts/extract_img.sh
 bash ./scripts/extract_img.sh "${FW_FILE_DIR}"
