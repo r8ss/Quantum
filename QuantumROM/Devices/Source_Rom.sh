@@ -24,6 +24,6 @@ chmod +x ./scripts/extract_firmware.sh
 bash ./scripts/extract_firmware.sh "$(pwd)/${FW_DIR}/${MODEL}" "${MODEL}.zip"
 
 echo ""
-echo "--- Disabling $MODEL Security ---"
+echo "--- Removing $MODEL $CSC Security ---"
 chmod +x ./QuantumROM/mods/musti_disabler.sh
 bash ./QuantumROM/mods/musti_disabler.sh "$(pwd)/${FW_DIR}/${MODEL}"
