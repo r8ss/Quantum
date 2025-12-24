@@ -61,7 +61,7 @@ rm -f "${FW_FILE_DIR}/boot.img"
 
 echo "Unpacking all img..."
 chmod +x ./scripts/extract_img.sh
-bash ./scripts/extract_ext4.sh "${FW_FILE_DIR}"
+bash ./scripts/extract_img.sh "${FW_FILE_DIR}"
 
 echo ""
 echo "✅ Firmware extraction complete in ${FW_FILE_DIR}"
