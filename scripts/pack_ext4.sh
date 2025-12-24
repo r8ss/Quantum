@@ -12,10 +12,10 @@ OUT_DIR="$3"
 rm -rf "$OUT_DIR"
 mkdir -p "$OUT_DIR"
 
-for folder_path in "$ROM_DIR"/*; do
-    [ -d "$folder_path" ] || continue
+for partition_path in "$ROM_DIR"/*; do
+    [ -d "$partition_path" ] || continue
 
-    partition=$(basename "$folder_path")
+    partition=$(basename "$partition_path")
 
     if [ "$partition" == "config" ]; then
         echo "Skipping config folder..."
@@ -34,7 +34,22 @@ for folder_path in "$ROM_DIR"/*; do
     fi
 
     echo ""
-    echo "Creating $partition.img from $folder_path..."
+    echo "Creating $partition.img from $partition_path..."
+    sort -u "$file_contexts_file" -o "$file_contexts_file"
+    sort -u "$fs_config_file" -o "$fs_config_file"
+    ./bin/make_ext4fs -J -T -1 \
+        -S "$file_contexts_file" \
+        -C "$fs_config_file" \
+        -l "$SIZE" \
+        -L "$mount_point" \
+        -a "$partition" \
+        "$OUT_DIR/$partition.img" "$ROM_DIR/$partition"
+done
+
+# --- Move boot.img to $OUT_DIR ---
+mv "$ROM_DIR/boot.img" "$OUT_DIR/"
+# --- Cleaning up $ROM_DIR ---
+rm -rf "$ROM_DIR"/*    echo "Creating $partition.img from $folder_path..."
     sort -u "$file_contexts_file" -o "$file_contexts_file"
     sort -u "$fs_config_file" -o "$fs_config_file"
     ./bin/make_ext4fs -J -T -1 \
