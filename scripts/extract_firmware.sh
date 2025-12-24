@@ -14,7 +14,7 @@ FW_FILE_DIR="$1"
 FW_FILE_NAME="$2"
 
 echo "Extracting firmware from ${FW_FILE_NAME}..."
-7z x "${FW_FILE_DIR}/${FW_FILE_NAME}" -o"${FW_FILE_DIR}"
+7z x "${FW_FILE_DIR}/${FW_FILE_NAME}" -o"${FW_FILE_DIR}" > /dev/null
 
 # Cleaning up original archive and text files
 rm -f "${FW_FILE_DIR}/${FW_FILE_NAME}"
@@ -28,7 +28,7 @@ done
 echo "Extracting tar files..."
 for file in "${FW_FILE_DIR}"/*.tar; do
     if [ -f "$file" ]; then
-        tar -xvf "$file" -C "${FW_FILE_DIR}"
+        tar -xvf "$file" -C "${FW_FILE_DIR}" > /dev/null
         rm -f "$file"
     fi
 done
@@ -41,7 +41,7 @@ find "${FW_FILE_DIR}" -type f \
 
 echo "Decompressing .lz4 files..."
 for file in "${FW_FILE_DIR}"/*.lz4; do
-    [ -f "$file" ] && lz4 -d "$file" "${file%.lz4}"
+    [ -f "$file" ] && lz4 -d "$file" "${file%.lz4}" > /dev/null
 done
 
 # Clean up .lz4 files and metadata
