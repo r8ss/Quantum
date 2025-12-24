@@ -19,7 +19,7 @@ chmod +x ./scripts/download_firmware.sh
 bash ./scripts/download_firmware.sh "$MODEL" "$CSC" "$IMEI" "$FW_DIR" "$MODEL"
 
 echo ""
-echo "--- Extracting Firmware ---"
+echo "--- Extracting $MODEL $CSC Firmware ---"
 chmod +x ./scripts/extract_firmware.sh
 bash ./scripts/extract_firmware.sh "$(pwd)/${FW_DIR}/${MODEL}" "${MODEL}.zip"
 
