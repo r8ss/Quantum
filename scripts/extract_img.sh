@@ -8,7 +8,7 @@ fi
 ROM_DIR="$1"
 
 # Setup
-chmod +x ./bin/extract.erofs
+chmod +x $(pwd)/../bin/extract.erofs
 
 for imgfile in "$ROM_DIR"/*.img; do
     [ -e "$imgfile" ] || continue
@@ -23,11 +23,11 @@ for imgfile in "$ROM_DIR"/*.img; do
     case "$fstype" in
         ext4)
             echo "[$imgfile] Detected ext4"
-            python3 ./bin/py_scripts/imgextractor.py "$imgfile" "$ROM_DIR"
+            python3 $(pwd)/../bin/py_scripts/imgextractor.py "$imgfile" "$ROM_DIR"
             ;;
         erofs)
             echo "[$imgfile] Detected EROFS"
-            ./bin/extract.erofs -i "$imgfile" -x -o "$ROM_DIR/$(basename "${imgfile%.img}")"
+            $(pwd)/../bin/extract.erofs -i "$imgfile" -x -o "$ROM_DIR/$(basename "${imgfile%.img}")"
             ;;
         *)
             echo "[$imgfile] Unknown filesystem type ($fstype), skipping"
