@@ -1,17 +1,10 @@
 #!/bin/bash
 
 # Linux setup.
-sudo apt update && \
-DEBIAN_FRONTEND=noninteractive sudo apt install -yq \
-  attr ccache clang ffmpeg golang \
-  libbrotli-dev libgtest-dev libprotobuf-dev libunwind-dev libpcre2-dev \
-  libzstd-dev linux-modules-extra-$(uname -r) lld protobuf-compiler webp \
-  p7zip-full lz4 android-sdk-libsparse-utils wget python3 python3-pip && \
-sudo modprobe erofs f2fs
+sudo apt update -y
+sudo apt install -y p7zip-full lz4 android-sdk-libsparse-utils wget util-linux python3 python3-pip
 
-sudo apt install -y util-linux
-
-# Installing Python packages. (silent)
+# Installing Python packages.
 pip3 install liblp google-api-python-client google-auth-httplib2 google-auth-oauthlib tgcrypto pyrogram
 pip3 install git+https://github.com/martinetd/samloader.git
 
