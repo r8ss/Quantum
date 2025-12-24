@@ -36,5 +36,5 @@ for imgfile in "$ROM_DIR"/*.img; do
     esac
 done
 
-# Remove original .img files except boot.img
-find "$ROM_DIR" -type f -name "*.img" ! -name "boot.img" -exec rm -f {} +
+# Remove a original .img
+rm -rf *.img
