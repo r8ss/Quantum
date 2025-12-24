@@ -9,6 +9,8 @@ DEBIAN_FRONTEND=noninteractive sudo apt install -yq \
   p7zip-full lz4 android-sdk-libsparse-utils wget python3 python3-pip && \
 sudo modprobe erofs f2fs
 
+sudo apt install -y util-linux
+
 # Installing Python packages. (silent)
 pip3 install liblp google-api-python-client google-auth-httplib2 google-auth-oauthlib tgcrypto pyrogram
 pip3 install git+https://github.com/martinetd/samloader.git
