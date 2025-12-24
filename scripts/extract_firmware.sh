@@ -28,7 +28,7 @@ echo ""
 echo "Extracting tar files..."
 for file in "${FW_FILE_DIR}"/*.tar; do
     if [ -f "$file" ]; then
-        tar -xvf "$file" -C "${FW_FILE_DIR}" > /dev/null
+        tar -xvf "$file" -C "${FW_FILE_DIR}" >/dev/null 2>&1
         rm -f "$file"
     fi
 done
@@ -42,7 +42,7 @@ find "${FW_FILE_DIR}" -type f \
 echo ""
 echo "Decompressing .lz4 files..."
 for file in "${FW_FILE_DIR}"/*.lz4; do
-    [ -f "$file" ] && lz4 -d "$file" "${file%.lz4}" > /dev/null
+    [ -f "$file" ] && lz4 -d "$file" "${file%.lz4}" >/dev/null 2>&1
 done
 
 # Clean up .lz4 files and metadata
