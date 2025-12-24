@@ -9,12 +9,11 @@ if [ "$#" -ne 2 ]; then
     exit 1
 fi
 
-echo "Running script: $(basename "$0")"
 FW_FILE_DIR="$1"
 FW_FILE_NAME="$2"
 
 echo ""
-echo "Extracting firmware from ${FW_FILE_NAME}..."
+echo "Extracting firmware ${FW_FILE_NAME}..."
 7z x "${FW_FILE_DIR}/${FW_FILE_NAME}" -o"${FW_FILE_DIR}" > /dev/null
 
 # Cleaning up original archive and text files
@@ -25,7 +24,6 @@ rm -f "${FW_FILE_DIR}"/*.txt
 for file in "${FW_FILE_DIR}"/*.md5; do
     [ -f "$file" ] && mv -- "$file" "${file%.md5}"
 done
-
 
 echo ""
 echo "Extracting tar files..."
