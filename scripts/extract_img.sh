@@ -27,7 +27,7 @@ for imgfile in "$ROM_DIR"/*.img; do
             ;;
         erofs)
             echo "[$imgfile] Detected EROFS"
-            ./bin/extract.erofs "$imgfile" "$ROM_DIR/$(basename "${imgfile%.img}")"
+            ./bin/extract.erofs -i "$imgfile" -x -o "$ROM_DIR/$(basename "${imgfile%.img}")"
             ;;
         *)
             echo "[$imgfile] Unknown filesystem type ($fstype), skipping"
