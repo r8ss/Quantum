@@ -127,9 +127,7 @@ class Extractor(object):
     def __ext4extractor(self):
         import ext4, string, struct
         #2021/04/25 -->
-        # config_dir = os.path.dirname(self.EXTRACT_DIR) + os.sep+ 'config' + os.sep + self.FileName + os.sep
-        # Now all img config file will stote in same config folder
-        config_dir = os.path.dirname(self.EXTRACT_DIR) + os.sep+ 'config' + os.sep + os.sep
+        config_dir = os.path.dirname(self.EXTRACT_DIR) + os.sep+ 'config' + os.sep + self.FileName + os.sep
         if not os.path.isdir(config_dir):
             os.makedirs(config_dir)
         fs_config_file = config_dir  + self.FileName + "_fs_config"
