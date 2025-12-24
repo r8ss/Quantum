@@ -23,7 +23,7 @@ for imgfile in "$ROM_DIR"/*.img; do
     case "$fstype" in
         ext4)
             echo "[$imgfile] Detected ext4"
-            python3 "$(pwd)/../bin/pyscripts/imgextractor.py" "$imgfile" "$ROM_DIR"
+            python3 "$(pwd)/../bin/py_scripts/imgextractor.py" "$imgfile" "$ROM_DIR"
             ;;
         erofs)
             echo "[$imgfile] Detected EROFS"
