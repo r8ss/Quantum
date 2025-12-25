@@ -26,7 +26,7 @@ for imgfile in "$ROM_DIR"/*.img; do
             IMG_SIZE=$(stat -c%s -- "$imgfile")
             echo "$imgfile size is $IMG_SIZE bytes."
             echo "Extracting $imgfile in $ROM_DIR/$partition"
-            python3 (pwd)/../bin/py_scripts/imgextractor.py "$imgfile" "$ROM_DIR" >/dev/null 2>&1
+            python3 "$(pwd)/../bin/py_scripts/imgextractor.py" "$imgfile" "$ROM_DIR" >/dev/null 2>&1
             ;;
         erofs)
             echo ""
@@ -35,7 +35,7 @@ for imgfile in "$ROM_DIR"/*.img; do
             echo "$imgfile size is $IMG_SIZE bytes."
             echo "Extracting $imgfile in $ROM_DIR/$partition"
             printf $IMG_SIZE > "$ROM_DIR/config/$partition_size.txt"
-            (pwd)/../bin/extract.erofs -i "$imgfile" -x -o "$ROM_DIR" >/dev/null 2>&1
+            "$(pwd)/../bin/extract.erofs" -i "$imgfile" -x -o "$ROM_DIR" >/dev/null 2>&1
             rm -f "$ROM_DIR/config/"*_fs_options
             ;;
         *)
