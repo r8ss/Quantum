@@ -22,13 +22,15 @@ for imgfile in "$ROM_DIR"/*.img; do
 
     case "$fstype" in
         ext4)
-            echo "$imgfile Detected ext4"
-            python3 ./bin/py_scripts/imgextractor.py "$imgfile" "$ROM_DIR"
+            echo -e "$imgfile Detected ext4.\nExtracting in ${ROM_DIR}/$(basename "${imgfile%.img}")"
+            python3 ./bin/py_scripts/imgextractor.py "$imgfile" "$ROM_DIR" 2>/dev/null
             ;;
         erofs)
             echo ""
-            echo -e "$imgfile Detected EROFS.\nExtracting in ${ROM_DIR}/$(basename "${imgfile%.img}")"
-            ./bin/extract.erofs -i "$imgfile" -x -o "$ROM_DIR"
+            echo -e "$imgfile Detected erofs.\nExtracting in ${ROM_DIR}/$(basename "${imgfile%.img}")"
+            ./bin/extract.erofs -i "$imgfile" -x -o "$ROM_DIR" 2>/dev/null
+            printf '%s\n' "$(stat -c%s "$imgfile")" > "${ROM_DIR}/config/$(basename "${imgfile%.img}")_size.txt"
+            rm -f "$ROM_DIR/config/"*_fs_options
             ;;
         *)
             echo "[$imgfile] Unknown filesystem type ($fstype), skipping"
