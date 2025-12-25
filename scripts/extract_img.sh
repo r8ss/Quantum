@@ -8,7 +8,7 @@ fi
 ROM_DIR="$1"
 
 # Setup
-chmod +x (pwd)/../bin/extract.erofs
+chmod +x "$(pwd)/../bin/extract.erofs"
 
 for imgfile in "$ROM_DIR"/*.img; do
     [ -e "$imgfile" ] || continue
