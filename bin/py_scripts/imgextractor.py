@@ -131,14 +131,23 @@ class Extractor(object):
         if not os.path.isdir(config_dir):
             os.makedirs(config_dir)
         fs_config_file = config_dir  + self.FileName + "_fs_config"
-        os.remove(fs_config_file)
+        try:
+            os.remove(fs_config_file)
+        except:
+            pass
         contexts = config_dir  + self.FileName + "_file_contexts"
-        os.remove(contexts)
+        try:
+            os.remove(contexts)
+        except:
+            pass
         # No need those files
         # pack_sh = config_dir  + self.FileName + "_pack.sh"
         # pack_sparse_sh = config_dir  + self.FileName + "_pack_sparse.sh"
         size = config_dir  + self.FileName + "_size.txt"
-        os.remove(size)
+        try:
+            os.remove(size)
+        except:
+            pass
         # name = config_dir  + self.FileName + "_name.txt"
         # spaces_file = config_dir  + self.FileName + "_space.txt"
         # self.__appendf('make_ext4fs -J -T -1 -S ./file_contexts -C ./fs_config -l ' +str(os.path.getsize(self.OUTPUT_IMAGE_FILE))+ ' -a /'+self.FileName+' "$outdir"/'+self.FileName+'.new.img '+self.FileName+'', pack_sh)
