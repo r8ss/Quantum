@@ -26,7 +26,7 @@ for imgfile in "$ROM_DIR"/*.img; do
             IMG_SIZE=$(stat -c%s -- "$imgfile")
             echo "$imgfile size is $IMG_SIZE bytes."
             echo "Extracting $imgfile in $ROM_DIR/$partition"
-            python3 ./bin/py_scripts/imgextractor.py "$imgfile" "$ROM_DIR"
+            python3 ./bin/py_scripts/imgextractor.py "$imgfile" "$ROM_DIR" >/dev/null 2>&1
             ;;
         erofs)
             echo ""
