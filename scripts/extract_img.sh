@@ -17,19 +17,25 @@ for imgfile in "$ROM_DIR"/*.img; do
         continue
     fi
 
-    # Detect filesystem type using blkid
+    partition=$(basename "${imgfile%.img}")
     fstype=$(blkid -o value -s TYPE "$imgfile" 2>/dev/null)
 
     case "$fstype" in
         ext4)
-            echo -e "$imgfile Detected ext4.\nExtracting in ${ROM_DIR}/$(basename "${imgfile%.img}")"
-            python3 ./bin/py_scripts/imgextractor.py "$imgfile" "$ROM_DIR" 2>/dev/null
+            echo "$imgfile Detected $fstype."
+            IMG_SIZE=$(stat -c%s -- "$imgfile")
+            echo "$imgfile size is $IMG_SIZE bytes."
+            echo "Extracting $imgfile in $ROM_DIR/$partition"
+            python3 ./bin/py_scripts/imgextractor.py "$imgfile" "$ROM_DIR" >/dev/null 2>&1
             ;;
         erofs)
             echo ""
-            echo -e "$imgfile Detected erofs.\nExtracting in ${ROM_DIR}/$(basename "${imgfile%.img}")"
-            ./bin/extract.erofs -i "$imgfile" -x -o "$ROM_DIR" 2>/dev/null
-            printf '%s\n' "$(stat -c%s "$imgfile")" > "${ROM_DIR}/config/$(basename "${imgfile%.img}")_size.txt"
+            echo "$imgfile Detected $fstype."
+            IMG_SIZE=$(stat -c%s -- "$imgfile")
+            echo "$imgfile size is $IMG_SIZE bytes."
+            echo "Extracting $imgfile in $ROM_DIR/$partition"
+            printf $IMG_SIZE > "$ROM_DIR/config/$partition_size.txt"
+            ./bin/extract.erofs -i "$imgfile" -x -o "$ROM_DIR" >/dev/null 2>&1
             rm -f "$ROM_DIR/config/"*_fs_options
             ;;
         *)
@@ -40,4 +46,4 @@ for imgfile in "$ROM_DIR"/*.img; do
 done
 
 # Remove all original .img
-rm -rf "$ROM_DIR"/*.img
+# rm -rf "$ROM_DIR"/*.img
