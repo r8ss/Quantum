@@ -1,49 +1,51 @@
 #!/bin/bash
 
-if [ -z "$1" ]; then
-    echo "Usage: $0 <ROM_DIR>"
+if [ -z "$3" ]; then
+    echo "Usage: $0 <ROM_DIR> <BIN_DIR> <OUT_DIR>"
     exit 1
 fi
 
 ROM_DIR="$1"
+BIN_DIR="$2"
+OUT_DIR="$3"
 
-# Setup
-chmod +x ./bin/extract.erofs
+rm -rf "$OUT_DIR"
+mkdir -p "$OUT_DIR"
 
-for imgfile in "$ROM_DIR"/*.img; do
-    [ -e "$imgfile" ] || continue
+for partition_path in "$ROM_DIR"/*; do
+    [ -d "$partition_path" ] || continue
 
-    if [[ "$(basename "$imgfile")" == "boot.img" ]]; then
+    partition=$(basename "$partition_path")
+
+    if [ "$partition" == "config" ]; then
+        echo "Skipping config folder..."
         continue
     fi
 
-    partition=$(basename "${imgfile%.img}")
-    fstype=$(blkid -o value -s TYPE "$imgfile" 2>/dev/null)
+    file_contexts="$ROM_DIR/config/${partition}_file_contexts"
+    fs_config="$ROM_DIR/config/${partition}_fs_config"
+    SIZE=$(cat "$ROM_DIR/config/${partition}_size.txt")
 
-    case "$fstype" in
-        ext4)
-            echo "$imgfile Detected $fstype."
-            IMG_SIZE=$(stat -c%s -- "$imgfile")
-            echo "$imgfile size is $IMG_SIZE bytes."
-            echo "Extracting $imgfile in $ROM_DIR/$partition"
-            python3 ./bin/py_scripts/imgextractor.py "$imgfile" "$ROM_DIR" >/dev/null 2>&1
-            ;;
-        erofs)
-            echo ""
-            echo "$imgfile Detected $fstype."
-            IMG_SIZE=$(stat -c%s -- "$imgfile")
-            echo "$imgfile size is $IMG_SIZE bytes."
-            echo "Extracting $imgfile in $ROM_DIR/$partition"
-            printf $IMG_SIZE > "$ROM_DIR/config/$partition_size.txt"
-            ./bin/extract.erofs -i "$imgfile" -x -o "$ROM_DIR" >/dev/null 2>&1
-            rm -f "$ROM_DIR/config/"*_fs_options
-            ;;
-        *)
-            echo "[$imgfile] Unknown filesystem type ($fstype), skipping"
-            exit 1
-            ;;
-    esac
+    if [ "$partition" = "system" ]; then
+        mount_point="/"
+    else
+        mount_point="/$partition"
+    fi
+
+    echo ""
+    echo "Creating $partition.img from $partition_path..."
+    sort -u "$file_contexts" -o "$file_contexts"
+    sort -u "$fs_config" -o "$fs_config"
+    ./bin/make_ext4fs -J -T -1 \
+        -S "$file_contexts" \
+        -C "$fs_config" \
+        -l "$SIZE" \
+        -L "$mount_point" \
+        -a "$partition" \
+        "$OUT_DIR/$partition.img" "$ROM_DIR/$partition"
 done
 
-# Remove all original .img
-rm -rf "$ROM_DIR"/*.img
+# --- Move boot.img to $OUT_DIR ---
+mv "$ROM_DIR/boot.img" "$OUT_DIR/"
+# --- Cleaning up $ROM_DIR ---
+rm -rf "$ROM_DIR"/*
