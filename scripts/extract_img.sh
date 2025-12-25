@@ -46,4 +46,4 @@ for imgfile in "$ROM_DIR"/*.img; do
 done
 
 # Remove all original .img
-# rm -rf "$ROM_DIR"/*.img
+rm -rf "$ROM_DIR"/*.img
