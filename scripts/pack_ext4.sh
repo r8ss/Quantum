@@ -15,35 +15,34 @@ mkdir -p "$OUT_DIR"
 for partition_path in "$ROM_DIR"/*; do
     [ -d "$partition_path" ] || continue
 
-    folder_name=$(basename "$partition_path")
+    partition=$(basename "$partition_path")
 
-    if [ "$folder_name" == "config" ]; then
+    if [ "$partition" == "config" ]; then
         echo "Skipping config folder..."
         continue
     fi
 
-    partition_name="$folder_name"
-    file_contexts_file="$ROM_DIR/config/$folder_name/${folder_name}_file_contexts"
-    fs_config_file="$ROM_DIR/config/$folder_name/${folder_name}_fs_config"
-    SIZE=$(du -sb "$ROM_DIR/$folder_name" | awk '{printf "%d", $1 * 1.07}')
+    file_contexts="$ROM_DIR/config/${partition}_file_contexts"
+    fs_config="$ROM_DIR/config/${partition}_fs_config"
+    SIZE=$(du -sb "$ROM_DIR/$partition" | awk '{printf "%d", $1 * 1.07}')
 
-    if [ "$folder_name" = "system" ]; then
+    if [ "$partition" = "system" ]; then
         mount_point="/"
     else
-        mount_point="/$folder_name"
+        mount_point="/$partition"
     fi
 
     echo ""
-    echo "Creating $partition_name.img from $partition_path..."
-    sort -u "$file_contexts_file" -o "$file_contexts_file"
-    sort -u "$fs_config_file" -o "$fs_config_file"
+    echo "Creating $partition.img from $partition_path..."
+    sort -u "$file_contexts" -o "$file_contexts"
+    sort -u "$fs_config" -o "$fs_config"
     ./bin/make_ext4fs -J -T -1 \
-        -S "$file_contexts_file" \
-        -C "$fs_config_file" \
+        -S "$file_contexts" \
+        -C "$fs_config" \
         -l "$SIZE" \
         -L "$mount_point" \
-        -a "$partition_name" \
-        "$OUT_DIR/$partition_name.img" "$ROM_DIR/$partition_name"
+        -a "$partition" \
+        "$OUT_DIR/$partition.img" "$ROM_DIR/$partition"
 done
 
 # --- Move boot.img to $OUT_DIR ---
