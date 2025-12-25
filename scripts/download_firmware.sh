@@ -31,7 +31,6 @@ if [ $? -ne 0 ] || [ -z "$version" ]; then
     exit 1
 else
     echo "✅ Update found: $version"
-    echo "Starting download..."
 fi
 
 # --- Step 3: Download Firmware ---
