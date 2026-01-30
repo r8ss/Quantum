@@ -22,7 +22,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout repository
@@ -36,23 +36,10 @@ jobs:
           
       - name: Installing required packages.
         run: |
-          chmod +x ./scripts/install_packages.sh
-          sudo bash ./scripts/install_packages.sh
-
-      - name: Setup directories.
-        run: |
-          chmod +x ./scripts/setup_directories.sh
-          chmod +x ./scripts/download_firmware.sh
-          sudo bash ./scripts/setup_directories.sh fw_download work out
-
-      - name: Starting stock device firmware download.
-        run: |
-          chmod +x ./QuantumROM/Devices/${{ github.event.inputs.STOCK_DEVICE_MODEL }}/${{ github.event.inputs.STOCK_DEVICE_MODEL }}.sh
-          sudo bash ./QuantumROM/Devices/${{ github.event.inputs.STOCK_DEVICE_MODEL }}/${{ github.event.inputs.STOCK_DEVICE_MODEL }}.sh
-
-      - name: Starting target device firmware download.
-        run: |
-          sudo bash ./QuantumROM/Devices/Source_Rom.sh "${{ github.event.inputs.TARGET_DEVICE_MODEL }}" "${{ github.event.inputs.TARGET_DEVICE_CSC }}" "${{ github.event.inputs.TARGET_DEVICE_IMEI }}"
+          export STOCK_DEVICE_MODEL="${{ github.event.inputs.STOCK_DEVICE_MODEL }}"
+          export TARGET_DEVICE_MODEL="${{ github.event.inputs.TARGET_DEVICE_MODEL }}"
+          export TARGET_DEVICE_CSC="${{ github.event.inputs.TARGET_DEVICE_CSC }}"
+          export TARGET_DEVICE_IMEI="${{ github.event.inputs.TARGET_DEVICE_IMEI }}"
 
       - name: Splitting files before uploading if need.
         run: |
