@@ -7,6 +7,15 @@ on:
         description: "Enter the STOCK_DEVICE_MODEL."
         required: true
         default: "SM-A225F"
+      STOCK_DEVICE_CSC:
+        description: "Enter the STOCK_DEVICE_CSC (Country Specific Code)."
+        required: true
+        default: "BKD"
+      STOCK_DEVICE_IMEI:
+        description: "Enter the STOCK_DEVICE_IMEI number."
+        required: true
+        default: "350167020473859"
+
       TARGET_DEVICE_MODEL:
         description: "Enter the TARGET_DEVICE_MODEL."
         required: true
@@ -37,9 +46,15 @@ jobs:
       - name: Installing required packages.
         run: |
           export STOCK_DEVICE_MODEL="${{ github.event.inputs.STOCK_DEVICE_MODEL }}"
+          export STOCK_DEVICE_CSC="${{ github.event.inputs.STOCK_DEVICE_CSC }}"
+          export STOCK_DEVICE_IMEI="${{ github.event.inputs.STOCK_DEVICE_IMEI }}"
+          
           export TARGET_DEVICE_MODEL="${{ github.event.inputs.TARGET_DEVICE_MODEL }}"
           export TARGET_DEVICE_CSC="${{ github.event.inputs.TARGET_DEVICE_CSC }}"
           export TARGET_DEVICE_IMEI="${{ github.event.inputs.TARGET_DEVICE_IMEI }}"
+
+          chmod +x ./make_rom.sh
+          sudo bash ./make_rom.sh
 
       - name: Splitting files before uploading if need.
         run: |
