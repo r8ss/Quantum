@@ -17,7 +17,7 @@ export VNDKS_COLLECTION="$(pwd)/QuantumRom/vndks"
 export BUILD_PARTITIONS=(product system)
 
 # Binary
-chmod -R 755 "$(pwd)/bin"
+find "$(pwd)/bin" -type f -executable -exec install -m 755 {} /usr/local/bin/ \;
 
 # Source
 source "$(pwd)/scripts/QuantumRom.sh"
