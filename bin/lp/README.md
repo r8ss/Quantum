@@ -9,5 +9,7 @@ Ubuntu: sudo apt-get install libz-dev
 Fedora: sudo dnf install libz-devel
 
 git clone https://github.com/anestisb/android-simg2img.git
+
 cd android-simg2img
+
 make
