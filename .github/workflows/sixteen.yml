@@ -34,7 +34,17 @@ jobs:
           export TARGET_DEVICE_MODEL="${{ github.event.inputs.TARGET_DEVICE_MODEL }}"
           export TARGET_DEVICE_CSC="${{ github.event.inputs.TARGET_DEVICE_CSC }}"
           export TARGET_DEVICE_IMEI="${{ github.event.inputs.TARGET_DEVICE_IMEI }}"
+
+      - name: Installing required packages.
+        run: |
+          chmod +x ./scripts/install_packages.sh
+          sudo bash ./scripts/install_packages.sh
       
+      - name: Setup directories.
+        run: |
+          chmod +x ./scripts/setup_directories.sh
+          sudo bash ./scripts/setup_directories.sh FIRMWARE WORK OUT
+
       - name: Make Rom.
         run: |
           chmod +x ./sixteen.sh
