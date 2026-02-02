@@ -154,7 +154,8 @@ EXTRACT_FIRMWARE_IMG() {
     fi
 
 	local FIRM_DIR="$1"
-
+    
+	echo "Extracting img from $FIRM_DIR"
     for imgfile in "$FIRM_DIR"/*.img; do
         [ -e "$imgfile" ] || continue
 
@@ -194,7 +195,7 @@ EXTRACT_FIRMWARE_IMG() {
     chmod -R u+rwX "$FIRM_DIR/config"
 
     # Remove all original .img
-    # rm -rf "$FIRM_DIR"/*.img
+    rm -rf "$FIRM_DIR"/*.img
 }
 
 
