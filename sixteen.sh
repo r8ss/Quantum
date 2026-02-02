@@ -1,15 +1,10 @@
 #!/bin/bash
 
+# Device info
 export STOCK_DEVICE=$1
 export TARGET_DEVICE=$2
 export TARGET_DEVICE_CSC=$3
 export TARGET_DEVICE_IMEI=$4
-
-
-echo $STOCK_DEVICE
-echo $TARGET_DEVICE
-echo $TARGET_DEVICE_CSC
-echo $TARGET_DEVICE_IMEI
 
 # Directories
 export DEVICES_DIR="$(pwd)/QuantumROM/Devices"
@@ -21,7 +16,7 @@ export VNDKS_COLLECTION="$(pwd)/QuantumRom/vndks"
 
 export BUILD_PARTITIONS=(product system)
 
-# Executables
+# Binary
 chmod 755 "$(pwd)/bin"/{erofs-utils,lp,simg2img,ext4}/*
 
 # Source
