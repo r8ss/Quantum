@@ -28,19 +28,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Free disk space
-        run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
-          sudo docker image prune --all --force
-          sudo docker builder prune -a
-          
-      - name: Installing required packages.
+      - name: Set Device info.
         run: |
           export STOCK_DEVICE_MODEL="${{ github.event.inputs.STOCK_DEVICE_MODEL }}"
           export TARGET_DEVICE_MODEL="${{ github.event.inputs.TARGET_DEVICE_MODEL }}"
           export TARGET_DEVICE_CSC="${{ github.event.inputs.TARGET_DEVICE_CSC }}"
           export TARGET_DEVICE_IMEI="${{ github.event.inputs.TARGET_DEVICE_IMEI }}"
-
+      
+      - name: Make Rom.
+        run: |
           chmod +x ./sixteen.sh
           sudo bash ./sixteen.sh
 
