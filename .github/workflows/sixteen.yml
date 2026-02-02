@@ -3,11 +3,11 @@ name: QuantumROM Tools
 on:
   workflow_dispatch:
     inputs:
-      STOCK_DEVICE_MODEL:
+      STOCK_DEVICE:
         description: "Enter the STOCK_DEVICE_MODEL."
         required: true
         default: "SM-A225F"
-      TARGET_DEVICE_MODEL:
+      TARGET_DEVICE:
         description: "Enter the TARGET_DEVICE_MODEL."
         required: true
         default: "SM-A346E"
@@ -30,8 +30,8 @@ jobs:
 
       - name: Set Device info.
         run: |
-          export STOCK_DEVICE_MODEL="${{ github.event.inputs.STOCK_DEVICE_MODEL }}"
-          export TARGET_DEVICE_MODEL="${{ github.event.inputs.TARGET_DEVICE_MODEL }}"
+          export STOCK_DEVICE="${{ github.event.inputs.STOCK_DEVICE }}"
+          export TARGET_DEVICE="${{ github.event.inputs.TARGET_DEVICE }}"
           export TARGET_DEVICE_CSC="${{ github.event.inputs.TARGET_DEVICE_CSC }}"
           export TARGET_DEVICE_IMEI="${{ github.event.inputs.TARGET_DEVICE_IMEI }}"
 
