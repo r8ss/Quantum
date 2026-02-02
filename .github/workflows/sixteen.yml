@@ -14,7 +14,7 @@ on:
       TARGET_DEVICE_CSC:
         description: "Enter the TARGET_DEVICE_CSC (Country Specific Code)."
         required: true
-        default: "AFG"
+        default: "BKD"
       TARGET_DEVICE_IMEI:
         description: "Enter the TARGET_DEVICE_IMEI number."
         required: true
