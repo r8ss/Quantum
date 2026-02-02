@@ -133,17 +133,9 @@ EXTRACT_FIRMWARE() {
             lpunpack "$FIRM_DIR/super_raw.img" "$FIRM_DIR"
         else
             lpunpack "$FIRM_DIR/super.img" "$FIRM_DIR"
+			rm -rf "$FIRM_DIR/super.img"
         fi
     fi
-
-    # ---- FINAL CLEANUP ----
-    find "$FIRM_DIR" -type f \
-        ! -name 'odm.img' \
-        ! -name 'product.img' \
-        ! -name 'system.img' \
-        ! -name 'system_ext.img' \
-        ! -name 'vendor.img' \
-        -delete
 
 	# ---- FILE COUNT SUMMARY ----
     local FILE_COUNT
