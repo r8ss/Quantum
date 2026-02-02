@@ -144,6 +144,13 @@ EXTRACT_FIRMWARE() {
         ! -name 'system_ext.img' \
         ! -name 'vendor.img' \
         -delete
+
+	# ---- FILE COUNT SUMMARY ----
+    local FILE_COUNT
+    FILE_COUNT=$(find "$FIRM_DIR" -maxdepth 1 -type f | wc -l)
+    echo "- Extraction complete"
+    echo "- Total files present in $FIRM_DIR: $FILE_COUNT"
+
 }
 
 
