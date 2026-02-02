@@ -17,3 +17,4 @@ Remove unwanted pre-installed apps and optimize device performance.
 
 # Credits:
 Salvo Giangreco: https://github.com/salvogiangri
+3arthur6: https://github.com/3arthur6/BluetoothLibraryPatcher
