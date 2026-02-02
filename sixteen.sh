@@ -8,12 +8,6 @@ export FIRM_DIR="$(pwd)/FIRMWARE"
 export APKTOOL="$(pwd)/bin/apktool/apktool.jar"
 export VNDKS_COLLECTION="$(pwd)/QuantumRom/vndks"
 
-export STOCK_DEVICE="SM-A225F"
-
-export TARGET_DEVICE="SM-A346E"
-export TARGET_DEVICE_CSC="BKD"
-export TARGET_DEVICE_IMEI="357181567907875"
-
 export BUILD_PARTITIONS=(product system)
 
 # Executables
