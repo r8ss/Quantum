@@ -716,7 +716,6 @@ PREPARE_PARTITIONS() {
 
 
 FIX_SYSTEM_EXT() {
-    echo ""
     if [ "$#" -ne 1 ]; then
         echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
@@ -778,7 +777,6 @@ FIX_SYSTEM_EXT() {
 
 
 FIX_VNDK() {
-    echo ""
     if [ "$#" -ne 1 ]; then
         echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
