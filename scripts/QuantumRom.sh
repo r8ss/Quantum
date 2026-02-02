@@ -161,7 +161,8 @@ EXTRACT_FIRMWARE_IMG() {
     fi
 
 	local FIRM_DIR="$1"
-    
+
+	echo ""
 	echo "Extracting img from $FIRM_DIR"
     for imgfile in "$FIRM_DIR"/*.img; do
         [ -e "$imgfile" ] || continue
