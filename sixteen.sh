@@ -5,6 +5,12 @@ export TARGET_DEVICE=$2
 export TARGET_DEVICE_CSC=$3
 export TARGET_DEVICE_IMEI=$4
 
+
+echo $STOCK_DEVICE
+echo $TARGET_DEVICE
+echo $TARGET_DEVICE_CSC
+echo $TARGET_DEVICE_IMEI
+
 # Directories
 export DEVICES_DIR="$(pwd)/QuantumROM/Devices"
 export OUT_DIR="$(pwd)/OUT"
