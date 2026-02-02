@@ -17,7 +17,7 @@ export VNDKS_COLLECTION="$(pwd)/QuantumRom/vndks"
 export BUILD_PARTITIONS=(product system)
 
 # Binary
-chmod 755 "$(pwd)/bin"/{erofs-utils,lp,simg2img,ext4}/*
+chmod -R 755 "$(pwd)/bin"
 
 # Source
 source "$(pwd)/scripts/QuantumRom.sh"
