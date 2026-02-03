@@ -144,8 +144,53 @@ EXTRACT_FIRMWARE() {
     echo "- Extraction complete"
 }
 
+PREPARE_PARTITIONS() {
+    if [ "$#" -ne 1 ]; then
+        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        return 1
+    fi
+
+    local EXTRACTED_FIRM_DIR="$1"
+
+    [[ -z "$EXTRACTED_FIRM_DIR" || ! -d "$EXTRACTED_FIRM_DIR" ]] && {
+        echo "Invalid directory: $EXTRACTED_FIRM_DIR"
+        return 1
+    }
+
+    IFS=',' read -r -a KEEP <<< "$BUILD_PARTITIONS"
+
+    for i in "${!KEEP[@]}"; do
+        KEEP[$i]=$(echo "${KEEP[$i]}" | xargs)
+    done
+
+    echo ""
+    echo "Preparing: $EXTRACTED_FIRM_DIR"
+
+    shopt -s nullglob dotglob
+
+    for item in "$EXTRACTED_FIRM_DIR"/*; do
+        base=$(basename "$item")
+
+        [[ "$base" == *.img ]] && base="${base%.img}"
+
+        keep_this=0
+        for k in "${KEEP[@]}"; do
+            [[ "$k" == "$base" ]] && keep_this=1 && break
+        done
+
+        if [[ $keep_this -eq 0 ]]; then
+            echo "- Deleting: $item"
+            rm -rf -- "$item"
+        else
+            echo "- Keeping: $item"
+        fi
+    done
+
+    shopt -u nullglob dotglob
+}
 
 EXTRACT_FIRMWARE_IMG() {
+    echo ""
 	if [ "$#" -ne 1 ]; then
         echo "Usage: ${FUNCNAME[0]} <FIRMWARE_DIRECTORY>"
         return 1
@@ -153,7 +198,8 @@ EXTRACT_FIRMWARE_IMG() {
 
 	local FIRM_DIR="$1"
 
-	echo ""
+	echo "Extracting imges from $FIRM_DIR"
+	ls $FIRM_DIR/
     for imgfile in "$FIRM_DIR"/*.img; do
         [ -e "$imgfile" ] || continue
 
@@ -670,53 +716,6 @@ PATCH_BT_LIB() {
     fi
 
     return 0
-}
-
-
-PREPARE_PARTITIONS() {
-    if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
-        return 1
-    fi
-
-    local EXTRACTED_FIRM_DIR="$1"
-
-    [[ -z "$EXTRACTED_FIRM_DIR" || ! -d "$EXTRACTED_FIRM_DIR" ]] && {
-        echo "Invalid directory: $EXTRACTED_FIRM_DIR"
-        return 1
-    }
-
-    IFS=',' read -r -a KEEP <<< "$BUILD_PARTITIONS"
-
-    for i in "${!KEEP[@]}"; do
-        KEEP[$i]=$(echo "${KEEP[$i]}" | xargs)
-    done
-
-    echo ""
-    echo "Preparing: $EXTRACTED_FIRM_DIR"
-
-    shopt -s nullglob dotglob
-
-    for item in "$EXTRACTED_FIRM_DIR"/*; do
-        base=$(basename "$item")
-
-        [[ "$base" == *.img ]] && base="${base%.img}"
-
-        keep_this=0
-        for k in "${KEEP[@]}"; do
-            [[ "$k" == "$base" ]] && keep_this=1 && break
-        done
-
-        if [[ $keep_this -eq 0 ]]; then
-            echo "- Deleting: $item"
-            rm -rf -- "$item"
-        else
-            echo "- Keeping: $item"
-        fi
-    done
-
-    shopt -u nullglob dotglob
-	ls $EXTRACTED_FIRM_DIR/
 }
 
 
