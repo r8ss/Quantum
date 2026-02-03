@@ -2,10 +2,15 @@
 
 set -e
 
-chmod +x \
-  "$(pwd)/bin/erofs-utils/extract.erofs" \
-  "$(pwd)/bin/erofs-utils/mkfs.erofs" \
-  "$(pwd)/bin/ext4/make_ext4fs"
+#  Binary
+export MAKE_EXT4FS="$(pwd)/bin/ext4/make_ext4fs"
+export EXTRACT_EROFS="$(pwd)/bin/erofs-utils/extract.erofs"
+export MKFS_EROFS="$(pwd)/bin/erofs-utils/mkfs.erofs"
+
+chmod +x "$MAKE_EXT4FS"
+chmod +x "$EXTRACT_EROFS"
+chmod +x "$MKFS_EROFS"
+
 
 # Device info
 export STOCK_DEVICE=$1
