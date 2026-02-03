@@ -17,8 +17,8 @@ export VNDKS_COLLECTION="$(pwd)/QuantumROM/vndks"
 export BUILD_PARTITIONS=(product system)
 
 # Source
-source "$(pwd)/scripts/QuantumRom.sh"
-source "$DEVICES_DIR/$STOCK_DEVICE/config"
+sudo source "$(pwd)/scripts/QuantumRom.sh"
+sudo source "$DEVICES_DIR/$STOCK_DEVICE/config"
 
 sudo DOWNLOAD_FIRMWARE "$TARGET_DEVICE" "$TARGET_DEVICE_CSC" "$TARGET_DEVICE_IMEI" "$FIRM_DIR"
 
