@@ -858,7 +858,7 @@ BUILD_IMG() {
 
         if [[ "$FILE_SYSTEM" == "erofs" ]]; then
             echo -e "\e[33mBuilding EROFS image:\e[0m $OUT_IMG"
-            ./bin/mkfs.erofs --mount-point="/$PARTITION" --fs-config-file="$FS_CONFIG" --file-contexts="$FILE_CONTEXTS" "$OUT_IMG" "$SRC_DIR"
+            ./bin/erofs-utils/mkfs.erofs --mount-point="/$PARTITION" --fs-config-file="$FS_CONFIG" --file-contexts="$FILE_CONTEXTS" "$OUT_IMG" "$SRC_DIR"
 
         elif [[ "$FILE_SYSTEM" == "ext4" ]]; then
             if [[ "$PARTITION" == "system" ]]; then
