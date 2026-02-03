@@ -123,6 +123,8 @@ EXTRACT_FIRMWARE() {
     done
     rm -rf "${FIRM_DIR}"/*.lz4
 
+	echo " - File in $FIRM_DIR"
+
     # ---- REMOVE UNWANTED FILES ----
     rm -rf \
         "$FIRM_DIR"/*.txt \
