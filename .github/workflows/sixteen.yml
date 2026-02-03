@@ -70,7 +70,7 @@ jobs:
             - 📱 Device Model: ${{ github.event.inputs.DEVICE_MODEL }}
             - 🌍 Rom CSC: ${{ github.event.inputs.CSC }}
           files: |
-            ./out/*
+            ./OUT/*
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
 
