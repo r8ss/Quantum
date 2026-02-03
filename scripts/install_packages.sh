@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Linux setup.
-sudo apt update
+# sudo apt update
 sudo apt install -y p7zip-full lz4 python3 python3-pip
 
 # Installing Python packages.
