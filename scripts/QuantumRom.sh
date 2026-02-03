@@ -621,11 +621,11 @@ PATCH_SSRM() {
 	local FILE="$SSRM_DIR/smali/com/android/server/ssrm/Feature.smali"
 
 	echo "Patching ssrm.jar"
-	echo "- Updating stock SIOP_FILENAME and DVFS_FILENAME in ssrm.jar"
+	echo "- Updating stock SIOP_FILENAME > $SIOP_FILENAME and DVFS_FILENAME > $DVFS_FILENAME in ssrm.jar"
 	echo "  $FILE"
 
-    sed -i "s/\(const-string v[0-9]\+,\s*\"\)siop_[^\"]*\"/\1${SIOP_FILENAME}\"/g" "$FILE"
-    sed -i "/dvfs_policy_default/! s/\(const-string v[0-9]\+,\s*\"\)dvfs_policy_[^\"]*\"/\1${DVFS_FILENAME}\"/g" "$FILE"
+    sed -i "s/\(const-string v[0-9]\+,\s*\"\)siop_[^\"]*\"/\1$SIOP_FILENAME\"/g" "$FILE"
+    sed -i "/dvfs_policy_default/! s/\(const-string v[0-9]\+,\s*\"\)dvfs_policy_[^\"]*\"/\1$DVFS_FILENAME\"/g" "$FILE"
 }
 
 
@@ -795,6 +795,29 @@ FIX_VNDK() {
 }
 
 
+FIX_SELINUX() {
+    echo ""
+    if [ "$#" -ne 1 ]; then
+        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        return 1
+    fi
+
+    local EXTRACTED_FIRM_DIR="$1"
+	local SELINUX_FILE="$FIRM_DIR/$TARGET_DEVICE/system/system_ext/etc/selinux/mapping/${STOCK_VNDK_VERSION}.0.cil"
+	echo "Fixing selinux for $STOCK_DEVICE."
+    UNSUPPORTED_SELINUX=("audiomirroring" "fabriccrypto" "hal_dsms_default" "qb_id_prop" "hal_dsms_service" "proc_compaction_proactiveness" "sbauth" "ker_app" "kpp_app" "kpp_data" "attiqi_app" "kpoc_charger")
+
+    for keyword in "${UNSUPPORTED_SELINUX[@]}"; do
+        grep "$keyword" "$SELINUX_FILE"
+        sed -i "/$keyword/d" "$SELINUX_FILE"
+    done
+
+    REMOVE_LINE "(genfscon proc "/sys/kernel/firmware_config" (u object_r proc_fmw ((s0) (s0))))" "$FIRM_DIR/$TARGET_DEVICE/system/system_ext/etc/selinux/system_ext_sepolicy.cil"
+    REMOVE_LINE "(genfscon proc "/sys/vm/compaction_proactiveness" (u object_r proc_compaction_proactiveness ((s0) (s0))))" "$FIRM_DIR/$TARGET_DEVICE/system/system_ext/etc/selinux/system_ext_sepolicy.cil"
+    REMOVE_LINE "init.svc.vendor.wvkprov_server_hal                           u:object_r:wvkprov_prop:s0" "$FIRM_DIR/$TARGET_DEVICE/system/system_ext/etc/selinux/system_ext_property_contexts"
+}
+
+
 APPLY_STOCK_CONFIG() {
     echo ""
 	echo "Applying $STOCK_DEVICE device config."
@@ -826,6 +849,8 @@ APPLY_STOCK_CONFIG() {
 	FIX_VNDK "$EXTRACTED_FIRM_DIR"
 
 	# FIX SELINUX
+	FIX_SELINUX "$EXTRACTED_FIRM_DIR"
+
 	# replace stock files.
 	find "$FIRM_DIR/$TARGET_DEVICE/system/system/media" -maxdepth 1 -type f \( -iname "*.spi" -o -iname "*.qmg" -o -iname "*.txt" \) -delete
 	rm -rf $FIRM_DIR/$TARGET_DEVICE/product/overlay/framework-res*auto_generated_rro_product.apk
