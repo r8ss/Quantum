@@ -33,15 +33,6 @@ jobs:
           chmod +x ./scripts/install_packages.sh
           bash ./scripts/install_packages.sh
 
-      - name: Setup binaries.
-        run: |
-          cp "$(pwd)/bin/erofs-utils/extract.erofs" "/usr/local/bin"
-          cp "$(pwd)/bin/erofs-utils/mkfs.erofs" "/usr/local/bin"
-          cp "$(pwd)/bin/ext4/make_ext4fs" "/usr/local/bin"
-          cp "$(pwd)/bin/lp/lpunpack" "/usr/local/bin"
-          cp "$(pwd)/bin/simg2img/simg2img" "/usr/local/bin"
-          sudo chmod 755 /usr/local/bin/*
-
       - name: Setup directories.
         run: |
           chmod +x ./scripts/setup_directories.sh
