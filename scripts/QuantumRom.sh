@@ -137,12 +137,7 @@ EXTRACT_FIRMWARE() {
         fi
     fi
 
-	# ---- FILE COUNT SUMMARY ----
-    local FILE_COUNT
-    FILE_COUNT=$(find "$FIRM_DIR" -maxdepth 1 -type f | wc -l)
     echo "- Extraction complete"
-    echo "- Total files present in $FIRM_DIR: $FILE_COUNT"
-
 }
 
 
@@ -177,7 +172,7 @@ EXTRACT_FIRMWARE_IMG() {
                 echo "Extracting $imgfile in $FIRM_DIR/$partition"
                 python3 ./bin/py_scripts/imgextractor.py "$imgfile" "$FIRM_DIR"
                 ;;
-            erofs)
+            data)
                 echo ""
                 IMG_SIZE=$(stat -c%s -- "$imgfile")
                 echo "$imgfile Detected $fstype. Size: $IMG_SIZE bytes."
