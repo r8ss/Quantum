@@ -176,7 +176,7 @@ EXTRACT_FIRMWARE_IMG() {
                 echo "Extracting $imgfile in $FIRM_DIR/$partition"
                 python3 ./bin/py_scripts/imgextractor.py "$imgfile" "$FIRM_DIR"
                 ;;
-            data)
+            erofs)
                 echo ""
                 IMG_SIZE=$(stat -c%s -- "$imgfile")
                 echo "$imgfile Detected $fstype. Size: $IMG_SIZE bytes."
