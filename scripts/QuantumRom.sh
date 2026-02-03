@@ -131,9 +131,10 @@ EXTRACT_FIRMWARE() {
         "$FIRM_DIR"/*.bin \
         "$FIRM_DIR"/meta-data
 
-    simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
+    echo "- Extracting super.img"
+    ./bin/simg2img/simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
     rm -rf "$FIRM_DIR/super.img"
-    lpunpack -o "$FIRM_DIR" "$FIRM_DIR/super_raw.img"
+    ./bin/lp/lpunpack "$FIRM_DIR/super_raw.img" "$FIRM_DIR"
 	rm -rf "$FIRM_DIR/super_raw.img"
     echo "- Extraction complete"
 }
@@ -217,7 +218,7 @@ EXTRACT_FIRMWARE_IMG() {
                 echo "Extracting $imgfile in $FIRM_DIR/$partition"
                 python3 ./bin/py_scripts/imgextractor.py "$imgfile" "$FIRM_DIR"
                 ;;
-            EROFS)
+            erofs)
                 echo ""
                 IMG_SIZE=$(stat -c%s -- "$imgfile")
                 echo "$imgfile Detected $fstype. Size: $IMG_SIZE bytes."
@@ -236,30 +237,6 @@ EXTRACT_FIRMWARE_IMG() {
 
     # sudo chown -R "$REAL_USER:$REAL_USER" "$FIRM_DIR/config"
     # chmod -R u+rwX "$FIRM_DIR/config"
-}
-
-
-REMOVE_LINE() {
-    local LINE="$1"
-    local FILE="$2"
-
-    if [ "$#" -ne 2 ]; then
-        echo "Usage: ${FUNCNAME[0]} LINE FILE"
-        return 1
-    fi
-
-    if [[ ! -f "$FILE" ]]; then
-        echo "File '$FILE' not found. Skipping....."
-        return 1
-    fi
-
-    if ! grep -Fqx "$LINE" "$FILE"; then
-        echo "Line not found in '$FILE'. Skipping....."
-        return 2
-    fi
-
-    echo -e "\e[31mRemoving\e[0m: $LINE from $FILE"
-    sed -i "\#$LINE#d" "$FILE"
 }
 
 
@@ -722,7 +699,7 @@ FIX_SYSTEM_EXT() {
 
     local EXTRACTED_FIRM_DIR="$1"
 	
-    if [[ "$STOCK_HAS_SEPARATE_SYSTEM_EXT" == "FALSE" && -d "$EXTRACTED_FIRM_DIR/system_ext" ]]; then
+    if [[ "$STOCK_HAS_SEPARATE_SYSTEM_EXT" == FALSE && -d "$EXTRACTED_FIRM_DIR/system_ext" ]]; then
 	    echo "Fixing system_ext according to $STOCK_DEVICE"
         echo "- Copying system_ext content into system root"
 		rm -rf "$EXTRACTED_FIRM_DIR/system/system_ext"
@@ -803,18 +780,22 @@ FIX_SELINUX() {
     fi
 
     local EXTRACTED_FIRM_DIR="$1"
-	local SELINUX_FILE="$FIRM_DIR/$TARGET_DEVICE/system/system_ext/etc/selinux/mapping/${STOCK_VNDK_VERSION}.0.cil"
-	echo "Fixing selinux for $STOCK_DEVICE."
+    local SELINUX_FILE="$FIRM_DIR/$TARGET_DEVICE/system/system_ext/etc/selinux/mapping/${STOCK_VNDK_VERSION}.0.cil"
+
+    if [ ! -f "$SELINUX_FILE" ]; then
+        echo "Error: SELinux file not found at $SELINUX_FILE"
+        return 1
+    fi
+
+    echo "Fixing selinux for $STOCK_DEVICE."
+    
     UNSUPPORTED_SELINUX=("audiomirroring" "fabriccrypto" "hal_dsms_default" "qb_id_prop" "hal_dsms_service" "proc_compaction_proactiveness" "sbauth" "ker_app" "kpp_app" "kpp_data" "attiqi_app" "kpoc_charger")
 
     for keyword in "${UNSUPPORTED_SELINUX[@]}"; do
-        grep "$keyword" "$SELINUX_FILE"
-        sed -i "/$keyword/d" "$SELINUX_FILE"
+        if grep -q "$keyword" "$SELINUX_FILE"; then
+            sed -i "/$keyword/d" "$SELINUX_FILE"
+        fi
     done
-
-    REMOVE_LINE "(genfscon proc "/sys/kernel/firmware_config" (u object_r proc_fmw ((s0) (s0))))" "$FIRM_DIR/$TARGET_DEVICE/system/system_ext/etc/selinux/system_ext_sepolicy.cil"
-    REMOVE_LINE "(genfscon proc "/sys/vm/compaction_proactiveness" (u object_r proc_compaction_proactiveness ((s0) (s0))))" "$FIRM_DIR/$TARGET_DEVICE/system/system_ext/etc/selinux/system_ext_sepolicy.cil"
-    REMOVE_LINE "init.svc.vendor.wvkprov_server_hal                           u:object_r:wvkprov_prop:s0" "$FIRM_DIR/$TARGET_DEVICE/system/system_ext/etc/selinux/system_ext_property_contexts"
 }
 
 
@@ -854,7 +835,7 @@ APPLY_STOCK_CONFIG() {
 	# replace stock files.
 	find "$FIRM_DIR/$TARGET_DEVICE/system/system/media" -maxdepth 1 -type f \( -iname "*.spi" -o -iname "*.qmg" -o -iname "*.txt" \) -delete
 	rm -rf $FIRM_DIR/$TARGET_DEVICE/product/overlay/framework-res*auto_generated_rro_product.apk
-	cp -rfv "$DEVICES_DIR/$STOCK_DEVICE/Stock"/* "$FIRM_DIR/$TARGET_DEVICE/"
+	cp -rf "$DEVICES_DIR/$STOCK_DEVICE/Stock"/* "$FIRM_DIR/$TARGET_DEVICE/"
 }
 
 
