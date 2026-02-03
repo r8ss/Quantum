@@ -131,29 +131,14 @@ EXTRACT_FIRMWARE() {
         "$FIRM_DIR"/meta-data
 
     # ---- SUPER.IMG handling ----
-    if [ -f "$FIRM_DIR/super.img" ]; then
-        if file "$FIRM_DIR/super.img" | grep -qi "sparse"; then
-		    echo "- Converting super.img to super_raw.img."
-            simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
-			echo " - File in $FIRM_DIR"
-            find "$FIRM_DIR"
-            rm -rf "$FIRM_DIR/super.img"
-			echo "- Extracting partition from super.img"
-            lpunpack "$FIRM_DIR/super_raw.img" "$FIRM_DIR"
-			rm -rf "$FIRM_DIR/super_raw.img"
-			echo " - File in $FIRM_DIR"
-            find "$FIRM_DIR"
-        else
-			echo "- Extracting partition from super.img"
-            lpunpack "$FIRM_DIR/super.img" "$FIRM_DIR"
-			echo " - File in $FIRM_DIR"
-            find "$FIRM_DIR"
-			rm -rf "$FIRM_DIR/super.img"
-			echo " - File in $FIRM_DIR"
-            find "$FIRM_DIR"
-        fi
-    fi
-
+    echo "- Converting super.img to super_raw.img."
+    simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
+    rm -rf "$FIRM_DIR/super.img"
+	echo "- Extracting partition from super.img"
+    lpunpack "$FIRM_DIR/super_raw.img" "$FIRM_DIR"
+	rm -rf "$FIRM_DIR/super_raw.img"
+	echo " - File in $FIRM_DIR"
+    find "$FIRM_DIR"
     echo "- Extraction complete"
 }
 
