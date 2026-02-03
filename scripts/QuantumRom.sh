@@ -114,6 +114,7 @@ EXTRACT_FIRMWARE() {
     rm -rf "$FIRM_DIR"/*.tar
 
     # ---- LZ4 ----
+	find "${FIRM_DIR}" -type f ! -name 'super.img.lz4' -delete
     find "$FIRM_DIR" -maxdepth 1 -name "*.lz4" \
         -exec sh -c 'lz4 -dq "$1" "${1%.lz4}"' _ {} \;
     rm -rf "$FIRM_DIR"/*.lz4
@@ -124,7 +125,7 @@ EXTRACT_FIRMWARE() {
         "$FIRM_DIR"/*.pit \
         "$FIRM_DIR"/*.bin \
         "$FIRM_DIR"/meta-data
-
+	
     # ---- SUPER.IMG handling ----
     if [ -f "$FIRM_DIR/super.img" ]; then
         if file "$FIRM_DIR/super.img" | grep -qi "sparse"; then
