@@ -5,11 +5,7 @@ set -e
 chmod +x \
   "$(pwd)/bin/erofs-utils/extract.erofs" \
   "$(pwd)/bin/erofs-utils/mkfs.erofs" \
-  "$(pwd)/bin/ext4/make_ext4fs" \
-  "$(pwd)/bin/lp/lpunpack" \
-  "$(pwd)/bin/simg2img/simg2img"
-
-export PATH="$(pwd)/bin/erofs-utils:$(pwd)/bin/ext4:$(pwd)/bin/lp:$(pwd)/bin/simg2img:$PATH"
+  "$(pwd)/bin/ext4/make_ext4fs"
 
 # Device info
 export STOCK_DEVICE=$1
