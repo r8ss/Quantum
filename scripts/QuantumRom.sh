@@ -136,15 +136,15 @@ EXTRACT_FIRMWARE() {
 	echo " - File in $FIRM_DIR"
     find "$FIRM_DIR"
 
-    # ---- SUPER.IMG handling ----
-    echo "- Converting super.img to super_raw.img."
-    simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
-    rm -rf "$FIRM_DIR/super.img"
-	echo "- Extracting partition from super.img"
-    lpunpack "$FIRM_DIR/super_raw.img" "$FIRM_DIR"
-	rm -rf "$FIRM_DIR/super_raw.img"
-	echo " - File in $FIRM_DIR"
-    find "$FIRM_DIR"
+    if [ -f "$FIRM_DIR/super_raw.img" ]; then
+	    simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
+        rm -rf "$FIRM_DIR/super.img"
+        lpunpack -o "$FIRM_DIR" "$FIRM_DIR/super_raw.img"
+		rm -rf "$FIRM_DIR/super_raw.img"
+    else
+        echo "super_raw.img not found"
+    fi
+
     echo "- Extraction complete"
 }
 
