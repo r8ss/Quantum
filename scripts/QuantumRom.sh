@@ -365,9 +365,8 @@ INSTALL_FRAMEWORK() {
         return 1
     fi
 
+    echo ""
     local framework_res_apk="$1"
-
-    echo
     echo "Installing Framework."
     java -jar "$APKTOOL" install-framework "$framework_res_apk"
 }
@@ -827,6 +826,9 @@ APPLY_STOCK_CONFIG() {
 	FIX_VNDK "$EXTRACTED_FIRM_DIR"
 
 	# FIX SELINUX
+	# replace stock files.
+	find "$FIRM_DIR/$TARGET_DEVICE/system/system/media" -maxdepth 1 -type f \( -iname "*.spi" -o -iname "*.qmg" -o -iname "*.txt" \) -delete
+	rm -rf $FIRM_DIR/$TARGET_DEVICE/product/overlay/framework-res*auto_generated_rro_product.apk
 	cp -rfv "$DEVICES_DIR/$STOCK_DEVICE/Stock"/* "$FIRM_DIR/$TARGET_DEVICE/"
 }
 
