@@ -6,10 +6,12 @@ set -e
 chmod +x "$(pwd)/bin/ext4/make_ext4fs"
 chmod +x "$(pwd)/bin/erofs-utils/extract.erofs"
 chmod +x "$(pwd)/bin/erofs-utils/mkfs.erofs"
+chmod +x "$(pwd)/bin/simg2img/simg2img"
+chmod +x "$(pwd)/bin/lp/lpunpack"
 
 # Device info
-export STOCK_DEVICE=$1
-export TARGET_DEVICE=$2
+export STOCK_DEVICE="SM-A225F"
+export TARGET_DEVICE="SM-A346E"
 export TARGET_DEVICE_CSC=$3
 export TARGET_DEVICE_IMEI=$4
 
