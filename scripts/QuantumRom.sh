@@ -96,15 +96,11 @@ EXTRACT_FIRMWARE() {
     fi
 
     echo "- Extracting zip file."
-	echo " - File in $FIRM_DIR"
-    find "$FIRM_DIR"
     find "$FIRM_DIR" -maxdepth 1 -name "*.zip" \
         -exec 7z x -y -bd -o"$FIRM_DIR" {} \;
     rm -rf "$FIRM_DIR"/*.zip
 
     echo "- Extracting xz file."
-	echo " - File in $FIRM_DIR"
-    find "$FIRM_DIR"
     find "$FIRM_DIR" -maxdepth 1 -name "*.xz" \
         -exec 7z x -y -bd -o"$FIRM_DIR" {} \;
     rm -rf "$FIRM_DIR"/*.xz
@@ -114,8 +110,6 @@ EXTRACT_FIRMWARE() {
         -exec sh -c 'mv -- "$1" "${1%.md5}"' _ {} \;
 
     echo "- Extracting tar files..."
-	echo " - File in $FIRM_DIR"
-    find "$FIRM_DIR"
     for file in "${FIRM_DIR}"/*.tar; do
         if [ -f "$file" ]; then
             tar -xvf "$file" -C "${FIRM_DIR}"
@@ -124,7 +118,6 @@ EXTRACT_FIRMWARE() {
     done
 
     echo "- Extracting lz4 file."
-	echo " - File in $FIRM_DIR"
 	for file in "${FIRM_DIR}"/*.lz4; do
         [ -f "$file" ] && lz4 -d "$file" "${file%.lz4}"
     done
@@ -137,9 +130,6 @@ EXTRACT_FIRMWARE() {
         "$FIRM_DIR"/*.bin \
         "$FIRM_DIR"/meta-data
 
-	echo " - File in $FIRM_DIR"
-    find "$FIRM_DIR"
-	
     # ---- SUPER.IMG handling ----
     if [ -f "$FIRM_DIR/super.img" ]; then
         if file "$FIRM_DIR/super.img" | grep -qi "sparse"; then
