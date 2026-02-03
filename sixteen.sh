@@ -25,7 +25,7 @@ export FIRM_DIR="$(pwd)/FIRMWARE"
 export APKTOOL="$(pwd)/bin/apktool/apktool.jar"
 export VNDKS_COLLECTION="$(pwd)/QuantumROM/vndks"
 
-export BUILD_PARTITIONS=(product system)
+export BUILD_PARTITIONS="product,system_ext,system"
 
 # Source
 source "$(pwd)/scripts/QuantumRom.sh"
