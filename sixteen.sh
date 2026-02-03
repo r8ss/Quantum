@@ -3,13 +3,9 @@
 set -e
 
 #  Binary
-export MAKE_EXT4FS="$(pwd)/bin/ext4/make_ext4fs"
-export EXTRACT_EROFS="$(pwd)/bin/erofs-utils/extract.erofs"
-export MKFS_EROFS="$(pwd)/bin/erofs-utils/mkfs.erofs"
-
-chmod +x "$MAKE_EXT4FS"
-chmod +x "$EXTRACT_EROFS"
-chmod +x "$MKFS_EROFS"
+chmod +x "$(pwd)/bin/ext4/make_ext4fs"
+chmod +x "$(pwd)/bin/erofs-utils/extract.erofs"
+chmod +x "$(pwd)/bin/erofs-utils/mkfs.erofs"
 
 
 # Device info
