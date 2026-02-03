@@ -143,7 +143,9 @@ EXTRACT_FIRMWARE() {
     fi
 
     echo "- Extraction complete"
+    ls $FIRM_DIR/
 }
+
 
 PREPARE_PARTITIONS() {
     if [ "$#" -ne 1 ]; then
@@ -189,6 +191,7 @@ PREPARE_PARTITIONS() {
 
     shopt -u nullglob dotglob
 }
+
 
 EXTRACT_FIRMWARE_IMG() {
     echo ""
