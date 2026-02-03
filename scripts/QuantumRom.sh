@@ -613,14 +613,12 @@ PATCH_KNOX_GUARD() {
 
 PATCH_SSRM() {
     echo ""
-	if [ "$#" -ne 3 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_SSRM_DIRECTORY> <SIOP_FILENAME> <DVFS_FILENAME>"
+	if [ "$#" -ne 1 ]; then
+        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_SSRM_DIRECTORY>"
         return 1
     fi
 
     local SSRM_DIR="$1"
-	local SIOP_FILENAME="$2"
-	local DVFS_FILENAME="$3"
 	local FILE="$SSRM_DIR/smali/com/android/server/ssrm/Feature.smali"
 
 	echo "Patching ssrm.jar"
@@ -818,6 +816,8 @@ APPLY_STOCK_CONFIG() {
         echo "- $STOCK_DEVICE config found."
         export STOCK_VNDK_VERSION="$(grep -m1 '^STOCK_VNDK_VERSION=' "$DEVICES_DIR/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
         export STOCK_HAS_SEPERATE_SYSTEM_EXT="$(grep -m1 '^STOCK_HAS_SEPERATE_SYSTEM_EXT=' "$DEVICES_DIR/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
+		export SIOP_FILENAME="$(grep -m1 '^SIOP_FILENAME=' "$DEVICES_DIR/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
+        export DVFS_FILENAME="$(grep -m1 '^DVFS_FILENAME=' "$DEVICES_DIR/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
     fi
 
 	# FIX SYSTEM_EXT	
@@ -827,7 +827,7 @@ APPLY_STOCK_CONFIG() {
 	FIX_VNDK "$EXTRACTED_FIRM_DIR"
 
 	# FIX SELINUX
-	cp -rfv "$DEVICES_DIR/$STOCK_DEVICE/stock"/* "$FIRM_DIR/$TARGET_DEVICE/"
+	cp -rfv "$DEVICES_DIR/$STOCK_DEVICE/Stock"/* "$FIRM_DIR/$TARGET_DEVICE/"
 }
 
 
