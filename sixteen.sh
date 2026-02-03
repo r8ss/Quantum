@@ -15,10 +15,11 @@ export TARGET_DEVICE_CSC=$3
 export TARGET_DEVICE_IMEI=$4
 
 # Directories
-export DEVICES_DIR="$(pwd)/QuantumROM/Devices"
 export OUT_DIR="$(pwd)/OUT"
 export WORK_DIR="$(pwd)/WORK"
 export FIRM_DIR="$(pwd)/FIRMWARE"
+export DEVICES_DIR="$(pwd)/QuantumROM/Devices"
+export APKTOOL="$(pwd)/bin/apktool/apktool.jar"
 export VNDKS_COLLECTION="$(pwd)/QuantumROM/vndks"
 
 export BUILD_PARTITIONS="product,system_ext,system"
