@@ -31,7 +31,7 @@ jobs:
       - name: Installing required packages.
         run: |
           chmod +x ./scripts/install_packages.sh
-          sudo bash ./scripts/install_packages.sh
+          bash ./scripts/install_packages.sh
 
       - name: Setup binaries.
         run: |
@@ -45,12 +45,12 @@ jobs:
       - name: Setup directories.
         run: |
           chmod +x ./scripts/setup_directories.sh
-          sudo bash ./scripts/setup_directories.sh FIRMWARE WORK OUT
+          bash ./scripts/setup_directories.sh FIRMWARE WORK OUT
 
       - name: Make Rom.
         run: |
           chmod +x ./sixteen.sh
-          sudo bash ./sixteen.sh ${{ github.event.inputs.STOCK_DEVICE }} ${{ github.event.inputs.TARGET_DEVICE }} ${{ github.event.inputs.TARGET_DEVICE_CSC }} ${{ github.event.inputs.TARGET_DEVICE_IMEI }}
+          bash ./sixteen.sh ${{ github.event.inputs.STOCK_DEVICE }} ${{ github.event.inputs.TARGET_DEVICE }} ${{ github.event.inputs.TARGET_DEVICE_CSC }} ${{ github.event.inputs.TARGET_DEVICE_IMEI }}
 
       - name: Splitting files before uploading if need.
         run: |
@@ -63,8 +63,8 @@ jobs:
             FILE_SIZE=$(stat -c%s "$file")
             if [ "$FILE_SIZE" -gt "$GIT_SUPPORT_SIZE" ]; then
               echo "📦 Splitting: $file (Size: $FILE_SIZE bytes)"
-              sudo split -b "$GIT_SUPPORT_SIZE" -d -a 3 "$file" "$file.part"
-              sudo rm -f "$file"
+              split -b "$GIT_SUPPORT_SIZE" -d -a 3 "$file" "$file.part"
+              rm -f "$file"
             fi
           done
 
@@ -84,4 +84,4 @@ jobs:
 
       - name: Cleaning everything.
         run: |
-          sudo rm -rf *
+          rm -rf *
