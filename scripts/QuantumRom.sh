@@ -109,15 +109,19 @@ EXTRACT_FIRMWARE() {
         -exec sh -c 'mv -- "$1" "${1%.md5}"' _ {} \;
 
     # ---- TAR ----
-    find "$FIRM_DIR" -maxdepth 1 -name "*.tar" \
-        -exec 7z x -y -bd -o"$FIRM_DIR" {} \;
-    rm -rf "$FIRM_DIR"/*.tar
+    echo "Extracting tar files..."
+    for file in "${FIRM_DIR}"/*.tar; do
+        if [ -f "$file" ]; then
+            tar -xvf "$file" -C "${FIRM_DIR}"
+            rm -f "$file"
+        fi
+    done
 
     # ---- LZ4 ----
-	find "${FIRM_DIR}" -type f ! -name 'super.img.lz4' -delete
-    find "$FIRM_DIR" -maxdepth 1 -name "*.lz4" \
-        -exec sh -c 'lz4 -dq "$1" "${1%.lz4}"' _ {} \;
-    rm -rf "$FIRM_DIR"/*.lz4
+	for file in "${FW_FILE_DIR}"/*.lz4; do
+        [ -f "$file" ] && lz4 -d "$file" "${file%.lz4}"
+    done
+    rm -rf "${FIRM_DIR}"/*.lz4
 
     # ---- REMOVE UNWANTED FILES ----
     rm -rf \
@@ -143,7 +147,8 @@ EXTRACT_FIRMWARE() {
     fi
 
     echo "- Extraction complete"
-    ls $FIRM_DIR/
+	echo " - File in $FIRM_DIR"
+    find "$FIRM_DIR"
 }
 
 
