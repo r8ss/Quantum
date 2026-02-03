@@ -2,7 +2,7 @@
 
 # Linux setup.
 # sudo apt update
-sudo apt install -y p7zip-full lz4 simg2img liblp python3 python3-pip
+sudo apt install -y p7zip-full lz4 android-sdk-libsparse-utils liblp python3 python3-pip
 
 # Installing Python packages.
 pip3 install liblp tgcrypto pyrogram
