@@ -123,9 +123,6 @@ EXTRACT_FIRMWARE() {
         [ -f "$file" ] && lz4 -d "$file" "${file%.lz4}"
     done
     rm -rf "${FIRM_DIR}"/*.lz4
-    
-	echo " - File in $FIRM_DIR"
-    find "$FIRM_DIR"
 
     # ---- REMOVE UNWANTED FILES ----
     rm -rf \
@@ -133,9 +130,6 @@ EXTRACT_FIRMWARE() {
         "$FIRM_DIR"/*.pit \
         "$FIRM_DIR"/*.bin \
         "$FIRM_DIR"/meta-data
-
-	echo " - File in $FIRM_DIR"
-    find "$FIRM_DIR"
 
     simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
     rm -rf "$FIRM_DIR/super.img"
@@ -424,7 +418,7 @@ RECOMPILE() {
 	echo ""
 	if [[ "$ext" == "jar" ]]; then
 	    echo "Zipaligning: $built_file to $final_file"
-        zipalign -v 4 "$built_file" "$final_file" >/dev/null 2>&1
+        zipalign -v 4 "$built_file" "$final_file"
 		rm -rf "$built_file" "$DECOMPILED_DIR"
     fi
 }
