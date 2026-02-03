@@ -101,7 +101,7 @@ EXTRACT_FIRMWARE() {
         -exec 7z x -y -bd -o"$FIRM_DIR" {} \;
     rm -rf "$FIRM_DIR"/*.zip
 
-    echo "Extracting xz file."
+    echo "- Extracting xz file."
 	echo " - File in $FIRM_DIR"
     find "$FIRM_DIR"
     find "$FIRM_DIR" -maxdepth 1 -name "*.xz" \
@@ -112,7 +112,7 @@ EXTRACT_FIRMWARE() {
     find "$FIRM_DIR" -maxdepth 1 -name "*.md5" \
         -exec sh -c 'mv -- "$1" "${1%.md5}"' _ {} \;
 
-    echo "Extracting tar files..."
+    echo "- Extracting tar files..."
 	echo " - File in $FIRM_DIR"
     find "$FIRM_DIR"
     for file in "${FIRM_DIR}"/*.tar; do
@@ -135,27 +135,35 @@ EXTRACT_FIRMWARE() {
         "$FIRM_DIR"/*.pit \
         "$FIRM_DIR"/*.bin \
         "$FIRM_DIR"/meta-data
+
+	echo " - File in $FIRM_DIR"
+    find "$FIRM_DIR"
 	
     # ---- SUPER.IMG handling ----
-
     if [ -f "$FIRM_DIR/super.img" ]; then
         if file "$FIRM_DIR/super.img" | grep -qi "sparse"; then
 		    echo "- Converting super.img to super_raw.img."
             simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
+			echo " - File in $FIRM_DIR"
+            find "$FIRM_DIR"
             rm -rf "$FIRM_DIR/super.img"
 			echo "- Extracting partition from super.img"
             lpunpack "$FIRM_DIR/super_raw.img" "$FIRM_DIR"
 			rm -rf "$FIRM_DIR/super_raw.img"
+			echo " - File in $FIRM_DIR"
+            find "$FIRM_DIR"
         else
 			echo "- Extracting partition from super.img"
             lpunpack "$FIRM_DIR/super.img" "$FIRM_DIR"
+			echo " - File in $FIRM_DIR"
+            find "$FIRM_DIR"
 			rm -rf "$FIRM_DIR/super.img"
+			echo " - File in $FIRM_DIR"
+            find "$FIRM_DIR"
         fi
     fi
 
     echo "- Extraction complete"
-	echo " - File in $FIRM_DIR"
-    find "$FIRM_DIR"
 }
 
 
