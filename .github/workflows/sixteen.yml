@@ -30,8 +30,9 @@ jobs:
 
       - name: Installing required packages.
         run: |
-          chmod +x ./scripts/install_packages.sh
-          bash ./scripts/install_packages.sh
+          sudo apt install -y p7zip-full lz4 android-sdk-libsparse-utils python3 python3-pip
+          pip3 install liblp tgcrypto pyrogram
+          pip3 install git+https://github.com/martinetd/samloader.git
 
       - name: Setup directories.
         run: |
