@@ -1,4 +1,5 @@
 #!/bin/bash
+
 set -e
 
 # REAL_USER=${SUDO_USER:-$USER}
@@ -88,12 +89,12 @@ DOWNLOAD_FIRMWARE() {
 
 
 EXTRACT_FIRMWARE() {
-    local FIRM_DIR="$1"
-    
 	if [ "$#" -ne 1 ]; then
         echo "Usage: ${FUNCNAME[0]} <FIRMWARE_DIRECTORY>"
         return 1
     fi
+
+    local FIRM_DIR="$1"
 
     echo "- Extracting zip file."
     find "$FIRM_DIR" -maxdepth 1 -name "*.zip" \
@@ -136,15 +137,10 @@ EXTRACT_FIRMWARE() {
 	echo " - File in $FIRM_DIR"
     find "$FIRM_DIR"
 
-    if [ -f "$FIRM_DIR/super_raw.img" ]; then
-	    simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
-        rm -rf "$FIRM_DIR/super.img"
-        lpunpack -o "$FIRM_DIR" "$FIRM_DIR/super_raw.img"
-		rm -rf "$FIRM_DIR/super_raw.img"
-    else
-        echo "super_raw.img not found"
-    fi
-
+    simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
+    rm -rf "$FIRM_DIR/super.img"
+    lpunpack -o "$FIRM_DIR" "$FIRM_DIR/super_raw.img"
+	rm -rf "$FIRM_DIR/super_raw.img"
     echo "- Extraction complete"
 }
 
