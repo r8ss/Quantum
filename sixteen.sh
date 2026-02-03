@@ -19,7 +19,6 @@ export DEVICES_DIR="$(pwd)/QuantumROM/Devices"
 export OUT_DIR="$(pwd)/OUT"
 export WORK_DIR="$(pwd)/WORK"
 export FIRM_DIR="$(pwd)/FIRMWARE"
-export APKTOOL="$(pwd)/bin/apktool/apktool.jar"
 export VNDKS_COLLECTION="$(pwd)/QuantumROM/vndks"
 
 export BUILD_PARTITIONS="product,system_ext,system"
@@ -41,10 +40,10 @@ INSTALL_FRAMEWORK "$FIRM_DIR/$TARGET_DEVICE/system/system/framework/framework-re
 DECOMPILE "$APKTOOL" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework/ssrm.jar" "$WORK_DIR"
 DECOMPILE "$APKTOOL" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework/services.jar" "$WORK_DIR"
 
+PATCH_SSRM "$WORK_DIR/ssrm"
+PATCH_KNOX_GUARD "$WORK_DIR/services"
 PATCH_FLAG_SECURE "$WORK_DIR/services"
 PATCH_SECURE_FOLDER "$WORK_DIR/services"
-PATCH_KNOX_GUARD "$WORK_DIR/services"
-PATCH_SSRM "$WORK_DIR/ssrm" "siop_a22_mt6769t" "dvfs_policy_mt6769t_xx"
 
 RECOMPILE "$APKTOOL" "$WORK_DIR/ssrm" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework" "$WORK_DIR"
 RECOMPILE "$APKTOOL" "$WORK_DIR/services" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework" "$WORK_DIR"
