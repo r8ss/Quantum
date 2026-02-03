@@ -702,6 +702,7 @@ PATCH_BT_LIB() {
             echo "- Found Bluetooth patch pattern [$idx]"
             HEX_PATCH "$BT_LIB_FILE" "$from" "$to" || return 1
             PATCHED=1
+			cp -fv "$WORK_DIR/libbluetooth_jni.so" "$EXTRACTED_FIRM_DIR/system/system/lib64/"
             break
         fi
     done
