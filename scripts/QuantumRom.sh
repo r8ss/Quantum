@@ -1,8 +1,7 @@
 #!/bin/bash
 set -e
 
-# REAL_USER=${SUDO_USER:-$USER
-
+# REAL_USER=${SUDO_USER:-$USER}
 
 CHECK_FILE() {
     if [ ! -f "$1" ]; then
