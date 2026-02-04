@@ -1129,7 +1129,7 @@ BUILD_IMG() {
 
         if [[ "$FILE_SYSTEM" == "erofs" ]]; then
             echo -e "\e[33mBuilding EROFS image:\e[0m $OUT_IMG"
-            $(pwd)/bin/erofs-utils/mkfs.erofs --mount-point="/$PARTITION" --fs-config-file="$FS_CONFIG" --file-contexts="$FILE_CONTEXTS" "$OUT_IMG" "$SRC_DIR"
+            $(pwd)/bin/erofs-utils/mkfs.erofs --mount-point="/$PARTITION" --fs-config-file="$FS_CONFIG" --file-contexts="$FILE_CONTEXTS" -z lz4hc,level=12 -m 4096:lz4hc,level=12 --workers=$(nproc) "$OUT_IMG" "$SRC_DIR"
 
         elif [[ "$FILE_SYSTEM" == "ext4" ]]; then
             if [[ "$PARTITION" == "system" ]]; then
