@@ -4,19 +4,19 @@ on:
   workflow_dispatch:
     inputs:
       STOCK_DEVICE:
-        description: "Enter the STOCK_DEVICE_MODEL."
+        description: "STOCK_DEVICE_MODEL."
         required: true
         default: "SM-A225F"
       TARGET_DEVICE:
-        description: "Enter the TARGET_DEVICE_MODEL."
+        description: "TARGET_DEVICE_MODEL."
         required: true
         default: "SM-A346E"
       TARGET_DEVICE_CSC:
-        description: "Enter the TARGET_DEVICE_CSC (Country Specific Code)."
+        description: "TARGET_DEVICE_CSC."
         required: true
         default: "BKD"
       TARGET_DEVICE_IMEI:
-        description: "Enter the TARGET_DEVICE_IMEI number."
+        description: "TARGET_DEVICE_IMEI."
         required: true
         default: "353435774197736"
 
