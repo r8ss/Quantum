@@ -50,8 +50,9 @@ jobs:
 
       - name: Splitting files before uploading if need.
         run: |
-          GIT_SUPPORT_SIZE=2147483648
-          OUT_DIR="./out"
+          GIT_SUPPORT_SIZE=2147483647
+          OUT_DIR="./OUT"
+          echo "BUILD_TIME=$(date '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_ENV
           echo "--- Checking for large files in $OUT_DIR ---"
 
           for file in "$OUT_DIR"/*; do
@@ -71,8 +72,9 @@ jobs:
           name: "QuantumROM Build: ${{ github.run_id }}"
           body: |
             ***Build Information***
-            - 📱 Device Model: ${{ github.event.inputs.DEVICE_MODEL }}
-            - 🌍 Rom CSC: ${{ github.event.inputs.CSC }}
+            - ➡️ Build For: ${{ github.event.inputs.STOCK_DEVICE }}
+            - ➡️ Build From: ${{ GITHUB.EVENT.INPUTS.TARGET_DEVICE }}
+            - ⏰️ Build Time: ${{ env.BUILD_TIME }}
           files: |
             ./OUT/*
         env:
