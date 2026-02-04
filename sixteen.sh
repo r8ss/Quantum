@@ -4,10 +4,8 @@ set -e
 
 #  Binary
 chmod +x "$(pwd)/bin/ext4/make_ext4fs"
-chmod +x "$(pwd)/bin/erofs-utils/extract.erofs"
 chmod +x "$(pwd)/bin/erofs-utils/mkfs.erofs"
-chmod +x "$(pwd)/bin/simg2img/simg2img"
-chmod +x "$(pwd)/bin/lp/lpunpack"
+chmod +x "$(pwd)/bin/erofs-utils/extract.erofs"
 
 # Device info
 export STOCK_DEVICE="SM-A225F"
