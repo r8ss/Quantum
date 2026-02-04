@@ -50,7 +50,7 @@ jobs:
 
       - name: Splitting files before uploading if need.
         run: |
-          GIT_SUPPORT_SIZE=2147000000
+          GIT_SUPPORT_SIZE=2147483648
           OUT_DIR="./out"
           echo "--- Checking for large files in $OUT_DIR ---"
 
