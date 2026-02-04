@@ -20,6 +20,20 @@ CHECK_EMPTY_ARGS() {
 }
 
 
+REMOVE_LINE() {
+    if [ "$#" -ne 2 ]; then
+        echo "Usage: ${FUNCNAME[0]} <TARGET_LINE> <TARGET_FILE>"
+        return 1
+    fi
+
+    local LINE="$1"
+    local FILE="$2"
+
+    echo "- Deleting $LINE from $FILE"
+    grep -vxF "$LINE" "$FILE" > "$FILE.tmp" && mv "$FILE.tmp" "$FILE"
+}
+
+
 DOWNLOAD_FIRMWARE() {
     if [ "$#" -ne 4 ]; then
         echo "Usage: ${FUNCNAME[0]} <MODEL> <CSC> <IMEI> <DOWNLOAD_DIRECTORY>"
@@ -132,9 +146,9 @@ EXTRACT_FIRMWARE() {
         "$FIRM_DIR"/meta-data
 
     echo "- Extracting super.img"
-    ./bin/simg2img/simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
+    simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
     rm -rf "$FIRM_DIR/super.img"
-    ./bin/lp/lpunpack "$FIRM_DIR/super_raw.img" "$FIRM_DIR"
+    lpunpack -o "$FIRM_DIR" "$FIRM_DIR/super_raw.img"
 	rm -rf "$FIRM_DIR/super_raw.img"
     echo "- Extraction complete"
 }
@@ -218,7 +232,7 @@ EXTRACT_FIRMWARE_IMG() {
                 echo "Extracting $imgfile in $FIRM_DIR/$partition"
                 python3 ./bin/py_scripts/imgextractor.py "$imgfile" "$FIRM_DIR"
                 ;;
-            erofs)
+            data)
                 echo ""
                 IMG_SIZE=$(stat -c%s -- "$imgfile")
                 echo "$imgfile Detected $fstype. Size: $IMG_SIZE bytes."
@@ -760,7 +774,7 @@ FIX_VNDK() {
 
     local EXTRACTED_FIRM_DIR="$1"
     local APEX_DIR="$EXTRACTED_FIRM_DIR/system/system_ext/apex"
-    echo "Checking $STOCK_DEVICE and $TARGET_DEVICE vndk version."
+    echo "- Checking $STOCK_DEVICE and $TARGET_DEVICE vndk version."
     if [ -f "$APEX_DIR/com.android.vndk.v${STOCK_VNDK_VERSION}.apex" ]; then
         echo "- VNDK matched."
     else
@@ -796,6 +810,10 @@ FIX_SELINUX() {
             sed -i "/$keyword/d" "$SELINUX_FILE"
         fi
     done
+	
+	REMOVE_LINE '(genfscon proc "/sys/kernel/firmware_config" (u object_r proc_fmw ((s0) (s0))))' "$EXTRACTED_FIRM_DIR/system/system_ext/etc/selinux/system_ext_sepolicy.cil"
+	REMOVE_LINE '(genfscon proc "/sys/vm/compaction_proactiveness" (u object_r proc_compaction_proactiveness ((s0) (s0))))' "$EXTRACTED_FIRM_DIR/system/system_ext/etc/selinux/system_ext_sepolicy.cil"
+    REMOVE_LINE 'init.svc.vendor.wvkprov_server_hal                           u:object_r:wvkprov_prop:s0' "$EXTRACTED_FIRM_DIR/system/system_ext/etc/selinux/system_ext_property_contexts"
 }
 
 
