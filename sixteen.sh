@@ -3,8 +3,8 @@
 set -e
 
 # Device info
-export STOCK_DEVICE="SM-A225F"
-export TARGET_DEVICE="SM-A346E"
+export STOCK_DEVICE=$1
+export TARGET_DEVICE=$2
 export TARGET_DEVICE_CSC=$3
 export TARGET_DEVICE_IMEI=$4
 
