@@ -230,14 +230,14 @@ EXTRACT_FIRMWARE_IMG() {
                 IMG_SIZE=$(stat -c%s -- "$imgfile")
 				echo "$imgfile Detected $fstype. Size: $IMG_SIZE bytes."
                 echo "Extracting $imgfile in $FIRM_DIR/$partition"
-                python3 ./bin/py_scripts/imgextractor.py "$imgfile" "$FIRM_DIR"
+                python3 $(pwd)/bin/py_scripts/imgextractor.py "$imgfile" "$FIRM_DIR"
                 ;;
             EROFS)
                 echo ""
                 IMG_SIZE=$(stat -c%s -- "$imgfile")
                 echo "$imgfile Detected $fstype. Size: $IMG_SIZE bytes."
                 echo "Extracting $imgfile in $FIRM_DIR/$partition"
-                ./bin/erofs-utils/extract.erofs -i "$imgfile" -x -f -o "$FIRM_DIR"
+                $(pwd)/bin/erofs-utils/extract.erofs -i "$imgfile" -x -f -o "$FIRM_DIR"
                 ;;
             *)
                 echo "[$imgfile] Unknown filesystem type ($fstype), skipping"
@@ -857,6 +857,64 @@ APPLY_STOCK_CONFIG() {
 }
 
 
+GEN_FS_CONFIG() {
+    if [ "$#" -ne 1 ]; then
+        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        return 1
+    fi
+
+    local EXTRACTED_FIRM_DIR="$1"
+
+    [ ! -d "$EXTRACTED_FIRM_DIR" ] && {
+        echo "- $EXTRACTED_FIRM_DIR not found."
+        return 1
+    }
+
+    [ ! -d "$EXTRACTED_FIRM_DIR/config" ] && {
+        echo "[ERROR] config directory missing"
+        return 1
+    }
+
+    for ROOT in "$EXTRACTED_FIRM_DIR"/*; do
+        [ ! -d "$ROOT" ] && continue
+
+        PARTITION="$(basename "$ROOT")"
+        [ "$PARTITION" = "config" ] && continue
+
+        local FS_CONFIG="$EXTRACTED_FIRM_DIR/config/${PARTITION}_fs_config"
+        local TMP_EXISTING
+        TMP_EXISTING="$(mktemp)"
+
+        touch "$FS_CONFIG"
+
+        echo ""
+        echo "Generating fs_config for partition: $PARTITION"
+        echo "- Source : $ROOT"
+        echo "- Output : $FS_CONFIG"
+
+        awk '{print $1}' "$FS_CONFIG" | sort -u > "$TMP_EXISTING"
+
+        find "$ROOT" -mindepth 1 \( -type f -o -type d \) | while IFS= read -r item; do
+            local REL_PATH="${item#$ROOT/}"
+            local PATH_ENTRY="$PARTITION/$REL_PATH"
+
+            grep -qxF "$PATH_ENTRY" "$TMP_EXISTING" && continue
+
+            if [ -d "$item" ]; then
+                echo "- Dir  : $PATH_ENTRY (0755)"
+                printf "%s 0 0 0755\n" "$PATH_ENTRY" >> "$FS_CONFIG"
+            else
+                echo "- File : $PATH_ENTRY (0644)"
+                printf "%s 0 0 0644\n" "$PATH_ENTRY" >> "$FS_CONFIG"
+            fi
+        done
+
+        rm -f "$TMP_EXISTING"
+        echo "- $PARTITION fs_config generated"
+    done
+}
+
+
 BUILD_IMG() {
     if [ "$#" -ne 3 ]; then
         echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR> <FILE_SYSTEM> <OUT_DIR>"
@@ -866,6 +924,8 @@ BUILD_IMG() {
     local EXTRACTED_FIRM_DIR="$1"
     local FILE_SYSTEM="$2"
 	local OUT_DIR="$3"
+
+    GEN_FS_CONFIG "$EXTRACTED_FIRM_DIR"
 
     for PART in "$EXTRACTED_FIRM_DIR"/*; do
         [[ -d "$PART" ]] || continue    
@@ -887,7 +947,7 @@ BUILD_IMG() {
 
         if [[ "$FILE_SYSTEM" == "erofs" ]]; then
             echo -e "\e[33mBuilding EROFS image:\e[0m $OUT_IMG"
-            ./bin/erofs-utils/mkfs.erofs --mount-point="/$PARTITION" --fs-config-file="$FS_CONFIG" --file-contexts="$FILE_CONTEXTS" "$OUT_IMG" "$SRC_DIR"
+            $(pwd)/bin/erofs-utils/mkfs.erofs --mount-point="/$PARTITION" --fs-config-file="$FS_CONFIG" --file-contexts="$FILE_CONTEXTS" "$OUT_IMG" "$SRC_DIR"
 
         elif [[ "$FILE_SYSTEM" == "ext4" ]]; then
             if [[ "$PARTITION" == "system" ]]; then
@@ -897,7 +957,7 @@ BUILD_IMG() {
             fi
 
             echo -e "\e[33mBuilding ext4 image:\e[0m $OUT_IMG"
-            ./bin/ext4/make_ext4fs -l "$(awk "BEGIN {printf \"%.0f\", $SIZE * 1.1}")" -J -b 4096 -S "$FILE_CONTEXTS" -C "$FS_CONFIG"  -a "$PARTITION" -L "$PARTITION" "$OUT_IMG" "$SRC_DIR"
+            $(pwd)/bin/ext4/make_ext4fs -l "$(awk "BEGIN {printf \"%.0f\", $SIZE * 1.1}")" -J -b 4096 -S "$FILE_CONTEXTS" -C "$FS_CONFIG"  -a "$PARTITION" -L "$PARTITION" "$OUT_IMG" "$SRC_DIR"
 			# Resize img to reduce size.
 			resize2fs -M "$OUT_IMG"
         else
