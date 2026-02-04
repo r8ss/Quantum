@@ -2,11 +2,6 @@
 
 set -e
 
-#  Binary
-chmod +x "$(pwd)/bin/ext4/make_ext4fs"
-chmod +x "$(pwd)/bin/erofs-utils/mkfs.erofs"
-chmod +x "$(pwd)/bin/erofs-utils/extract.erofs"
-
 # Device info
 export STOCK_DEVICE="SM-A225F"
 export TARGET_DEVICE="SM-A346E"
@@ -45,6 +40,7 @@ PATCH_KNOX_GUARD "$WORK_DIR/services"
 PATCH_FLAG_SECURE "$WORK_DIR/services"
 PATCH_SECURE_FOLDER "$WORK_DIR/services"
 
+RECOMPILE "$APKTOOL" "$WORK_DIR/ssrm" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework" "$WORK_DIR"
 RECOMPILE "$APKTOOL" "$WORK_DIR/ssrm" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework" "$WORK_DIR"
 RECOMPILE "$APKTOOL" "$WORK_DIR/services" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework" "$WORK_DIR"
 cp -fv "$WORK_DIR"/*.jar "$FIRM_DIR/$TARGET_DEVICE/system/system/framework/"
