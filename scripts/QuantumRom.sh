@@ -1043,7 +1043,7 @@ DEBLOAT() {
 BUILD_PROP() {
     local EXTRACTED_FIRM_DIR="$1"
     local KEY="$2"
-    local VALUE="$3"
+    local VALUE="${3:-}"
 
     if [ -z "$EXTRACTED_FIRM_DIR" ] || [ -z "$KEY" ]; then
         echo "Usage: BUILD_PROP <EXTRACTED_FIRM_DIR> <key> [value]"
