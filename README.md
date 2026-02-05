@@ -22,6 +22,7 @@ Floating feature.
 Screen Recorder.
 AI enable.
 Edge feature.
+China smart manager.
 
 ![QuantumROM Logo](QuantumROM/logo/linux.jpeg)
 

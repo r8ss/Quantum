@@ -174,7 +174,7 @@ PREPARE_PARTITIONS() {
     done
 
     echo ""
-    echo "Preparing: $EXTRACTED_FIRM_DIR"
+    echo "Preparing partitinos."
 
     shopt -s nullglob dotglob
 
@@ -189,7 +189,7 @@ PREPARE_PARTITIONS() {
         done
 
         if [[ $keep_this -eq 0 ]]; then
-            echo "- Deleting: $item"
+            # echo "- Deleting: $item"
             rm -rf -- "$item"
         else
             echo "- Keeping: $item"
@@ -1032,7 +1032,6 @@ DEBLOAT() {
     REMOVE_ESIM_FILES "$EXTRACTED_FIRM_DIR"
 	REMOVE_FABRIC_CRYPTO "$EXTRACTED_FIRM_DIR"
 	echo "- Deleting unnecessary files and folders."
-	echo "- Deleting unnecessary files and folders."
     rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/init/boot-image.bprof"
     rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/init/boot-image.prof"
     rm -rf "$EXTRACTED_FIRM_DIR/system/system/hidden"
@@ -1152,10 +1151,10 @@ GEN_FS_CONFIG() {
             grep -qxF "$PATH_ENTRY" "$TMP_EXISTING" && continue
 
             if [ -d "$item" ]; then
-                echo "- Dir  : $PATH_ENTRY (0755)"
+                # echo "- Dir  : $PATH_ENTRY (0755)"
                 printf "%s 0 0 0755\n" "$PATH_ENTRY" >> "$FS_CONFIG"
             else
-                echo "- File : $PATH_ENTRY (0644)"
+                # echo "- File : $PATH_ENTRY (0644)"
                 printf "%s 0 0 0644\n" "$PATH_ENTRY" >> "$FS_CONFIG"
             fi
         done
