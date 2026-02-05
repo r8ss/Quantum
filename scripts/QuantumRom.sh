@@ -575,11 +575,11 @@ PATCH_SSRM() {
 	local FILE="$SSRM_DIR/smali/com/android/server/ssrm/Feature.smali"
 
 	echo "Patching ssrm.jar"
-	echo "- Updating stock SIOP_FILENAME > $SIOP_FILENAME and DVFS_FILENAME > $DVFS_FILENAME in ssrm.jar"
+	echo "- Updating stock SIOP_FILENAME > $STOCK_SIOP_FILENAME and STOCK_DVFS_FILENAME > $STOCK_DVFS_FILENAME in ssrm.jar"
 	echo "  $FILE"
 
-    sed -i "s/\(const-string v[0-9]\+,\s*\"\)siop_[^\"]*\"/\1$SIOP_FILENAME\"/g" "$FILE"
-    sed -i "/dvfs_policy_default/! s/\(const-string v[0-9]\+,\s*\"\)dvfs_policy_[^\"]*\"/\1$DVFS_FILENAME\"/g" "$FILE"
+    sed -i "s/\(const-string v[0-9]\+,\s*\"\)siop_[^\"]*\"/\1$STOCK_SIOP_FILENAME\"/g" "$FILE"
+    sed -i "/dvfs_policy_default/! s/\(const-string v[0-9]\+,\s*\"\)dvfs_policy_[^\"]*\"/\1$STOCK_DVFS_FILENAME\"/g" "$FILE"
 }
 
 
@@ -963,12 +963,14 @@ APPLY_STOCK_CONFIG() {
         echo "- $STOCK_DEVICE config found."
         export STOCK_VNDK_VERSION="$(grep -m1 '^STOCK_VNDK_VERSION=' "$DEVICES_DIR/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
         export STOCK_HAS_SEPERATE_SYSTEM_EXT="$(grep -m1 '^STOCK_HAS_SEPERATE_SYSTEM_EXT=' "$DEVICES_DIR/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
-		export SIOP_FILENAME="$(grep -m1 '^SIOP_FILENAME=' "$DEVICES_DIR/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
-        export DVFS_FILENAME="$(grep -m1 '^DVFS_FILENAME=' "$DEVICES_DIR/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
+        export STOCK_DVFS_FILENAME="$(grep -m1 '^STOCK_DVFS_FILENAME=' "$DEVICES_DIR/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
     fi
 
     export STOCK_FLOATING_FEATURE="$DEVICES_DIR/$STOCK_DEVICE/floating_feature.xml"
 	export TARGET_FLOATING_FEATURE="$EXTRACTED_FIRM_DIR/system/system/etc/floating_feature.xml"
+	
+	export STOCK_SIOP_FILENAME="$(awk -F'[<>]' '$2 == "SEC_FLOATING_FEATURE_SYSTEM_CONFIG_SIOP_POLICY_FILENAME" {print $3}' "$STOCK_FLOATING_FEATURE")"
+
 
 	# FIX SYSTEM_EXT.
     FIX_SYSTEM_EXT "$EXTRACTED_FIRM_DIR"
@@ -1139,8 +1141,8 @@ GEN_FS_CONFIG() {
 
         echo ""
         echo "Generating fs_config for partition: $PARTITION"
-        echo "- Source : $ROOT"
-        echo "- Output : $FS_CONFIG"
+        #echo "- Source : $ROOT"
+        #echo "- Output : $FS_CONFIG"
 
         awk '{print $1}' "$FS_CONFIG" | sort -u > "$TMP_EXISTING"
 
@@ -1165,6 +1167,54 @@ GEN_FS_CONFIG() {
 }
 
 
+GEN_FILE_CONTEXTS() {
+    if [ "$#" -ne 1 ]; then
+        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        return 1
+    fi
+
+    local EXTRACTED_FIRM_DIR="$1"
+    [ ! -d "$EXTRACTED_FIRM_DIR" ] && { echo "- $EXTRACTED_FIRM_DIR not found."; return 1; }
+    [ ! -d "$EXTRACTED_FIRM_DIR/config" ] && { echo "[ERROR] config directory missing"; return 1; }
+
+    for ROOT in "$EXTRACTED_FIRM_DIR"/*; do
+        [ ! -d "$ROOT" ] && continue
+        PARTITION="$(basename "$ROOT")"
+        [ "$PARTITION" = "config" ] && continue
+
+        local FILE_CONTEXTS="$EXTRACTED_FIRM_DIR/config/${PARTITION}_file_contexts"
+        touch "$FILE_CONTEXTS"
+
+        echo ""
+        echo "Generating file_contexts for partition: $PARTITION"
+
+        declare -A EXISTING=()
+        while IFS= read -r line; do
+            [ -z "$line" ] && continue
+            PATH_ONLY=$(echo "$line" | awk '{print $1}')
+            EXISTING["$PATH_ONLY"]=1
+        done < "$FILE_CONTEXTS"
+
+        find "$ROOT" -mindepth 1 \( -type f -o -type d \) | while IFS= read -r item; do
+            local REL_PATH="${item#$ROOT}"
+            local PATH_ENTRY="/$PARTITION$REL_PATH"
+
+            local ESCAPED_PATH
+            ESCAPED_PATH=$(echo "$PATH_ENTRY" | sed -e 's/[.+]/\\&/g')
+
+            [ "${EXISTING[$ESCAPED_PATH]+exists}" ] && continue
+
+            printf "%s u:object_r:system_file:s0\n" "$ESCAPED_PATH" >> "$FILE_CONTEXTS"
+
+            EXISTING["$ESCAPED_PATH"]=1
+        done
+
+        echo "- $PARTITION file_contexts generated"
+        unset EXISTING
+    done
+}
+
+
 BUILD_IMG() {
     if [ "$#" -ne 3 ]; then
         echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR> <FILE_SYSTEM> <OUT_DIR>"
@@ -1176,6 +1226,7 @@ BUILD_IMG() {
 	local OUT_DIR="$3"
 
     GEN_FS_CONFIG "$EXTRACTED_FIRM_DIR"
+	GEN_FILE_CONTEXTS "$EXTRACTED_FIRM_DIR"
 
     for PART in "$EXTRACTED_FIRM_DIR"/*; do
         [[ -d "$PART" ]] || continue    
