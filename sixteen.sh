@@ -19,7 +19,7 @@ trap '{
 
 
 if [ "$#" -lt 5 ]; then
-    echo "Usage: $0 <STOCK_DEVICE> <TARGET_DEVICE> <CSC> <IMEI> <OUTPUT_FILESYSTEM>"
+    echo "Usage: $0 <STOCK_DEVICE> <TARGET_DEVICE> <TARGET_DEVICE_CSC> <TARGET_DEVICE_IMEI> <OUTPUT_FILESYSTEM>"
     exit 1
 fi
 
