@@ -211,7 +211,6 @@ EXTRACT_FIRMWARE_IMG() {
 	local FIRM_DIR="$1"
 
 	echo "Extracting imges from $FIRM_DIR"
-	ls $FIRM_DIR/
     for imgfile in "$FIRM_DIR"/*.img; do
         [ -e "$imgfile" ] || continue
 
@@ -959,7 +958,6 @@ APPLY_STOCK_CONFIG() {
         return 1
 	fi
 
-    # OVERWRITE STOCK DEVICE INFO IF GIVEN IN QuantumRom/Devices
     if [ -f "$DEVICES_DIR/$STOCK_DEVICE/config" ]; then
         echo "- $STOCK_DEVICE config found."
         export STOCK_VNDK_VERSION="$(grep -m1 '^STOCK_VNDK_VERSION=' "$DEVICES_DIR/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
@@ -969,6 +967,7 @@ APPLY_STOCK_CONFIG() {
 
     export STOCK_FLOATING_FEATURE="$DEVICES_DIR/$STOCK_DEVICE/floating_feature.xml"
 	export TARGET_FLOATING_FEATURE="$EXTRACTED_FIRM_DIR/system/system/etc/floating_feature.xml"
+	export STOCK_SIOP_FILENAME="$(awk -F'[<>]' '$2 == "SEC_FLOATING_FEATURE_SYSTEM_CONFIG_SIOP_POLICY_FILENAME" {print $3}' "$STOCK_FLOATING_FEATURE" | tr -d '\r' | xargs)"
 
 	# FIX SYSTEM_EXT.
     FIX_SYSTEM_EXT "$EXTRACTED_FIRM_DIR"
@@ -1025,7 +1024,7 @@ DEBLOAT() {
         echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
     fi
-    
+
 	local EXTRACTED_FIRM_DIR="$1"
     echo "Debloating."
     KICK "$EXTRACTED_FIRM_DIR"
