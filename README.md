@@ -13,6 +13,16 @@ Tools to bypass or remove security restrictions for enhanced customization.
 **ROM Debloat:**
 Remove unwanted pre-installed apps and optimize device performance.
 
+**ROM Feature:**
+Enable screenshot anywhere.
+Secure folder support.
+Full oneui apps.
+Important apps.
+Floating feature.
+Screen Recorder.
+AI enable.
+Edge feature.
+
 ![QuantumROM Logo](QuantumROM/logo/linux.jpeg)
 
 # Credits:
