@@ -112,12 +112,12 @@ EXTRACT_FIRMWARE() {
 
     echo "- Extracting zip file."
     find "$FIRM_DIR" -maxdepth 1 -name "*.zip" \
-        -exec 7z x -y -bd -o"$FIRM_DIR" {} \;
+        -exec 7z x -y -bd -o"$FIRM_DIR" {} \; >/dev/null 2>&1
     rm -rf "$FIRM_DIR"/*.zip
 
     echo "- Extracting xz file."
     find "$FIRM_DIR" -maxdepth 1 -name "*.xz" \
-        -exec 7z x -y -bd -o"$FIRM_DIR" {} \;
+        -exec 7z x -y -bd -o"$FIRM_DIR" {} \; >/dev/null 2>&1
     rm -rf "$FIRM_DIR"/*.xz
 
     # ---- MD5 rename ----
@@ -127,14 +127,14 @@ EXTRACT_FIRMWARE() {
     echo "- Extracting tar files..."
     for file in "${FIRM_DIR}"/*.tar; do
         if [ -f "$file" ]; then
-            tar -xvf "$file" -C "${FIRM_DIR}"
+            tar -xvf "$file" -C "${FIRM_DIR}" >/dev/null 2>&1
             rm -f "$file"
         fi
     done
 
     echo "- Extracting lz4 file."
 	for file in "${FIRM_DIR}"/*.lz4; do
-        [ -f "$file" ] && lz4 -d "$file" "${file%.lz4}"
+        [ -f "$file" ] && lz4 -d "$file" "${file%.lz4}" >/dev/null 2>&1
     done
     rm -rf "${FIRM_DIR}"/*.lz4
 
