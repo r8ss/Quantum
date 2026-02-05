@@ -237,7 +237,7 @@ EXTRACT_FIRMWARE_IMG() {
                 IMG_SIZE=$(stat -c%s -- "$imgfile")
                 echo "$imgfile Detected $fstype. Size: $IMG_SIZE bytes."
                 echo "Extracting $imgfile in $FIRM_DIR/$partition"
-                $(pwd)/bin/erofs-utils/extract.erofs -i "$imgfile" -x -f -o "$FIRM_DIR"
+                $(pwd)/bin/erofs-utils/extract.erofs -i "$imgfile" -x -f -o "$FIRM_DIR" >/dev/null 2>&1
                 ;;
             *)
                 echo "[$imgfile] Unknown filesystem type ($fstype), skipping"
@@ -1188,7 +1188,7 @@ BUILD_IMG() {
 
         if [[ "$FILE_SYSTEM" == "erofs" ]]; then
             echo -e "\e[33mBuilding EROFS image:\e[0m $OUT_IMG"
-            $(pwd)/bin/erofs-utils/mkfs.erofs --mount-point="/$PARTITION" --fs-config-file="$FS_CONFIG" --file-contexts="$FILE_CONTEXTS" -z lz4hc,level=12 -m 4096:lz4hc,level=12 --workers=$(nproc) "$OUT_IMG" "$SRC_DIR"
+            $(pwd)/bin/erofs-utils/mkfs.erofs --mount-point="/$PARTITION" --fs-config-file="$FS_CONFIG" --file-contexts="$FILE_CONTEXTS" -z lz4hc,level=12 -m 4096:lz4hc,level=12 --workers=$(nproc) "$OUT_IMG" "$SRC_DIR" >/dev/null 2>&1
 
         elif [[ "$FILE_SYSTEM" == "ext4" ]]; then
             if [[ "$PARTITION" == "system" ]]; then
