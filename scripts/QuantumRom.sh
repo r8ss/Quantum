@@ -683,11 +683,11 @@ FIX_SYSTEM_EXT() {
     fi
 
     local EXTRACTED_FIRM_DIR="$1"
-	
+
 	if [[ ! -d "$EXTRACTED_FIRM_DIR/system_ext" ]]; then
         export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system/system_ext"
 	fi
-	
+
     if [[ "$STOCK_HAS_SEPARATE_SYSTEM_EXT" == FALSE && -d "$EXTRACTED_FIRM_DIR/system_ext" ]]; then
 	    echo "Fixing system_ext according to $STOCK_DEVICE"
         echo "- Copying system_ext content into system root"
@@ -743,13 +743,7 @@ FIX_SYSTEM_EXT() {
 
 FIX_SELINUX() {
     echo ""
-    if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
-        return 1
-    fi
-
-    local EXTRACTED_FIRM_DIR="$1"
-    local SELINUX_FILE="$EXTRACTED_FIRM_DIR/system/system_ext/etc/selinux/mapping/${STOCK_VNDK_VERSION}.0.cil"
+    local SELINUX_FILE="$$TARGET_ROM_SYSTEM_EXT_DIR/etc/selinux/mapping/${STOCK_VNDK_VERSION}.0.cil"
 
     if [ ! -f "$SELINUX_FILE" ]; then
         echo "Error: SELinux file not found at $SELINUX_FILE"
@@ -757,7 +751,7 @@ FIX_SELINUX() {
     fi
 
     echo "Fixing selinux for $STOCK_DEVICE."
-    
+
     UNSUPPORTED_SELINUX=("audiomirroring" "fabriccrypto" "hal_dsms_default" "qb_id_prop" "hal_dsms_service" "proc_compaction_proactiveness" "sbauth" "ker_app" "kpp_app" "kpp_data" "attiqi_app" "kpoc_charger")
 
     for keyword in "${UNSUPPORTED_SELINUX[@]}"; do
@@ -765,10 +759,10 @@ FIX_SELINUX() {
             sed -i "/$keyword/d" "$SELINUX_FILE"
         fi
     done
-	
-	REMOVE_LINE '(genfscon proc "/sys/kernel/firmware_config" (u object_r proc_fmw ((s0) (s0))))' "$EXTRACTED_FIRM_DIR/system/system_ext/etc/selinux/system_ext_sepolicy.cil"
-	REMOVE_LINE '(genfscon proc "/sys/vm/compaction_proactiveness" (u object_r proc_compaction_proactiveness ((s0) (s0))))' "$EXTRACTED_FIRM_DIR/system/system_ext/etc/selinux/system_ext_sepolicy.cil"
-    REMOVE_LINE 'init.svc.vendor.wvkprov_server_hal                           u:object_r:wvkprov_prop:s0' "$EXTRACTED_FIRM_DIR/system/system_ext/etc/selinux/system_ext_property_contexts"
+
+	REMOVE_LINE '(genfscon proc "/sys/kernel/firmware_config" (u object_r proc_fmw ((s0) (s0))))' "$TARGET_ROM_SYSTEM_EXT_DIR/etc/selinux/system_ext_sepolicy.cil"
+	REMOVE_LINE '(genfscon proc "/sys/vm/compaction_proactiveness" (u object_r proc_compaction_proactiveness ((s0) (s0))))' "$TARGET_ROM_SYSTEM_EXT_DIR/etc/selinux/system_ext_sepolicy.cil"
+    REMOVE_LINE 'init.svc.vendor.wvkprov_server_hal                           u:object_r:wvkprov_prop:s0' "$TARGET_ROM_SYSTEM_EXT_DIR/etc/selinux/system_ext_property_contexts"
 }
 
 
@@ -968,7 +962,7 @@ APPLY_STOCK_CONFIG() {
 	FIX_VNDK
 
 	# FIX SELINUX.
-	FIX_SELINUX "$EXTRACTED_FIRM_DIR"
+	FIX_SELINUX
 
     # Floating Feature.
     APPLY_FLOATING_FEATURE
