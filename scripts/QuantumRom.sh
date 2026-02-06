@@ -743,7 +743,7 @@ FIX_SYSTEM_EXT() {
 
 FIX_SELINUX() {
     echo ""
-    local SELINUX_FILE="$$TARGET_ROM_SYSTEM_EXT_DIR/etc/selinux/mapping/${STOCK_VNDK_VERSION}.0.cil"
+    local SELINUX_FILE="$TARGET_ROM_SYSTEM_EXT_DIR/etc/selinux/mapping/${STOCK_VNDK_VERSION}.0.cil"
 
     if [ ! -f "$SELINUX_FILE" ]; then
         echo "Error: SELinux file not found at $SELINUX_FILE"
