@@ -739,7 +739,7 @@ FIX_VNDK() {
     else
         echo "- VNDK mismatch or missing."
         rm -f "$APEX_DIR"/com.android.vndk*.apex
-        cp -rfa "$VNDKS_COLLECTION/com.android.vndk.v${STOCK_VNDK_VERSION}.apex" "$APEX_DIR/"
+        cp -rfa "$VNDKS_COLLECTION/oneui_8.0/com.android.vndk.v${STOCK_VNDK_VERSION}.apex" "$APEX_DIR/"
         sed -i "/<vendor-ndk>/,/<\/vendor-ndk>/ s|<version>[0-9]\+</version>|<version>${STOCK_VNDK_VERSION}</version>|" "$EXTRACTED_FIRM_DIR/system/system_ext/etc/vintf/manifest.xml"
     fi
 }
