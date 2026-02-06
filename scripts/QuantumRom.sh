@@ -88,8 +88,7 @@ DOWNLOAD_FIRMWARE() {
     # --- Show Firmware Info ---
     file_size=$(du -m "${DOWN_DIR}/${MODEL}.zip" | cut -f1)
     echo
-    echo "✅ Firmware decrypted successfully!"
-    echo "Firmware Size: ${file_size} MB"
+    echo "✅ Firmware decrypted successfully!. Firmware Size: ${file_size} MB"
     echo "Saved to: ${DOWN_DIR}/${MODEL}.zip"
 
     # --- Cleanup ---
