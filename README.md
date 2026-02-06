@@ -1,20 +1,8 @@
-![QuantumROM Logo](QuantumROM/logo/QuantumROM.jpg)
 
-# Tools Features:
-**Direct Firmware Download:**
-Seamlessly fetch the latest firmware directly from Samsung’s official servers.
-
-**Image Unpack & Repack:**
-Efficiently extract and reassemble .img files with precision and ease.
-
-**Security Removal:**
-Tools to bypass or remove security restrictions for enhanced customization.
-
-**ROM Debloat:**
-Remove unwanted pre-installed apps and optimize device performance.
 
 **ROM Feature:**
 Enable screenshot anywhere.
+Heavy debloated.
 Secure folder support.
 Full oneui apps.
 Important apps.
@@ -24,9 +12,10 @@ AI enable.
 Edge feature.
 China smart manager.
 
-![QuantumROM Logo](QuantumROM/logo/linux.jpeg)
-
-# Credits:
-Salvo Giangreco: https://github.com/salvogiangri
-
-3arthur6: https://github.com/3arthur6/BluetoothLibraryPatcher
+## Licensing
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+- **[android-tools](https://github.com/nmeum/android-tools)** - Licensed under Apache License 2.0
+- **[apktool](https://github.com/iBotPeaches/Apktool)** - Licensed under Apache License 2.0  
+- **[erofs-utils](https://github.com/sekaiacg/erofs-utils)** - Dual licensed (GPL-2.0, Apache-2.0)
+- **[platform_build](https://android.googlesource.com/platform/build)** - Licensed under Apache License 2.0
+- **[e2fsprogs](https://github.com/tytso/e2fsprogs)** - Licensed under GPL-2.0 / LGPL-2.1
