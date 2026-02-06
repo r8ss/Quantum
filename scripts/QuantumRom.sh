@@ -15,12 +15,6 @@ CHECK_FILE() {
 }
 
 
-CHECK_EMPTY_ARGS() {
-    [ -z "$2" ] && { echo "Missing parameter: $1"; return 1; }
-    return 0
-}
-
-
 REMOVE_LINE() {
     if [ "$#" -ne 2 ]; then
         echo "Usage: ${FUNCNAME[0]} <TARGET_LINE> <TARGET_FILE>"
@@ -401,9 +395,11 @@ REPLACE_SMALI_METHOD() {
 
 
 HEX_PATCH() {
-    CHECK_EMPTY_ARGS "FILE" "$1" || return 1
-    CHECK_EMPTY_ARGS "FROM" "$2" || return 1
-    CHECK_EMPTY_ARGS "TO" "$3" || return 1
+    echo ""
+	if [ "$#" -ne 3 ]; then
+        echo "Usage: ${FUNCNAME[0]} <FILE> <TARGET_VALUE> <REPLACE_VALUE>"
+        return 1
+    fi
 
     local FILE="$1"
     local FROM="$(echo "$2" | tr '[:upper:]' '[:lower:]')"
