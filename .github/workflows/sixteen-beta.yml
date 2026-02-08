@@ -96,11 +96,6 @@ jobs:
       run: |
         source scripts/QuantumRom.sh
         EXTRACT_FIRMWARE "$FIRM_DIR/$TARGET_DEVICE"
-
-    - name: Prepare partitions
-      shell: bash
-      run: |
-        source scripts/QuantumRom.sh
         PREPARE_PARTITIONS "$FIRM_DIR/$TARGET_DEVICE"
 
     - name: Extract firmware images
@@ -127,9 +122,6 @@ jobs:
         source scripts/QuantumRom.sh
         APPLY_FEATURES "$FIRM_DIR/$TARGET_DEVICE"
 
-    # --------------------------------------------------
-    # Framework patching
-    # --------------------------------------------------
     - name: Install framework-res
       shell: bash
       run: |
@@ -166,9 +158,6 @@ jobs:
         cp -fv "$WORK_DIR"/*.jar \
           "$FIRM_DIR/$TARGET_DEVICE/system/system/framework/"
 
-    # --------------------------------------------------
-    # Final patch & build
-    # --------------------------------------------------
     - name: Patch Bluetooth library
       shell: bash
       run: |
@@ -181,9 +170,6 @@ jobs:
         source scripts/QuantumRom.sh
         BUILD_IMG "$FIRM_DIR/$TARGET_DEVICE" "$OUTPUT_FILESYSTEM" "$OUT_DIR"
 
-    # --------------------------------------------------
-    # Split large files
-    # --------------------------------------------------
     - name: Split large output files
       run: |
         GIT_SUPPORT_SIZE=2147483647
@@ -198,9 +184,6 @@ jobs:
           fi
         done
 
-    # --------------------------------------------------
-    # Upload
-    # --------------------------------------------------
     - name: Upload to GitHub Release
       uses: softprops/action-gh-release@v2
       with:
@@ -216,9 +199,6 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
 
-    # --------------------------------------------------
-    # Cleanup
-    # --------------------------------------------------
     - name: Cleanup
       run: |
         rm -rf *
