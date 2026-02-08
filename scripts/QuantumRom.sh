@@ -104,6 +104,7 @@ EXTRACT_FIRMWARE() {
 
     local FIRM_DIR="$1"
 
+    echo "Extracting downloaded firmware."
     echo "- Extracting zip file."
     find "$FIRM_DIR" -maxdepth 1 -name "*.zip" \
         -exec 7z x -y -bd -o"$FIRM_DIR" {} \; >/dev/null 2>&1
