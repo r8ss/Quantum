@@ -59,7 +59,7 @@ jobs:
         run: |
           GIT_SUPPORT_SIZE=2147483647
           OUT_DIR="./OUT"
-          echo "BUILD_TIME=$(date '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_ENV
+          echo "BUILD_TIME=$(date '+%Y-%m-%d %I:%M:%S %p UTC')" >> $GITHUB_ENV
           echo "--- Checking for large files in $OUT_DIR ---"
 
           for file in "$OUT_DIR"/*; do
