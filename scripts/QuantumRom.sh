@@ -819,6 +819,9 @@ APPLY_FLOATING_FEATURE() {
 
     #========== SCREEN RECORDER ==========#
     UPDATE_FLOATING_FEATURE "SEC_FLOATING_FEATURE_FRAMEWORK_SUPPORT_SCREEN_RECORDER" "TRUE"
+	
+	#========== VOICE RECORDER ==========#
+    UPDATE_FLOATING_FEATURE "SEC_FLOATING_FEATURE_VOICERECORDER_CONFIG_DEF_MODE" "normal,interview,voicememo"
 
     #========== AUDIO ==========#
     UPDATE_FLOATING_FEATURE "SEC_FLOATING_FEATURE_AUDIO_SUPPORT_BT_RECORDING" "TRUE"
@@ -1088,6 +1091,7 @@ APPLY_FEATURES() {
     rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/SmartManager_v5"
     rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/SmartManagerCN"
 	cp -rfa "$(pwd)/QuantumROM/Mods/SMART_MANAGER_CN/." "$EXTRACTED_FIRM_DIR/"
+	UPDATE_FLOATING_FEATURE "SEC_FLOATING_FEATURE_SMARTMANAGER_CONFIG_PACKAGE_NAME" "com.samsung.android.sm_cn"
 
 	echo " Full oneui and important apps."
 	rm -rf "$EXTRACTED_FIRM_DIR/system/system/app/ClockPackage"
