@@ -1095,7 +1095,7 @@ APPLY_FEATURES() {
 
 	echo " Adding full oneui and important apps."
 	rm -rf "$EXTRACTED_FIRM_DIR/system/system/app/ClockPackage"
-	rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/PhotoEditor_*"
+	rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app"/PhotoEditor_*
 	cp -rfa "$(pwd)/QuantumROM/Mods/Apps/." "$EXTRACTED_FIRM_DIR/"
 	
 	# SDHMS
