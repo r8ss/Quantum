@@ -1097,10 +1097,7 @@ APPLY_FEATURES() {
 	rm -rf "$EXTRACTED_FIRM_DIR/system/system/app/ClockPackage"
 	rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/PhotoEditor_*"
 	cp -rfa "$(pwd)/QuantumROM/Mods/Apps/." "$EXTRACTED_FIRM_DIR/"
-	
-	# SDHMS
-	cp -rfa "$(pwd)/QuantumROM/Mods/SDHMS/." "$EXTRACTED_FIRM_DIR/"
-	
+
 	# Remove power and data usage permissions for certain apps when Power Saver and Data Saver are always enabled.
 	sed -i '/^[[:space:]]*<allow-in-power-save/d; /^[[:space:]]*<allow-in-data-usage-save/d' "$EXTRACTED_FIRM_DIR/product/etc/sysconfig/"*.xml "$EXTRACTED_FIRM_DIR/system/system/etc/sysconfig/"*.xml
 }
