@@ -599,7 +599,7 @@ PATCH_SSRM() {
 
     sed -i "s/\(const-string v[0-9]\+,\s*\"\)siop_[^\"]*\"/\1$STOCK_SIOP_FILENAME\"/g" "$FILE"
     sed -i "/dvfs_policy_default/! s/\(const-string v[0-9]\+,\s*\"\)dvfs_policy_[^\"]*\"/\1$STOCK_DVFS_FILENAME\"/g" "$FILE"
-	
+
     UPDATE_SDHMS "$FIRM_DIR/$TARGET_DEVICE"
 }
 
