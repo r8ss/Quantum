@@ -560,6 +560,29 @@ PATCH_KNOX_GUARD() {
 }
 
 
+UPDATE_SDHMS() {
+    echo ""
+    if [ "$#" -ne 1 ]; then
+        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIRECTORY>"
+        return 1
+    fi
+
+    local EXTRACTED_FIRM_DIR="$1"
+    local TARGET_APK="$EXTRACTED_FIRM_DIR/system/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk"
+    local ALT_APK="$(pwd)/QuantumROM/Mods/SDHMS/system/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk"
+
+    if [ -f "$TARGET_APK" ] && zipinfo -1 "$TARGET_APK" 2>/dev/null | grep -q "^res/raw/${STOCK_DVFS_FILENAME}\.xml$"; then
+        echo "Stock Dynamic Voltage and Frequency Scaling table found in current SDHMS app"
+    elif [ -f "$ALT_APK" ] && zipinfo -1 "$ALT_APK" 2>/dev/null | grep -q "^res/raw/${STOCK_DVFS_FILENAME}\.xml$"; then
+        echo "Stock Dynamic Voltage and Frequency Scaling table found in alternative APK. Replacing in target ROM"
+        rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/SamsungDeviceHealthManagerService"
+        cp -a "$(pwd)/QuantumROM/Mods/SDHMS/." "$EXTRACTED_FIRM_DIR/"
+    else
+        echo "Stock Dynamic Voltage and Frequency Scaling table not found anywhere"
+    fi
+}
+
+
 PATCH_SSRM() {
     echo ""
 	if [ "$#" -ne 1 ]; then
@@ -576,6 +599,8 @@ PATCH_SSRM() {
 
     sed -i "s/\(const-string v[0-9]\+,\s*\"\)siop_[^\"]*\"/\1$STOCK_SIOP_FILENAME\"/g" "$FILE"
     sed -i "/dvfs_policy_default/! s/\(const-string v[0-9]\+,\s*\"\)dvfs_policy_[^\"]*\"/\1$STOCK_DVFS_FILENAME\"/g" "$FILE"
+	
+    UPDATE_SDHMS "$FIRM_DIR/$TARGET_DEVICE"
 }
 
 
