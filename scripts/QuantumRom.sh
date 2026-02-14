@@ -150,6 +150,12 @@ EXTRACT_FIRMWARE() {
 
 
 PREPARE_PARTITIONS() {
+    echo ""
+	if [ -z "$STOCK_DEVICE" ] || [ "$STOCK_DEVICE" = "None" ]; then
+        export BUILD_PARTITIONS="odm,product,system_ext,system,vendor"
+        return 1
+    fi
+
     if [ "$#" -ne 1 ]; then
         echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
@@ -168,7 +174,6 @@ PREPARE_PARTITIONS() {
         KEEP[$i]=$(echo "${KEEP[$i]}" | xargs)
     done
 
-    echo ""
     echo "Preparing partitinos."
 
     shopt -s nullglob dotglob
@@ -974,6 +979,11 @@ REMOVE_FABRIC_CRYPTO() {
 
 APPLY_STOCK_CONFIG() {
     echo ""
+	if [ -z "$STOCK_DEVICE" ] || [ "$STOCK_DEVICE" = "None" ]; then
+        echo "No target device is set. Just modifying ROM without any device config."
+        return 1
+    fi
+
 	echo "Applying $STOCK_DEVICE device config."
     if [ "$#" -ne 1 ]; then
         echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
