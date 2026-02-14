@@ -43,7 +43,6 @@ export BUILD_PARTITIONS="product,system_ext,system"
 
 # Source
 source "$(pwd)/scripts/QuantumRom.sh"
-source "$DEVICES_DIR/$STOCK_DEVICE/config"
 
 DOWNLOAD_FIRMWARE "$TARGET_DEVICE" "$TARGET_DEVICE_CSC" "$TARGET_DEVICE_IMEI" "$FIRM_DIR"
 
