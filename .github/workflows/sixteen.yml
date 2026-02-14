@@ -55,7 +55,7 @@ jobs:
         shell: bash
         run: |
           source scripts/QuantumRom.sh
-          DOWNLOAD_FIRMWARE "${{ github.event.inputs.TARGET_DEVICE }}" "${{ github.event.inputs.TARGET_DEVICE_CSC }}" "=${{ github.event.inputs.TARGET_DEVICE_IMEI }}" "FIRMWARE"
+          DOWNLOAD_FIRMWARE "${{ github.event.inputs.TARGET_DEVICE }}" "${{ github.event.inputs.TARGET_DEVICE_CSC }}" "${{ github.event.inputs.TARGET_DEVICE_IMEI }}" "FIRMWARE"
 
       - name: Make Rom.
         run: |
