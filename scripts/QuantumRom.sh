@@ -155,7 +155,6 @@ PREPARE_PARTITIONS() {
     echo ""
 	if [ -z "$STOCK_DEVICE" ] || [ "$STOCK_DEVICE" = "None" ]; then
         export BUILD_PARTITIONS="odm,product,system_ext,system,vendor"
-        return 1
     fi
 
     if [ "$#" -ne 1 ]; then
