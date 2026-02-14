@@ -3,6 +3,8 @@
 ###################################################################################################
 # REAL_USER=${SUDO_USER:-$USER}
 
+export TARGET_FLOATING_FEATURE="$FIRM_DIR/$TARGET_DEVICE/system/system/etc/floating_feature.xml"
+
 CHECK_FILE() {
     if [ ! -f "$1" ]; then
         echo "[!] File not found: $1"
@@ -1005,7 +1007,6 @@ APPLY_STOCK_CONFIG() {
     fi
 
     export STOCK_FLOATING_FEATURE="$DEVICES_DIR/$STOCK_DEVICE/floating_feature.xml"
-	export TARGET_FLOATING_FEATURE="$EXTRACTED_FIRM_DIR/system/system/etc/floating_feature.xml"
 	export STOCK_SIOP_FILENAME="$(awk -F'[<>]' '$2 == "SEC_FLOATING_FEATURE_SYSTEM_CONFIG_SIOP_POLICY_FILENAME" {print $3}' "$STOCK_FLOATING_FEATURE" | tr -d '\r' | xargs)"
 
 	# FIX SYSTEM_EXT.
