@@ -718,10 +718,10 @@ FIX_SYSTEM_EXT() {
 
 	if [[ ! -d "$EXTRACTED_FIRM_DIR/system_ext" ]]; then
         export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system/system_ext"
+		return 1
 	fi
 
-    if [[ "$STOCK_HAS_SEPARATE_SYSTEM_EXT" == FALSE && -d "$EXTRACTED_FIRM_DIR/system_ext" ]]; then
-	    echo "Fixing system_ext according to $STOCK_DEVICE"
+    if [[ -d "$EXTRACTED_FIRM_DIR/system_ext" ]]; then
         echo "- Copying system_ext content into system root"
 		rm -rf "$EXTRACTED_FIRM_DIR/system/system_ext"
         cp -a --preserve=all "$EXTRACTED_FIRM_DIR/system_ext" "$EXTRACTED_FIRM_DIR/system"
