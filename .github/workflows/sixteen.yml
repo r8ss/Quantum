@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       STOCK_DEVICE:
-        description: "STOCK_DEVICE_MODEL."
+        description: "STOCK_DEVICE_MODEL or None"
         required: true
         default: "SM-A225F"
       TARGET_DEVICE:
