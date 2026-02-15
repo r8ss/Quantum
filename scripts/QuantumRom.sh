@@ -716,12 +716,12 @@ FIX_SYSTEM_EXT() {
 
     local EXTRACTED_FIRM_DIR="$1"
 
-	if [[ ! -d "$EXTRACTED_FIRM_DIR/system_ext" ]]; then
-        export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system/system_ext"
+	if [ "$STOCK_HAS_SEPARATE_SYSTEM_EXT" = "TRUE" ] && [ -d "$EXTRACTED_FIRM_DIR/system_ext" ]; then
+        export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system_ext"
 		return 1
 	fi
 
-    if [[ -d "$EXTRACTED_FIRM_DIR/system_ext" ]]; then
+    if [ "$STOCK_HAS_SEPARATE_SYSTEM_EXT" = "FALSE" ] && [[ -d "$EXTRACTED_FIRM_DIR/system_ext" ]]; then
         echo "- Copying system_ext content into system root"
 		rm -rf "$EXTRACTED_FIRM_DIR/system/system_ext"
         cp -a --preserve=all "$EXTRACTED_FIRM_DIR/system_ext" "$EXTRACTED_FIRM_DIR/system"
@@ -769,6 +769,8 @@ FIX_SYSTEM_EXT() {
 	    rm -rf "$EXTRACTED_FIRM_DIR/system_ext"
 		rm -rf "$EXTRACTED_FIRM_DIR/config/system_ext_fs_config"
 		rm -rf "$EXTRACTED_FIRM_DIR/config/system_ext_file_contexts"
+    else
+	    export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system/system_ext"
     fi
 }
 
