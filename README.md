@@ -1,5 +1,8 @@
 ![QuantumROM Logo](QuantumROM/logo/QuantumROM.jpg)
 
+**Info:**
+Custom ROM builder based on many projects such as UNICA, Legacy-UI, and AstroRom.
+
 **ROM Feature:**
 Enable screenshot anywhere.
 Heavy debloated.
