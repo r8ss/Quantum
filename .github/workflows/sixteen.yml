@@ -44,11 +44,8 @@ jobs:
           chmod +x "bin/ext4/make_ext4fs"
           chmod +x "bin/erofs-utils/extract.erofs"
           chmod +x "bin/erofs-utils/mkfs.erofs"
-
-      - name: Setup.
-        run: |
+          # Setup directory
           chmod +x sixteen.sh
-          chmod +x scripts/setup_directories.sh
           bash scripts/setup_directories.sh FIRMWARE WORK OUT
 
       - name: Download firmware
