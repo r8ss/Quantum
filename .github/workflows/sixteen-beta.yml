@@ -102,7 +102,7 @@ jobs:
             - ➡️ Build From: ${{ github.event.inputs.TARGET_DEVICE }}
             - ⏰️ Build Time: ${{ env.BUILD_TIME }}
           files: |
-            ./OUT/*
+            OUT/*
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
 
