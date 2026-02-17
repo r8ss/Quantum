@@ -30,6 +30,7 @@ on:
 
 jobs:
   build:
+    name: Build QuantumROM
     runs-on: ubuntu-latest
 
     steps:
