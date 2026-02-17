@@ -34,13 +34,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repository.
         uses: actions/checkout@v4
 
       - name: Cleaning junk files
         uses: rokibhasansagar/slimhub_actions@v25.42.5
 
-      - name: Installing required packages.
+      - name: Install Dependencies.
         run: |
           sudo apt install -y p7zip-full lz4 android-sdk-libsparse-utils python3 python3-pip zipalign unzip e2fsprogs openjdk-17-jdk >/dev/null 2>&1
           pip3 install liblp tgcrypto pyrogram >/dev/null 2>&1
@@ -55,7 +55,7 @@ jobs:
           source scripts/QuantumRom.sh
           DOWNLOAD_FIRMWARE "${{ github.event.inputs.TARGET_DEVICE }}" "${{ github.event.inputs.TARGET_DEVICE_CSC }}" "${{ github.event.inputs.TARGET_DEVICE_IMEI }}" "FIRMWARE"
 
-      - name: Make Rom.
+      - name: Build Rom.
         run: |
           bash sixteen.sh \
             "${{ github.event.inputs.STOCK_DEVICE }}" \
