@@ -26,7 +26,7 @@ on:
       COMPRESS_IMG_TO_XZ:
         description: "Compress IMG to XZ (True/False)"
         required: true
-        default: "False"
+        default: "True"
 
 jobs:
   build:
@@ -63,14 +63,11 @@ jobs:
             "${{ github.event.inputs.TARGET_DEVICE_IMEI }}" \
             "${{ github.event.inputs.OUTPUT_FILESYSTEM }}"
 
-      - name: Compress & Split files before uploading if needed
+      - name: Compress & Split files before upload.
         run: |
           GIT_SUPPORT_SIZE=2147483647
           OUT_DIR="OUT"
-
           echo "BUILD_TIME=$(TZ='Asia/Dhaka' date '+%Y-%m-%d %I:%M:%S %p UTC+6')" >> $GITHUB_ENV
-          echo "--- Checking if IMG compression is enabled ---"
-
           if [ "${{ github.event.inputs.COMPRESS_IMG_TO_XZ }}" = "True" ]; then
             echo "Compressing all .img files to .xz (level 9)..."
             for img in "$OUT_DIR"/*.img; do
@@ -80,7 +77,6 @@ jobs:
             done
           fi
 
-          echo "--- Checking for large files in $OUT_DIR ---"
           for file in "$OUT_DIR"/*; do
             [ -f "$file" ] || continue
             FILE_SIZE=$(stat -c%s "$file")
