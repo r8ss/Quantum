@@ -45,10 +45,9 @@ jobs:
           chmod +x "bin/erofs-utils/extract.erofs"
           chmod +x "bin/erofs-utils/mkfs.erofs"
           # Setup directory
-          chmod +x sixteen.sh
           bash scripts/setup_directories.sh FIRMWARE WORK OUT
 
-      - name: Download firmware
+      - name: Download firmware.
         shell: bash
         run: |
           source scripts/QuantumRom.sh
@@ -89,6 +88,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
 
-      - name: Cleaning everything.
+      - name: Clean everything.
         run: |
           rm -rf *
