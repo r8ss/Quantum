@@ -209,6 +209,7 @@ EXTRACT_FIRMWARE_IMG() {
     fi
 
 	local FIRM_DIR="$1"
+	PREPARE_PARTITIONS "$FIRM_DIR"
 
 	echo "Extracting imges from $FIRM_DIR"
     for imgfile in "$FIRM_DIR"/*.img; do
@@ -248,7 +249,6 @@ EXTRACT_FIRMWARE_IMG() {
         esac
     done
 
-    # Remove all original .img
     rm -rf "$FIRM_DIR"/*.img
 
     # sudo chown -R "$REAL_USER:$REAL_USER" "$FIRM_DIR/config"
