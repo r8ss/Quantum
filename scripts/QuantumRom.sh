@@ -1165,6 +1165,13 @@ APPLY_CUSTOM_FEATURES() {
     fi
 
 	if [ ! -d "$EXTRACTED_FIRM_DIR/system/system/priv-app/PhotoEditor_AIFull" ]; then
+	    rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/ailasso"
+		rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/ailassomatting"
+		rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/inpainting"
+		rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/objectremoval"
+		rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/reflectionremoval"
+		rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/shadowremoval"
+		rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/style_transfer"
 	    rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app"/PhotoEditor_*
         unzip -o "$(pwd)/QuantumROM/Mods/Apps/PhotoEditor_AIFull/system/system/priv-app/PhotoEditor_AIFull.zip" -d "$(pwd)/QuantumROM/Mods/Apps/PhotoEditor_AIFull/system/system/priv-app/" >/dev/null 2>&1
 		rm -f "$(pwd)/QuantumROM/Mods/Apps/PhotoEditor_AIFull/system/system/priv-app/PhotoEditor_AIFull.zip"
