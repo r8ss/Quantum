@@ -698,13 +698,14 @@ PATCH_BT_LIB() {
 
 FIX_VNDK() {
     echo "- Checking $STOCK_DEVICE and $TARGET_DEVICE vndk version."
+	export SDK=$(grep -m1 '^ro.build.version.sdk_full=' "$EXTRACTED_FIRM_DIR/system/system/build.prop" | cut -d'=' -f2)
+	echo "- Target rom SDK version: $SDK"
     if [ -f "$TARGET_ROM_SYSTEM_EXT_DIR/apex/com.android.vndk.v${STOCK_VNDK_VERSION}.apex" ]; then
         echo "- VNDK matched."
     else
-        echo "- VNDK mismatch or missing."
-        rm -f "$TARGET_ROM_SYSTEM_EXT_DIR/apex/com.android.vndk"*.apex
-        cp -rfa "$VNDKS_COLLECTION/com.android.vndk.v${STOCK_VNDK_VERSION}.apex" "$TARGET_ROM_SYSTEM_EXT_DIR/apex/"
-        sed -i "/<vendor-ndk>/,/<\/vendor-ndk>/ s|<version>[0-9]\+</version>|<version>${STOCK_VNDK_VERSION}</version>|" "$TARGET_ROM_SYSTEM_EXT_DIR/etc/vintf/manifest.xml"
+        echo "- VNDK mismatch. Adding SDK $SDK com.android.vndk.v${STOCK_VNDK_VERSION}.apex"
+        rm -rf "$TARGET_ROM_SYSTEM_EXT_DIR/apex/"*.apex
+        cp -rfa "$VNDKS_COLLECTION/$SDK/$STOCK_VNDK_VERSION/system_ext/"* "$TARGET_ROM_SYSTEM_EXT_DIR/"
     fi
 }
 
