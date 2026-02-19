@@ -1161,10 +1161,6 @@ APPLY_CUSTOM_FEATURES() {
     if [ ! -d "$EXTRACTED_FIRM_DIR/system/system/app/SecCalculator_R" ]; then
         cp -rfa "$(pwd)/QuantumROM/Mods/Apps/SecCalculator_R/"* "$EXTRACTED_FIRM_DIR/"
     fi
-	
-	if [ ! -d "$EXTRACTED_FIRM_DIR/system/system/app/VoiceNote_5.0" ]; then
-        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/VoiceNote_5.0/"* "$EXTRACTED_FIRM_DIR/"
-    fi
 
 	if [ ! -d "$EXTRACTED_FIRM_DIR/system/system/priv-app/PhotoEditor_AIFull" ]; then
 	    rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/ailasso"
