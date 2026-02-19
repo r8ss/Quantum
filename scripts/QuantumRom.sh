@@ -176,6 +176,8 @@ PREPARE_PARTITIONS() {
     done
 
     echo "Preparing partitinos."
+	
+    find "$EXTRACTED_FIRM_DIR" -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} +
 
     shopt -s nullglob dotglob
 
@@ -190,10 +192,7 @@ PREPARE_PARTITIONS() {
         done
 
         if [[ $keep_this -eq 0 ]]; then
-            # echo "- Deleting: $item"
             rm -rf -- "$item"
-        else
-            echo "- Keeping: $item"
         fi
     done
 
@@ -209,8 +208,8 @@ EXTRACT_FIRMWARE_IMG() {
     fi
 
 	local FIRM_DIR="$1"
-	PREPARE_PARTITIONS "$FIRM_DIR"
 
+    PREPARE_PARTITIONS "$FIRM_DIR"
 	echo "Extracting imges from $FIRM_DIR"
     for imgfile in "$FIRM_DIR"/*.img; do
         [ -e "$imgfile" ] || continue
@@ -625,8 +624,8 @@ PATCH_BT_LIB() {
 
     echo "Patching Bluetooth library."
     # Get libbluetooth_jni.so
-    unzip "$EXTRACTED_FIRM_DIR/system/system/apex/com.android.bt.apex" "apex_payload.img" -d "$WORK_DIR"
-	debugfs -R "dump /lib64/libbluetooth_jni.so $WORK_DIR/libbluetooth_jni.so" "$WORK_DIR/apex_payload.img"  >/dev/null 2>&1
+    unzip "$EXTRACTED_FIRM_DIR/system/system/apex/com.android.bt.apex" "apex_payload.img" -d "$WORK_DIR" >/dev/null 2>&1
+	debugfs -R "dump /lib64/libbluetooth_jni.so $WORK_DIR/libbluetooth_jni.so" "$WORK_DIR/apex_payload.img" >/dev/null 2>&1
 	rm -rf "$WORK_DIR/apex_payload.img"
 
     # local associative array (function-scoped)
@@ -806,7 +805,7 @@ UPDATE_FLOATING_FEATURE() {
     local key="$1"
     local value="$2"
     if [[ -z "$value" ]]; then
-        echo "⛔️️ Skipping $key — no value found."
+        echo " ⛔️️ Skipping $key — no value found."
         return
     fi
 
@@ -824,18 +823,18 @@ UPDATE_FLOATING_FEATURE() {
         indent=$(echo "$current_line" | sed -E "s/(<${key}>.*<\/${key}>).*//")
         local line="${indent}<${key}>${value}</${key}>"
         sed -i "s|${indent}<${key}>.*</${key}>|$line|" "$TARGET_FLOATING_FEATURE"
-        echo "✳️ Updated $key with ▶️ $value"
+        # echo " ✳️ Updated $key with ▶️ $value"
     else
         local line="    <$key>$value</$key>"
         sed -i "3i\\$line" "$TARGET_FLOATING_FEATURE"
-        echo "✅️ Added $key with value ▶️ $value"
+        # echo " ✅️ Added $key with value ▶️ $value"
     fi
 }
 
 
 APPLY_CUSTOM_FLOATING_FEATURE() {
     echo ""
-	echo "============ Applying Custom Floating Feature ============"
+	echo "Applying Custom Floating Feature."
     #========== COMMON ==========#
     UPDATE_FLOATING_FEATURE "SEC_FLOATING_FEATURE_COMMON_CONFIG_SEP_CATEGORY" "sep_basic"
 
@@ -894,7 +893,7 @@ APPLY_CUSTOM_FLOATING_FEATURE() {
 
 APPLY_STOCK_FLOATING_FEATURE() {
     echo " "
-    echo "============ Applying Stock Floating Feature ============"
+    echo "Applying Stock Floating Feature."
     #========== AUDIO ==========#
     UPDATE_FLOATING_FEATURE "SEC_FLOATING_FEATURE_AUDIO_CONFIG_VOLUMEMONITOR_STAGE" "$(awk -F'[<>]' '$2 == "SEC_FLOATING_FEATURE_AUDIO_CONFIG_VOLUMEMONITOR_STAGE" {print $3}' "$STOCK_FLOATING_FEATURE")"
     UPDATE_FLOATING_FEATURE "SEC_FLOATING_FEATURE_AUDIO_SUPPORT_VOLUME_MONITOR" "$(awk -F'[<>]' '$2 == "SEC_FLOATING_FEATURE_AUDIO_SUPPORT_VOLUME_MONITOR" {print $3}' "$STOCK_FLOATING_FEATURE")"
@@ -1110,14 +1109,9 @@ BUILD_PROP() {
 
         if [ -z "$VALUE" ]; then
             sed -i "/^${KEY}=.*/d" "$PROP"
-            echo " Removed: $KEY"
         else
             if grep -q "^${KEY}=" "$PROP"; then
                 sed -i "s|^${KEY}=.*|${KEY}=${VALUE}|" "$PROP"
-                echo " Updated: $KEY=$VALUE"
-            else
-                echo "${KEY}=${VALUE}" >> "$PROP"
-                echo " Added: $KEY=$VALUE"
             fi
         fi
     done
@@ -1153,14 +1147,28 @@ APPLY_CUSTOM_FEATURES() {
 	cp -rfa "$(pwd)/QuantumROM/Mods/SMART_MANAGER_CN/." "$EXTRACTED_FIRM_DIR/"
 	UPDATE_FLOATING_FEATURE "SEC_FLOATING_FEATURE_SMARTMANAGER_CONFIG_PACKAGE_NAME" "com.samsung.android.sm_cn"
 
-	echo "Adding full OneUI and important apps."
-    if [ -d "$EXTRACTED_FIRM_DIR/system/system/app/ClockPackage" ]; then
-        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/system/system/app/ClockPackage" "$EXTRACTED_FIRM_DIR/system/system/app/"
+	echo " Adding full OneUI and important apps."
+	if [ ! -d "$EXTRACTED_FIRM_DIR/product/priv-app/AiWallpaper" ]; then
+        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/AiWallpaper/"* "$EXTRACTED_FIRM_DIR/product/priv-app/AiWallpaper/"
+    fi
+
+    if [ ! -d "$EXTRACTED_FIRM_DIR/system/system/app/ClockPackage" ]; then
+        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/ClockPackage/"* "$EXTRACTED_FIRM_DIR/"
+    fi
+
+    if [ ! -d "$EXTRACTED_FIRM_DIR/system/system/app/SecCalculator_R" ]; then
+        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/SecCalculator_R/"* "$EXTRACTED_FIRM_DIR/"
+    fi
+	
+	if [ ! -d "$EXTRACTED_FIRM_DIR/system/system/app/VoiceNote_5.0" ]; then
+        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/VoiceNote_5.0/"* "$EXTRACTED_FIRM_DIR/"
     fi
 
 	if [ ! -d "$EXTRACTED_FIRM_DIR/system/system/priv-app/PhotoEditor_AIFull" ]; then
 	    rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app"/PhotoEditor_*
-        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/system/system/priv-app/PhotoEditor_AIFull" "$EXTRACTED_FIRM_DIR/system/system/priv-app/"
+        unzip -o "$(pwd)/QuantumROM/Mods/Apps/PhotoEditor_AIFull/system/system/priv-app/PhotoEditor_AIFull.zip" -d "$(pwd)/QuantumROM/Mods/Apps/PhotoEditor_AIFull/system/system/priv-app/" >/dev/null 2>&1
+		rm -f "$(pwd)/QuantumROM/Mods/Apps/PhotoEditor_AIFull/system/system/priv-app/PhotoEditor_AIFull.zip"
+        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/PhotoEditor_AIFull/"* "$EXTRACTED_FIRM_DIR"
     fi
 
     # STOCK CUSTOM FLOATING FEATURES
