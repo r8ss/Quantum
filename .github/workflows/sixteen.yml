@@ -7,6 +7,10 @@ on:
         description: "STOCK_DEVICE_MODEL or None"
         required: true
         default: "SM-A225F"
+      USE_UI_8_TETHERING_APEX:
+        description: "Set True if your kernel BPF version is 5.4 (lower than 5.10)."
+        required: true
+        default: "True"
       TARGET_DEVICE:
         description: "TARGET_DEVICE_MODEL."
         required: true
