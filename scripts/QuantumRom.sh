@@ -1031,6 +1031,11 @@ APPLY_STOCK_CONFIG() {
     # STOCK STOCK FLOATING FEATURES
 	APPLY_STOCK_FLOATING_FEATURE
 
+    # Fix unsupported BPF error for kernels lower than 5.10.
+    if [ "$USE_UI_8_TETHERING_APEX" = "True" ]; then
+        cp -rfa "$(pwd)/QuantumROM/Mods/Tethering_Apex/UI-8/." "$EXTRACTED_FIRM_DIR/"
+    fi
+
 	# Replace Stock Files.
 	rm -f "$EXTRACTED_FIRM_DIR/system/system/etc/init"/rscmgr*.rc
 	find "$EXTRACTED_FIRM_DIR/system/system/media" -maxdepth 1 -type f \( -iname "*.spi" -o -iname "*.qmg" -o -iname "*.txt" \) -delete
@@ -1130,7 +1135,7 @@ APPLY_CUSTOM_FEATURES() {
 	local EXTRACTED_FIRM_DIR="$1"
 
     echo "Applying usefull features."
-	echo " Adding build prop tweak."
+	echo "- Adding build prop tweak."
 	BUILD_PROP "$EXTRACTED_FIRM_DIR" "ro.frp.pst"
     BUILD_PROP "$EXTRACTED_FIRM_DIR" "ro.product.locale" "en-US"
     BUILD_PROP "$EXTRACTED_FIRM_DIR" "fw.max_users" "5"
@@ -1141,7 +1146,7 @@ APPLY_CUSTOM_FEATURES() {
 	BUILD_PROP "$EXTRACTED_FIRM_DIR" "ro.telephony.sim_slots.count" "2"
     BUILD_PROP "$EXTRACTED_FIRM_DIR" "ro.surface_flinger.protected_contents" "true"
 
-	echo " Adding China smart manager."
+	echo "- Adding China smart manager."
 	rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/AppLock"
     rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/Firewall"
     rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/SmartManager_v5"
@@ -1149,7 +1154,7 @@ APPLY_CUSTOM_FEATURES() {
 	cp -rfa "$(pwd)/QuantumROM/Mods/SMART_MANAGER_CN/." "$EXTRACTED_FIRM_DIR/"
 	UPDATE_FLOATING_FEATURE "SEC_FLOATING_FEATURE_SMARTMANAGER_CONFIG_PACKAGE_NAME" "com.samsung.android.sm_cn"
 
-	echo " Adding full OneUI and important apps."
+	echo "- Adding full OneUI and important apps."
 	if [ ! -d "$EXTRACTED_FIRM_DIR/product/priv-app/AiWallpaper" ]; then
         cp -rfa "$(pwd)/QuantumROM/Mods/Apps/AiWallpaper/"* "$EXTRACTED_FIRM_DIR/product/priv-app/AiWallpaper/"
     fi
