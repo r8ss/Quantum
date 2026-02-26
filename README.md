@@ -4,16 +4,25 @@
 This Custom ROM is built by combining and refining features from multiple projects, including UNICA, Legacy-UI, and AstroRom.
 The goal of this ROM is to provide a clean, optimized, feature-rich, and stable One UI experience with enhanced usability and performance.
 
-✨ Key Features
+✨ Key Features:
 🔧 System Optimization
+
 Heavy debloated system (removed unnecessary apps & services)
+
 Improved performance and smoother UI experience
+
 Optimized background processes
+
 Better battery efficiency
+
 Enhanced Functionality
+
 Screenshot anywhere (enabled globally)
+
 Built-in Screen Recorder
+
 Floating features enabled
+
 Edge features fully working
 
 🔐 Security & Privacy
