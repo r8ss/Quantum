@@ -6,13 +6,9 @@ The goal of this ROM is to provide a clean, optimized, feature-rich, and stable 
 
 ✨ Key Features:
 🔧 System Optimization
-
 Heavy debloated system (removed unnecessary apps & services)
-
 Improved performance and smoother UI experience
-
 Optimized background processes
-
 Better battery efficiency
 
 Enhanced Functionality
