@@ -2,19 +2,31 @@
 
 # 📌 Overview:
 - This Custom ROM is built by combining and refining features from multiple projects, including UNICA, Legacy-UI, and AstroRom.
-- The goal of this ROM is to provide a clean, optimized, feature-rich, and stable One UI experience with enhanced usability and performance.
+- The goal of this ROM is to provide a clean, optimized, and stable One UI experience with enhanced usability and performance.
+
+# Tools features.
+- Download firmware directly from samsung server.
+- File config and file contexts generate.
+- Extract and img build ( erofs and ext4 supported).
 
 # ✨ Key Features:
-- System Optimization
-- Heavy debloated system (removed unnecessary apps & services)
-- Improved performance and smoother UI experience
-- Optimized background processes
-- Better battery efficiency
-- Enhanced Functionality
-- Screenshot anywhere (enabled globally)
-- Built-in Screen Recorder
-- More floating features enabled
-- Edge features fully working
+- System Optimization.
+- Heavy debloated system (removed unnecessary apps & services).
+- Improved performance and smoother UI experience.
+- Optimized background processes.
+- Better battery efficiency.
+- Enhanced Functionality.
+- Screenshot anywhere (enabled globally).
+- Built-in Screen Recorder.
+- More floating features enabled.
+- Edge features fully working.
+- Stock device conig always be added.
+- Extra brightness support.
+- Object, shadow and reflection remover support.
+- Multi user support.
+- Camera privacy toggle support
+- [BluetoothLibraryPatcher](https://github.com/3arthur6/BluetoothLibraryPatcher) integrated
+- [KnoxPatch](https://github.com/salvogiangri/KnoxPatch) integrated
 
 # 🔐 Security & Privacy:
 - Secure Folder support.
