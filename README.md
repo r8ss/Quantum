@@ -1,8 +1,8 @@
 ![QuantumROM Logo](QuantumROM/logo/QuantumROM.jpg)
 
-📌 Overview:
-This Custom ROM is built by combining and refining features from multiple projects, including UNICA, Legacy-UI, and AstroRom.
-The goal of this ROM is to provide a clean, optimized, feature-rich, and stable One UI experience with enhanced usability and performance.
+# 📌 Overview:
+- This Custom ROM is built by combining and refining features from multiple projects, including UNICA, Legacy-UI, and AstroRom.
+- The goal of this ROM is to provide a clean, optimized, feature-rich, and stable One UI experience with enhanced usability and performance.
 
 # ✨ Key Features:
 - System Optimization
@@ -13,26 +13,26 @@ The goal of this ROM is to provide a clean, optimized, feature-rich, and stable 
 - Enhanced Functionality
 - Screenshot anywhere (enabled globally)
 - Built-in Screen Recorder
-- Floating features enabled
+- More floating features enabled
 - Edge features fully working
 
-🔐 Security & Privacy
-Secure Folder support
-Essential security components retained
-Stable and safe daily-driver experience
+# 🔐 Security & Privacy:
+- Secure Folder support.
+- Essential security components retained.
+- Stable and safe daily-driver experience.
 
-📱 One UI Experience
-Full One UI apps included
-Important system apps preserved
-China Smart Manager support
-AI features enabled
+# 📱 One UI Experience:
+- Full One UI apps included.
+- Important system apps preserved.
+- China Smart Manager support.
+- AI features enabled.
 
-🎯 Project Goal
-To deliver a lightweight yet fully featured Samsung One UI ROM that balances:
-Performance
-Stability
-Essential Features
-Clean User Experience
+# 🎯 Project Goal
+- To deliver a lightweight yet fully featured Samsung One UI ROM that balances.
+- Performance.
+- Stability.
+- Essential Features.
+- Clean User Experience.
 
 ## Licensing
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
