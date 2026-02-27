@@ -276,16 +276,14 @@ EXTRACT_FIRMWARE_IMG() {
         case "$fstype" in
             ext4)
                 IMG_SIZE=$(stat -c%s -- "$imgfile")
-				echo "$imgfile Detected $fstype. Size: $IMG_SIZE bytes."
-                echo "Extracting $imgfile in $FIRM_DIR/$partition"
+				echo "$partition.img Detected $fstype. Size: $IMG_SIZE bytes. Extracting..."
 				rm -rf "$FIRM_DIR/$partition"
                 python3 $(pwd)/bin/py_scripts/imgextractor.py "$imgfile" "$FIRM_DIR"
                 ;;
             erofs)
                 echo ""
                 IMG_SIZE=$(stat -c%s -- "$imgfile")
-                echo "$imgfile Detected $fstype. Size: $IMG_SIZE bytes."
-                echo "Extracting $imgfile in $FIRM_DIR/$partition"
+				echo "$partition.img Detected $fstype. Size: $IMG_SIZE bytes. Extracting..."
 				rm -rf "$FIRM_DIR/$partition"
                 $(pwd)/bin/erofs-utils/extract.erofs -i "$imgfile" -x -f -o "$FIRM_DIR" >/dev/null 2>&1
                 ;;
