@@ -285,7 +285,7 @@ EXTRACT_FIRMWARE_IMG() {
         local IMG_SIZE
 
         partition="$(basename "${imgfile%.img}")"
-        fstype=$(file -b $imgfile | awk '{print $1}')
+        fstype=$(blkid -o value -s TYPE "$imgfile")
 
         case "$fstype" in
             ext4)
@@ -295,7 +295,7 @@ EXTRACT_FIRMWARE_IMG() {
 				rm -rf "$FIRM_DIR/$partition"
                 python3 $(pwd)/bin/py_scripts/imgextractor.py "$imgfile" "$FIRM_DIR"
                 ;;
-            EROFS)
+            erofs)
                 echo ""
                 IMG_SIZE=$(stat -c%s -- "$imgfile")
                 echo "$imgfile Detected $fstype. Size: $IMG_SIZE bytes."
@@ -760,7 +760,7 @@ PATCH_BT_LIB() {
 
 FIX_VNDK() {
     echo "- Checking $STOCK_DEVICE and $TARGET_DEVICE vndk version."
-	export SDK=$(grep -m1 '^ro.build.version.sdk_full=' "$EXTRACTED_FIRM_DIR/system/system/build.prop" | cut -d'=' -f2)
+	export SDK=$(GET_PROP $EXTRACTED_FIRM_DIR system ro.build.version.sdk_full)
 	echo "- Target rom SDK version: $SDK"
     if [ -f "$TARGET_ROM_SYSTEM_EXT_DIR/apex/com.android.vndk.v${STOCK_VNDK_VERSION}.apex" ]; then
         echo "- VNDK matched."
