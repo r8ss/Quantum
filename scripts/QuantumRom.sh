@@ -31,60 +31,46 @@ REMOVE_LINE() {
 
 GET_PROP() {
     if [ "$#" -ne 3 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR> <PARTITION> <BUILD_PROP_LINE>"
+        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR> <PARTITION> <PROP>"
         return 1
     fi
 
-    EXTRACTED_FIRM_DIR="$1"
+    local EXTRACTED_FIRM_DIR="$1"
     local PARTITION="$2"
     local PROP="$3"
 
-    local DIR=""
-    local FILE=""
-
-    if [ ! -d "$PARTITION" ]; then
-        echo "[$PARTITION] partition directory not found."
-        exit 1
-    fi
-
     case "$PARTITION" in
         system)
-            DIR="$EXTRACTED_FIRM_DIR/system/system"
-            FILE="$DIR/build.prop"
+            FILE="$EXTRACTED_FIRM_DIR/system/system/build.prop"
             ;;
         vendor)
-            DIR="$EXTRACTED_FIRM_DIR/vendor"
-            FILE="$DIR/build.prop"
+            FILE="$EXTRACTED_FIRM_DIR/vendor/build.prop"
             ;;
         product)
-            DIR="$EXTRACTED_FIRM_DIR/product"
-            FILE="$DIR/etc/build.prop"
+            FILE="$EXTRACTED_FIRM_DIR/product/etc/build.prop"
             ;;
         system_ext)
-            DIR="$EXTRACTED_FIRM_DIR/system_ext"
-            FILE="$DIR/etc/build.prop"
+            FILE="$EXTRACTED_FIRM_DIR/system_ext/etc/build.prop"
             ;;
         odm)
-            DIR="$EXTRACTED_FIRM_DIR/odm"
-            FILE="$DIR/etc/build.prop"
+            FILE="$EXTRACTED_FIRM_DIR/odm/etc/build.prop"
             ;;
         *)
             echo "Unknown partition: $PARTITION"
-            exit 1
+            return 1
             ;;
     esac
 
     if [ ! -f "$FILE" ]; then
-        echo "- $FILE not found."
-        exit 1
+        echo "$FILE not found."
+        return 1
     fi
 
     local VALUE
-    VALUE=$(grep -m1 "^$PROP=" "$FILE" | cut -d'=' -f2-)
+    VALUE=$(grep -m1 "^${PROP}=" "$FILE" | cut -d'=' -f2-)
 
     if [ -z "$VALUE" ]; then
-        echo "- $PROP property not found."
-        exit 1
+        return 1
     fi
 
     echo "$VALUE"
@@ -760,7 +746,7 @@ PATCH_BT_LIB() {
 
 FIX_VNDK() {
     echo "- Checking $STOCK_DEVICE and $TARGET_DEVICE vndk version."
-	export SDK=$(GET_PROP $EXTRACTED_FIRM_DIR system ro.build.version.sdk_full)
+	export SDK="$(GET_PROP "$EXTRACTED_FIRM_DIR" "system" ro.system.build.version.sdk_full)"
 	echo "- Target rom SDK version: $SDK"
     if [ -f "$TARGET_ROM_SYSTEM_EXT_DIR/apex/com.android.vndk.v${STOCK_VNDK_VERSION}.apex" ]; then
         echo "- VNDK matched."
