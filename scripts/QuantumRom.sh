@@ -28,6 +28,7 @@ REMOVE_LINE() {
     grep -vxF "$LINE" "$FILE" > "$FILE.tmp" && mv "$FILE.tmp" "$FILE"
 }
 
+
 GET_PROP() {
         if [ "$#" -ne 3 ]; then
         echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR> <PARTITION> <BUILD_PROP_LINE>"
