@@ -28,6 +28,67 @@ REMOVE_LINE() {
     grep -vxF "$LINE" "$FILE" > "$FILE.tmp" && mv "$FILE.tmp" "$FILE"
 }
 
+GET_PROP() {
+        if [ "$#" -ne 3 ]; then
+        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR> <PARTITION> <BUILD_PROP_LINE>"
+        return 1
+    fi
+
+    EXTRACTED_FIRM_DIR="$1"
+    local PARTITION="$2"
+    local PROP="$3"
+
+    local DIR=""
+    local FILE=""
+
+    if [ ! -d "$PARTITION" ]; then
+        echo "[$PARTITION] partition directory not found."
+        exit 1
+    fi
+
+    case "$PARTITION" in
+        system)
+            DIR="$EXTRACTED_FIRM_DIR/system/system"
+            FILE="$DIR/build.prop"
+            ;;
+        vendor)
+            DIR="$EXTRACTED_FIRM_DIR/vendor"
+            FILE="$DIR/build.prop"
+            ;;
+        product)
+            DIR="$EXTRACTED_FIRM_DIR/product"
+            FILE="$DIR/etc/build.prop"
+            ;;
+        system_ext)
+            DIR="$EXTRACTED_FIRM_DIR/system_ext"
+            FILE="$DIR/etc/build.prop"
+            ;;
+        odm)
+            DIR="$EXTRACTED_FIRM_DIR/odm"
+            FILE="$DIR/etc/build.prop"
+            ;;
+        *)
+            echo "Unknown partition: $PARTITION"
+            exit 1
+            ;;
+    esac
+
+    if [ ! -f "$FILE" ]; then
+        echo "- $FILE not found."
+        exit 1
+    fi
+
+    local VALUE
+    VALUE=$(grep -m1 "^$PROP=" "$FILE" | cut -d'=' -f2-)
+
+    if [ -z "$VALUE" ]; then
+        echo "- $PROP property not found."
+        exit 1
+    fi
+
+    echo "$VALUE"
+}
+
 
 DOWNLOAD_FIRMWARE() {
     if [ "$#" -ne 4 ]; then
