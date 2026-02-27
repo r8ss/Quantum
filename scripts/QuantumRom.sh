@@ -1163,7 +1163,7 @@ DEBLOAT() {
 BUILD_PROP() {
     local EXTRACTED_FIRM_DIR="$1"
     local KEY="$2"
-    local VALUE="${3:-}"
+    local VALUE="${3-}"
 
     if [ -z "$EXTRACTED_FIRM_DIR" ] || [ -z "$KEY" ]; then
         echo "Usage: BUILD_PROP <EXTRACTED_FIRM_DIR> <key> [value]"
@@ -1174,14 +1174,21 @@ BUILD_PROP() {
         "$EXTRACTED_FIRM_DIR/product/etc/build.prop"
         "$EXTRACTED_FIRM_DIR/system/system/build.prop"
     )
+
     for PROP in "${PROP_FILES[@]}"; do
         [ -f "$PROP" ] || continue
 
-        if [ -z "$VALUE" ]; then
-            sed -i "/^${KEY}=.*/d" "$PROP"
-        else
-            if grep -q "^${KEY}=" "$PROP"; then
+        if grep -q "^${KEY}=" "$PROP"; then
+            if [ -z "$VALUE" ]; then
+                sed -i "s|^${KEY}=.*|${KEY}=|" "$PROP"
+            else
                 sed -i "s|^${KEY}=.*|${KEY}=${VALUE}|" "$PROP"
+            fi
+        else
+            if [ -z "$VALUE" ]; then
+                echo "${KEY}=" >> "$PROP"
+            else
+                echo "${KEY}=${VALUE}" >> "$PROP"
             fi
         fi
     done
