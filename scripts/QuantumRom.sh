@@ -30,7 +30,7 @@ REMOVE_LINE() {
 
 
 GET_PROP() {
-        if [ "$#" -ne 3 ]; then
+    if [ "$#" -ne 3 ]; then
         echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR> <PARTITION> <BUILD_PROP_LINE>"
         return 1
     fi
