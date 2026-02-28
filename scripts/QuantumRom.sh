@@ -837,7 +837,7 @@ FIX_SELINUX() {
 
     echo "Fixing selinux for $STOCK_DEVICE."
 
-    UNSUPPORTED_SELINUX=("audiomirroring" "fabriccrypto" "hal_dsms_default" "qb_id_prop" "hal_dsms_service" "proc_compaction_proactiveness" "sbauth" "ker_app" "kpp_app" "kpp_data" "attiqi_app" "kpoc_charger")
+    UNSUPPORTED_SELINUX=("audiomirroring" "fabriccrypto" "hal_dsms_default" "qb_id_prop" "hal_dsms_service" "proc_compaction_proactiveness" "sbauth" "ker_app" "kpp_app" "kpp_data" "attiqi_app" "kpoc_charger" "sec_diag")
 
     for keyword in "${UNSUPPORTED_SELINUX[@]}"; do
         if grep -q "$keyword" "$SELINUX_FILE"; then
