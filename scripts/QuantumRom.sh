@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ###################################################################################################
-# REAL_USER=${SUDO_USER:-$USER}
+REAL_USER=${SUDO_USER:-$USER}
 
 export TARGET_FLOATING_FEATURE="$FIRM_DIR/$TARGET_DEVICE/system/system/etc/floating_feature.xml"
 
@@ -257,7 +257,7 @@ EXTRACT_FIRMWARE_IMG() {
 
 	local FIRM_DIR="$1"
 
-    PREPARE_PARTITIONS "$FIRM_DIR"
+    # PREPARE_PARTITIONS "$FIRM_DIR"
 	echo "Extracting imges from $FIRM_DIR"
     for imgfile in "$FIRM_DIR"/*.img; do
         [ -e "$imgfile" ] || continue
@@ -278,13 +278,12 @@ EXTRACT_FIRMWARE_IMG() {
                 IMG_SIZE=$(stat -c%s -- "$imgfile")
 				echo "$partition.img Detected $fstype. Size: $IMG_SIZE bytes. Extracting..."
 				rm -rf "$FIRM_DIR/$partition"
-                python3 $(pwd)/bin/py_scripts/imgextractor.py "$imgfile" "$FIRM_DIR"
+                sudo python3 $(pwd)/bin/py_scripts/imgextractor.py "$imgfile" "$FIRM_DIR"
                 ;;
             erofs)
-                echo ""
                 IMG_SIZE=$(stat -c%s -- "$imgfile")
 				echo "$partition.img Detected $fstype. Size: $IMG_SIZE bytes. Extracting..."
-				rm -rf "$FIRM_DIR/$partition"
+				sudo rm -rf "$FIRM_DIR/$partition"
                 $(pwd)/bin/erofs-utils/extract.erofs -i "$imgfile" -x -f -o "$FIRM_DIR" >/dev/null 2>&1
                 ;;
             *)
@@ -296,8 +295,8 @@ EXTRACT_FIRMWARE_IMG() {
 
     rm -rf "$FIRM_DIR"/*.img
 
-    # sudo chown -R "$REAL_USER:$REAL_USER" "$FIRM_DIR/config"
-    # chmod -R u+rwX "$FIRM_DIR/config"
+    sudo chown -R "$REAL_USER:$REAL_USER" "$FIRM_DIR"
+    sudo chmod -R u+rwX "$FIRM_DIR"
 }
 
 
@@ -744,7 +743,7 @@ PATCH_BT_LIB() {
 
 FIX_VNDK() {
     echo "- Checking $STOCK_DEVICE and $TARGET_DEVICE vndk version."
-	export SDK="$(GET_PROP "$EXTRACTED_FIRM_DIR" "system" ro.system.build.version.sdk_full)"
+    export SDK="$(GET_PROP "$EXTRACTED_FIRM_DIR" "system" ro.system.build.version.sdk_full)"
 	echo "- Target rom SDK version: $SDK"
     if [ -f "$TARGET_ROM_SYSTEM_EXT_DIR/apex/com.android.vndk.v${STOCK_VNDK_VERSION}.apex" ]; then
         echo "- VNDK matched."
@@ -818,7 +817,11 @@ FIX_SYSTEM_EXT() {
 		rm -rf "$EXTRACTED_FIRM_DIR/config/system_ext_fs_config"
 		rm -rf "$EXTRACTED_FIRM_DIR/config/system_ext_file_contexts"
     else
-	    export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system/system_ext"
+        if [ -d "$EXTRACTED_FIRM_DIR/system/system_ext/apex" ]; then
+            export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system_ext"
+        elif [ -d "$EXTRACTED_FIRM_DIR/system/system/system_ext/apex" ]; then
+            export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system/system_ext"
+        fi
     fi
 }
 
@@ -1091,7 +1094,7 @@ APPLY_STOCK_CONFIG() {
 }
 
 
-DEBLOAT_APPS=("FactoryCameraFB" "WlanTest" "AssistantShell" "HotwordEnrollmentOKGoogleEx4CORTEXM55" "HotwordEnrollmentXGoogleEx4CORTEXM55" "BardShell" "DuoStub" "GoogleCalendarSyncAdapter" "AndroidDeveloperVerifier" "AndroidGlassesCore" "SOAgent77" "YourPhone_Stub" "AndroidAutoStub" "SingleTakeService" "SamsungBilling" "AndroidSystemIntelligence" "GoogleRestore" "Messages" "SearchSelector" "AirGlance" "AirReadingGlass" "SamsungTTS" "WlanTest" "ARCore" "ARDrawing" "ARZone" "BGMProvider" "BixbyWakeup" "BlockchainBasicKit" "Cameralyzer" "DictDiotekForSec" "EasymodeContactsWidget81" "Fast" "FBAppManager_NS" "FunModeSDK" "GearManagerStub" "KidsHome_Installer" "LinkSharing_v11" "LiveDrawing" "MAPSAgent" "MdecService" "MinusOnePage" "MoccaMobile" "Netflix_stub" "Notes40" "ParentalCare" "PhotoTable" "PlayAutoInstallConfig" "SamsungPassAutofill_v1" "SamsungTTSVoice_de_DE_f00" "SamsungTTSVoice_el_GR_f00" "SamsungTTSVoice_en_GB_f00" "SamsungTTSVoice_en_US_f00" "SamsungTTSVoice_en_US_l03" "SamsungTTSVoice_es_ES_f00" "SamsungTTSVoice_es_MX_f00" "SamsungTTSVoice_es_US_f00" "SamsungTTSVoice_fr_FR_f00" "SamsungTTSVoice_hi_IN_f00" "SamsungTTSVoice_it_IT_f00" "SamsungTTSVoice_pl_PL_f00" "SamsungTTSVoice_pt_BR_f00" "SamsungTTSVoice_ru_RU_f00" "SamsungTTSVoice_th_TH_f00" "SamsungTTSVoice_vi_VN_f00" "SamsungTTSVoice_en_IN_f00" "SmartReminder" "SmartSwitchStub" "UnifiedWFC" "UniversalMDMClient" "VideoEditorLite_Dream_N" "VisionIntelligence3.7" "VoiceAccess" "VTCameraSetting" "WebManual" "WifiGuider" "KTAuth" "KTCustomerService" "KTUsimManager" "LGUMiniCustomerCenter" "LGUplusTsmProxy" "SamsungTTSVoice_ko_KR_r00" "SketchBook" "SKTMemberShip_new" "SktUsimService" "TWorld" "AirCommand" "AppUpdateCenter" "AREmoji" "AREmojiEditor" "AuthFramework" "AutoDoodle" "AvatarEmojiSticker" "AvatarEmojiSticker_S" "Bixby" "BixbyInterpreter" "BixbyVisionFramework3.5" "DevGPUDriver-EX2200" "DigitalKey" "Discover" "DiscoverSEP" "EarphoneTypeC" "EasySetup" "FBInstaller_NS" "FBServices" "FotaAgent" "GalleryWidget" "GameDriver-EX2100" "GameDriver-EX2200" "GameDriver-SM8150" "HashTagService" "MultiControlVP6" "LedCoverService" "LinkToWindowsService" "LiveStickers" "MemorySaver_O_Refresh" "MultiControl" "OMCAgent5" "OneDrive_Samsung_v3" "OneStoreService" "SamsungCarKeyFw" "SamsungPass" "SamsungSmartSuggestions" "SettingsBixby" "SetupIndiaServicesTnC" "SKTFindLostPhone" "SKTHiddenMenu" "SKTMemberShip" "SKTOneStore" "SktUsimService" "SmartEye" "SmartPush" "SmartThingsKit" "SmartTouchCall" "SOAgent7" "SOAgent75" "SolarAudio-service" "SPPPushClient" "sticker" "StickerFaceARAvatar" "StoryService" "SumeNNService" "SVoiceIME" "SwiftkeyIme" "SwiftkeySetting" "SystemUpdate" "TADownloader" "TalkbackSE" "TaPackAuthFw" "TPhoneOnePackage" "TPhoneSetup" "TWorld" "UltraDataSaving_O" "Upday" "UsimRegistrationKOR" "YourPhone_P1_5" "AvatarPicker" "GpuWatchApp" "KT114Provider2" "KTHiddenMenu" "KTOneStore" "KTServiceAgent" "KTServiceMenu" "LGUGPSnWPS" "LGUHiddenMenu" "LGUOZStore" "SKTFindLostPhoneApp" "SmartPush_64" "SOAgent76" "TService" "vexfwk_service" "VexScanner" "LiveEffectService" "YourPhone_P1_5" "vexfwk_service")
+DEBLOAT_APPS=("Duo" "Photos" "FactoryCameraFB" "WlanTest" "AssistantShell" "HotwordEnrollmentOKGoogleEx4CORTEXM55" "HotwordEnrollmentXGoogleEx4CORTEXM55" "BardShell" "DuoStub" "GoogleCalendarSyncAdapter" "AndroidDeveloperVerifier" "AndroidGlassesCore" "SOAgent77" "YourPhone_Stub" "AndroidAutoStub" "SingleTakeService" "SamsungBilling" "AndroidSystemIntelligence" "GoogleRestore" "Messages" "SearchSelector" "AirGlance" "AirReadingGlass" "SamsungTTS" "WlanTest" "ARCore" "ARDrawing" "ARZone" "BGMProvider" "BixbyWakeup" "BlockchainBasicKit" "Cameralyzer" "DictDiotekForSec" "EasymodeContactsWidget81" "Fast" "FBAppManager_NS" "FunModeSDK" "GearManagerStub" "KidsHome_Installer" "LinkSharing_v11" "LiveDrawing" "MAPSAgent" "MdecService" "MinusOnePage" "MoccaMobile" "Netflix_stub" "Notes40" "ParentalCare" "PhotoTable" "PlayAutoInstallConfig" "SamsungPassAutofill_v1" "SamsungTTSVoice_de_DE_f00" "SamsungTTSVoice_el_GR_f00" "SamsungTTSVoice_en_GB_f00" "SamsungTTSVoice_en_US_f00" "SamsungTTSVoice_en_US_l03" "SamsungTTSVoice_es_ES_f00" "SamsungTTSVoice_es_MX_f00" "SamsungTTSVoice_es_US_f00" "SamsungTTSVoice_fr_FR_f00" "SamsungTTSVoice_hi_IN_f00" "SamsungTTSVoice_it_IT_f00" "SamsungTTSVoice_pl_PL_f00" "SamsungTTSVoice_pt_BR_f00" "SamsungTTSVoice_ru_RU_f00" "SamsungTTSVoice_th_TH_f00" "SamsungTTSVoice_vi_VN_f00" "SamsungTTSVoice_en_IN_f00" "SmartReminder" "SmartSwitchStub" "UnifiedWFC" "UniversalMDMClient" "VideoEditorLite_Dream_N" "VisionIntelligence3.7" "VoiceAccess" "VTCameraSetting" "WebManual" "WifiGuider" "KTAuth" "KTCustomerService" "KTUsimManager" "LGUMiniCustomerCenter" "LGUplusTsmProxy" "SamsungTTSVoice_ko_KR_r00" "SketchBook" "SKTMemberShip_new" "SktUsimService" "TWorld" "AirCommand" "AppUpdateCenter" "AREmoji" "AREmojiEditor" "AuthFramework" "AutoDoodle" "AvatarEmojiSticker" "AvatarEmojiSticker_S" "Bixby" "BixbyInterpreter" "BixbyVisionFramework3.5" "DevGPUDriver-EX2200" "DigitalKey" "Discover" "DiscoverSEP" "EarphoneTypeC" "EasySetup" "FBInstaller_NS" "FBServices" "FotaAgent" "GalleryWidget" "GameDriver-EX2100" "GameDriver-EX2200" "GameDriver-SM8150" "HashTagService" "MultiControlVP6" "LedCoverService" "LinkToWindowsService" "LiveStickers" "MemorySaver_O_Refresh" "MultiControl" "OMCAgent5" "OneDrive_Samsung_v3" "OneStoreService" "SamsungCarKeyFw" "SamsungPass" "SamsungSmartSuggestions" "SettingsBixby" "SetupIndiaServicesTnC" "SKTFindLostPhone" "SKTHiddenMenu" "SKTMemberShip" "SKTOneStore" "SktUsimService" "SmartEye" "SmartPush" "SmartThingsKit" "SmartTouchCall" "SOAgent7" "SOAgent75" "SolarAudio-service" "SPPPushClient" "sticker" "StickerFaceARAvatar" "StoryService" "SumeNNService" "SVoiceIME" "SwiftkeyIme" "SwiftkeySetting" "SystemUpdate" "TADownloader" "TalkbackSE" "TaPackAuthFw" "TPhoneOnePackage" "TPhoneSetup" "TWorld" "UltraDataSaving_O" "Upday" "UsimRegistrationKOR" "YourPhone_P1_5" "AvatarPicker" "GpuWatchApp" "KT114Provider2" "KTHiddenMenu" "KTOneStore" "KTServiceAgent" "KTServiceMenu" "LGUGPSnWPS" "LGUHiddenMenu" "LGUOZStore" "SKTFindLostPhoneApp" "SmartPush_64" "SOAgent76" "TService" "vexfwk_service" "VexScanner" "LiveEffectService" "YourPhone_P1_5" "vexfwk_service")
 
 KICK() {
     if [ "$#" -ne 1 ]; then
@@ -1134,6 +1137,8 @@ DEBLOAT() {
     REMOVE_ESIM_FILES "$EXTRACTED_FIRM_DIR"
 	REMOVE_FABRIC_CRYPTO "$EXTRACTED_FIRM_DIR"
 	echo "- Deleting unnecessary files and folders."
+    rm -rf "$EXTRACTED_FIRM_DIR/system/system/app"/SamsungTTSVoice_*
+	rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app"/GameDriver-*
     rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/init/boot-image.bprof"
     rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/init/boot-image.prof"
     rm -rf "$EXTRACTED_FIRM_DIR/system/system/hidden"
@@ -1145,37 +1150,61 @@ DEBLOAT() {
 
 
 BUILD_PROP() {
-    local EXTRACTED_FIRM_DIR="$1"
-    local KEY="$2"
-    local VALUE="${3-}"
-
-    if [ -z "$EXTRACTED_FIRM_DIR" ] || [ -z "$KEY" ]; then
-        echo "Usage: BUILD_PROP <EXTRACTED_FIRM_DIR> <key> [value]"
+    if [ "$#" -lt 3 ]; then
+        echo "Usage: BUILD_PROP <EXTRACTED_FIRM_DIR> <PARTITION> <KEY> [VALUE]"
         return 1
     fi
 
-    local PROP_FILES=(
-        "$EXTRACTED_FIRM_DIR/product/etc/build.prop"
-        "$EXTRACTED_FIRM_DIR/system/system/build.prop"
-    )
+    local EXTRACTED_FIRM_DIR="$1"
+    local PARTITION="$2"
+    local KEY="$3"
+    local VALUE="${4-}"
 
-    for PROP in "${PROP_FILES[@]}"; do
-        [ -f "$PROP" ] || continue
+    local FILE=""
 
-        if grep -q "^${KEY}=" "$PROP"; then
-            if [ -z "$VALUE" ]; then
-                sed -i "s|^${KEY}=.*|${KEY}=|" "$PROP"
-            else
-                sed -i "s|^${KEY}=.*|${KEY}=${VALUE}|" "$PROP"
-            fi
+    case "$PARTITION" in
+        system)
+            FILE="$EXTRACTED_FIRM_DIR/system/system/build.prop"
+            ;;
+        vendor)
+            FILE="$EXTRACTED_FIRM_DIR/vendor/build.prop"
+            ;;
+        product)
+            FILE="$EXTRACTED_FIRM_DIR/product/etc/build.prop"
+            ;;
+        system_ext)
+            FILE="$EXTRACTED_FIRM_DIR/system_ext/etc/build.prop"
+            ;;
+        odm)
+            FILE="$EXTRACTED_FIRM_DIR/odm/etc/build.prop"
+            ;;
+        *)
+            echo "Unknown partition: $PARTITION"
+            return 1
+            ;;
+    esac
+
+    if [ ! -f "$FILE" ]; then
+        echo "build.prop not found: $FILE"
+        return 1
+    fi
+
+    if grep -q "^${KEY}=" "$FILE"; then
+        if [ -z "$VALUE" ]; then
+            # Keep key, remove value
+            sed -i "s|^${KEY}=.*|${KEY}=|" "$FILE"
         else
-            if [ -z "$VALUE" ]; then
-                echo "${KEY}=" >> "$PROP"
-            else
-                echo "${KEY}=${VALUE}" >> "$PROP"
-            fi
+            # Replace value
+            sed -i "s|^${KEY}=.*|${KEY}=${VALUE}|" "$FILE"
         fi
-    done
+    else
+        # Append if not exists
+        if [ -z "$VALUE" ]; then
+            echo "${KEY}=" >> "$FILE"
+        else
+            echo "${KEY}=${VALUE}" >> "$FILE"
+        fi
+    fi
 }
 
 
@@ -1190,15 +1219,15 @@ APPLY_CUSTOM_FEATURES() {
 
     echo "Applying usefull features."
 	echo "- Adding build prop tweak."
-	BUILD_PROP "$EXTRACTED_FIRM_DIR" "ro.frp.pst"
-    BUILD_PROP "$EXTRACTED_FIRM_DIR" "ro.product.locale" "en-US"
-    BUILD_PROP "$EXTRACTED_FIRM_DIR" "fw.max_users" "5"
-    BUILD_PROP "$EXTRACTED_FIRM_DIR" "fw.show_multiuserui" "1"
-    BUILD_PROP "$EXTRACTED_FIRM_DIR" "wifi.interface=" "wlan0"
-    BUILD_PROP "$EXTRACTED_FIRM_DIR" "wlan.wfd.hdcp" "disabled"
-    BUILD_PROP "$EXTRACTED_FIRM_DIR" "debug.hwui.renderer" "skiavk"
-	BUILD_PROP "$EXTRACTED_FIRM_DIR" "ro.telephony.sim_slots.count" "2"
-    BUILD_PROP "$EXTRACTED_FIRM_DIR" "ro.surface_flinger.protected_contents" "true"
+	REMOVE_LINE "ro.frp.pst=/dev/block/persistent" "$EXTRACTED_FIRM_DIR/product/etc/build.prop"
+    BUILD_PROP "$EXTRACTED_FIRM_DIR" "product" "product" "ro.product.locale" "en-US"
+    BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "fw.max_users" "5"
+    BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "fw.show_multiuserui" "1"
+    BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "wifi.interface=" "wlan0"
+    BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "wlan.wfd.hdcp" "disabled"
+    BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "debug.hwui.renderer" "skiavk"
+	BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.telephony.sim_slots.count" "2"
+    BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.surface_flinger.protected_contents" "true"
 
 	echo "- Adding China smart manager."
 	rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/AppLock"
