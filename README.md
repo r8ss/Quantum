@@ -4,7 +4,7 @@
 - This Custom ROM is built by combining and refining features from multiple projects, including UNICA, Legacy-UI, and AstroRom.
 - The goal of this ROM is to provide a clean, optimized, and stable One UI experience with enhanced usability and performance.
 
-# Tools features.
+# 🔧 Tools features:
 - Download firmware directly from samsung server.
 - File config and file contexts generate.
 - Extract and img build ( erofs and ext4 supported).
@@ -39,14 +39,14 @@
 - China Smart Manager support.
 - AI features enabled.
 
-# 🎯 Project Goal
+# 🎯 Project Goal:
 - To deliver a lightweight yet fully featured Samsung One UI ROM that balances.
 - Performance.
 - Stability.
 - Essential Features.
 - Clean User Experience.
 
-## Licensing
+## 📃 Licensing:
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 - **[android-tools](https://github.com/nmeum/android-tools)** - Licensed under Apache License 2.0
 - **[apktool](https://github.com/iBotPeaches/Apktool)** - Licensed under Apache License 2.0  
