@@ -130,7 +130,7 @@ DOWNLOAD_FIRMWARE() {
 
     if [ $? -ne 0 ]; then
         echo "- ⛔️ Decryption failed."
-        return 1
+        exit 1
     fi
 
     # --- Show Firmware Info ---
@@ -284,7 +284,7 @@ EXTRACT_FIRMWARE_IMG() {
                 IMG_SIZE=$(stat -c%s -- "$imgfile")
 				echo "$partition.img Detected $fstype. Size: $IMG_SIZE bytes. Extracting..."
 				sudo rm -rf "$FIRM_DIR/$partition"
-                $(pwd)/bin/erofs-utils/extract.erofs -i "$imgfile" -x -f -o "$FIRM_DIR" >/dev/null 2>&1
+                sudo $(pwd)/bin/erofs-utils/extract.erofs -i "$imgfile" -x -f -o "$FIRM_DIR" >/dev/null 2>&1
                 ;;
             *)
                 echo "$imgfile unsupported filesystem type ($fstype), exiting"
