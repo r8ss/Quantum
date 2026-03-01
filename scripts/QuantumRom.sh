@@ -3,6 +3,12 @@
 ###################################################################################################
 REAL_USER=${SUDO_USER:-$USER}
 
+# Binary
+chmod +x $(pwd)/bin/lp/lpunpack
+chmod +x $(pwd)/bin/ext4/make_ext4fs
+chmod +x $(pwd)/bin/erofs-utils/extract.erofs
+chmod +x $(pwd)/bin/erofs-utils/mkfs.erofs
+
 export TARGET_FLOATING_FEATURE="$FIRM_DIR/$TARGET_DEVICE/system/system/etc/floating_feature.xml"
 
 CHECK_FILE() {
@@ -192,7 +198,7 @@ EXTRACT_FIRMWARE() {
         echo "- Extracting super.img"
         simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
         rm -f "$FIRM_DIR/super.img"
-        lpunpack -o "$FIRM_DIR" "$FIRM_DIR/super_raw.img"
+        sudo $(pwd)/bin/lp/lpunpack "$FIRM_DIR/super_raw.img" "$FIRM_DIR"
         rm -f "$FIRM_DIR/super_raw.img"
         echo "- Extraction complete"
     fi
