@@ -75,7 +75,7 @@ jobs:
             for img in "$OUT_DIR"/*.img; do
               [ -f "$img" ] || continue
               echo "Compressing $img"
-              xz -9 -T0 "$img"
+              sudo xz -9 -T0 "$img"
             done
           fi
 
@@ -84,8 +84,8 @@ jobs:
             FILE_SIZE=$(stat -c%s "$file")
             if [ "$FILE_SIZE" -gt "$GIT_SUPPORT_SIZE" ]; then
               echo "Splitting: $file (Size: $FILE_SIZE bytes)"
-              split -b "$GIT_SUPPORT_SIZE" -d -a 3 "$file" "$file.part"
-              rm -f "$file"
+              sudo split -b "$GIT_SUPPORT_SIZE" -d -a 3 "$file" "$file.part"
+              sudo rm -f "$file"
             fi
           done
 
@@ -105,4 +105,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
 
       - name: Clean everything.
-        run: rm -rf *
+        run: sudo rm -rf *
