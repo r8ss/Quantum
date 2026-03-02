@@ -106,8 +106,7 @@ Example split files:
 - Split files Will Like:
    system.img.xz.part000
    system.img.xz.part001
-
-- Steps to Recreate the Original File
+- Steps to Recreate the Original File.
 - Download all split files from the Release section.
 - Combine them into a single file.
 - On Linux or Termux:
