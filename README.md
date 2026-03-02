@@ -47,26 +47,26 @@
 - Clean User Experience.
 
 # How to Use:
-1. Fork the Repository
+#### 1. Fork the Repository
 - Give a ⭐ star to the repository.
 - Fork the repository to your GitHub account.
 
-### 2. Run the Workflow:
+#### 2. Run the Workflow:
 - Open your forked repository.
 - Go to the Actions tab.
 - Select QuantumROM Tools.
 - Click Run workflow.
 
-### 3. Set Your Device Model:
+#### 3. Set Your Device Model:
 - Update your device model in the STOCK_DEVICE_MODEL option.
 - If your model is available in /QuantumROM/Device folder of this repository, the tool will work for your device.
 - If your model is not present, set STOCK_DEVICE_MODEL to None.
 
-### 4. Kernel BPF Version Option:
+#### 4. Kernel BPF Version Option:
 - Set this option to True if your kernel BPF version is 5.4 (lower than 5.10).
 - Otherwise, set it to False.
 
-### 5. Set Target Device Information:
+#### 5. Set Target Device Information:
 - Configure the following options:
 - TARGET_DEVICE_MODEL
 - The device model from which you want to port the ROM.
@@ -78,7 +78,7 @@
 - Required to download the target device firmware from the Samsung server.
 - Change the IMEI if you want to change the target device.
 
-### 6. OUTPUT_FILESYSTEM (erofs / ext4)
+#### 6. OUTPUT_FILESYSTEM (erofs / ext4):
 - My tool can build images in two formats:
 - erofs
 - Recommended if your device partition size is small.
@@ -88,19 +88,19 @@
 - Use this if your kernel does not support EROFS.
 - The generated image will be larger in size.
 
-### 7. Compress IMG to XZ (True / False)
+#### 7. Compress IMG to XZ (True / False):
 - If set to True:
 The generated image will be compressed to .xz format.
 - This reduces file size before uploading.
 - If set to False:
 - The image will remain in its original format without compression.
    
-### 8: Add git credentials
+#### 8: Add git credentials:
 In You Forked Repo /Settings/Secret and VariableS/Action option > New repository secret Make A New secret and Set NamE GIT_TOKEN and add git token.
 - Search in YouTube how to make github secret token.
 - If you don't add token in secret, your Build rom will not upload in your repo release Center.
    
-#### 9. How to Get IMG from Split Files
+#### 9. How to Get IMG from Split Files:
 GitHub does not allow uploading a single file larger than 2GB.
 Therefore, any image file larger than 2GB will be automatically split.
 Example split files:
