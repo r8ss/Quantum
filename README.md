@@ -1,11 +1,11 @@
 ![QuantumROM Logo](QuantumROM/logo/QuantumROM.jpg)
 
 # 📌 Overview:
-- This Custom ROM is built by combining and refining features from multiple projects, including UNICA, Legacy-UI, and AstroRom.
+This Custom ROM is built by combining and refining features from multiple projects, including UNICA, Legacy-UI, and AstroRom.
 - The goal of this ROM is to provide a clean, optimized, and stable One UI experience with enhanced usability and performance.
 
 ## Tools features.
-- Download firmware directly from samsung server.
+Download firmware directly from samsung server.
 - File config and file contexts generate.
 - Extract and img build ( erofs and ext4 supported).
 
@@ -29,7 +29,7 @@
 - [KnoxPatch](https://github.com/salvogiangri/KnoxPatch) integrated
 
 ## 🔐 Security & Privacy:
-- Secure Folder support.
+Secure Folder support.
 - Essential security components retained.
 - Stable and safe daily-driver experience.
 
@@ -94,7 +94,7 @@ The generated image will be compressed to .xz format.
 - If set to False:
 - The image will remain in its original format without compression.
    
-#### 8️⃣ Add Git Credentials:
+#### 8. Add Git Credentials:
 In your forked repository, go to:
 -Settings → Secrets and variables → Actions
 - Click **New repository secret**, then create a new secret:
