@@ -71,10 +71,8 @@ ption to True if your kernel BPF version is 5.4 (lower than 5.10).
 - Configure the following options:
 - TARGET_DEVICE_MODEL
 - The device model from which you want to port the ROM.
-
 - TARGET_DEVICE_CSC
 - The country/region code used to download the target device firmware.
-
 - TARGET_DEVICE_IMEI
 - Required to download the target device firmware from the Samsung server.
 - Change the IMEI if you want to change the target device.
@@ -85,7 +83,6 @@ ption to True if your kernel BPF version is 5.4 (lower than 5.10).
 - Recommended if your device partition size is small.
 - Saves storage space.
 - Your kernel must support EROFS.
-
 - ext4
 - Use this if your kernel does not support EROFS.
 - The generated image will be larger in size.
