@@ -100,7 +100,7 @@ In your forked repository, go to:
 - Click **New repository secret**, then create a new secret:
 - Name:
   - GIT_TOKEN
-  - Add git secret token and save.
+- Add git secret token and save.
 - You can search on YouTube for a guide on how to create a GitHub Personal Access Token.
 - If you do not add the `GIT_TOKEN`, the built ROM will not be uploaded to your repository's Release section.
    
