@@ -853,15 +853,50 @@ FIX_SYSTEM_EXT() {
 
 
 FIX_SELINUX() {
-    echo ""
-    local SELINUX_FILE="$TARGET_ROM_SYSTEM_EXT_DIR/etc/selinux/mapping/${STOCK_VNDK_VERSION}.0.cil"
-
-    if [ ! -f "$SELINUX_FILE" ]; then
-        echo "Error: SELinux file not found at $SELINUX_FILE"
+    if [ "$#" -ne 1 ]; then
+        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
     fi
 
-    echo "Fixing selinux for $STOCK_DEVICE."
+    echo "- Fixing selinux"
+
+	local EXTRACTED_FIRM_DIR="$1"
+
+	if [ -d "$EXTRACTED_FIRM_DIR/system_ext/apex" ]; then
+        export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system_ext"
+	elif [ -d "$EXTRACTED_FIRM_DIR/system/system_ext/apex" ]; then
+        export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system_ext"
+    elif [ -d "$EXTRACTED_FIRM_DIR/system/system/system_ext/apex" ]; then
+            export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system/system_ext"
+    fi
+
+    if [ -n "$STOCK_VNDK_VERSION" ]; then
+	    echo "- Fixing selinux for $STOCK_DEVICE."
+        SELINUX_FILE="$TARGET_ROM_SYSTEM_EXT_DIR/etc/selinux/mapping/${STOCK_VNDK_VERSION}.0.cil"
+    else
+        MANIFEST_FILE="$TARGET_ROM_SYSTEM_EXT_DIR/etc/vintf/manifest.xml"
+
+        if [ ! -f "$MANIFEST_FILE" ]; then
+            echo "- manifest.xml not found. Cannot determine VNDK version."
+            return 1
+        fi
+
+        STOCK_VNDK_VERSION=$(grep -oP '(?<=<version>)[0-9]+' "$MANIFEST_FILE" | head -n1)
+
+        if [ -z "$STOCK_VNDK_VERSION" ]; then
+            echo "- Failed to extract VNDK version from manifest."
+            return 1
+        fi
+
+        SELINUX_FILE="$TARGET_ROM_SYSTEM_EXT_DIR/etc/selinux/mapping/${STOCK_VNDK_VERSION}.0.cil"
+    fi
+
+    echo "- Using SELinux mapping file: $SELINUX_FILE"
+
+    if [ ! -f "$SELINUX_FILE" ]; then
+        echo "- Error: SELinux file not found at $SELINUX_FILE"
+        exit 1
+    fi
 
     UNSUPPORTED_SELINUX=("audiomirroring" "fabriccrypto" "hal_dsms_default" "qb_id_prop" "hal_dsms_service" "proc_compaction_proactiveness" "sbauth" "ker_app" "kpp_app" "kpp_data" "attiqi_app" "kpoc_charger" "sec_diag")
 
@@ -1240,11 +1275,11 @@ DISABLE_SECURITY() {
 
 	local EXTRACTED_FIRM_DIR="$1"
 
-    echo "Disabling security related things..."
+    echo "- Disabling security related things..."
     if [ -f "$EXTRACTED_FIRM_DIR/product/etc/build.prop" ]; then
         REMOVE_LINE "ro.frp.pst=/dev/block/persistent" "$EXTRACTED_FIRM_DIR/product/etc/build.prop"
     else
-        echo "build.prop not found in product/etc. Skipping FRP removal."
+        echo "- build.prop not found in product/etc. Skipping FRP removal."
     fi
 
 	DISABLE_FBE "$EXTRACTED_FIRM_DIR"
@@ -1261,10 +1296,8 @@ APPLY_CUSTOM_FEATURES() {
 
 	local EXTRACTED_FIRM_DIR="$1"
 
-	# FIX SELINUX.
-	FIX_SELINUX
-
     echo "Applying usefull features."
+	FIX_SELINUX "$EXTRACTED_FIRM_DIR"
 	DISABLE_SECURITY "$EXTRACTED_FIRM_DIR"
 	
 	echo "- Adding build prop tweak."
