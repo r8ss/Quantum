@@ -195,7 +195,7 @@ EXTRACT_FIRMWARE() {
     done
 
     # ---- LZ4 ----
-	rm -rf $FIRM_DIR/{boot.img.lz4,cache.img.lz4,dtbo.img.lz4,efuse.img.lz4,gz-verified.img.lz4,lk-verified.img.lz4,md1img.img.lz4,md_udc.img.lz4,misc.bin.lz4,omr.img.lz4,optics.img.lz4,param.bin.lz4,preloader.img.lz4,prism.img.lz4,recovery.img.lz4,scp-verified.img.lz4,spmfw-verified.img.lz4,sspm-verified.img.lz4,tee-verified.img.lz4,tzar.img.lz4,up_param.bin.lz4,userdata.img.lz4,vbmeta.img.lz4,vbmeta_system.img.lz4}
+	rm -rf $FIRM_DIR/{cache.img.lz4,dtbo.img.lz4,efuse.img.lz4,gz-verified.img.lz4,lk-verified.img.lz4,md1img.img.lz4,md_udc.img.lz4,misc.bin.lz4,omr.img.lz4,param.bin.lz4,preloader.img.lz4,recovery.img.lz4,scp-verified.img.lz4,spmfw-verified.img.lz4,sspm-verified.img.lz4,tee-verified.img.lz4,tzar.img.lz4,up_param.bin.lz4,userdata.img.lz4,vbmeta.img.lz4,vbmeta_system.img.lz4,audio_dsp-verified.img.lz4,cam_vpu1-verified.img.lz4,cam_vpu2-verified.img.lz4,cam_vpu3-verified.img.lz4,dpm-verified.img.lz4,init_boot.img.lz4,mcupm-verified.img.lz4,pi_img-verified.img.lz4,uh.bin.lz4,vendor_boot.img.lz4}
     for file in "$FIRM_DIR"/*.lz4; do
         if [ -f "$file" ]; then
             echo "- Extracting lz4: $(basename "$file")"
@@ -226,7 +226,6 @@ EXTRACT_FIRMWARE() {
 
 
 PREPARE_PARTITIONS() {
-    echo ""
 	if [ -z "$STOCK_DEVICE" ] || [ "$STOCK_DEVICE" = "None" ]; then
         export BUILD_PARTITIONS="odm,product,system_ext,system,vendor"
     fi
@@ -302,24 +301,29 @@ EXTRACT_FIRMWARE_IMG() {
         case "$fstype" in
             ext4)
                 IMG_SIZE=$(stat -c%s -- "$imgfile")
-				echo "$partition.img Detected $fstype. Size: $IMG_SIZE bytes. Extracting..."
-				rm -rf "$FIRM_DIR/$partition"
+				echo "- $partition.img Detected $fstype. Size: $IMG_SIZE bytes. Extracting..."
+				sudo rm -rf "$FIRM_DIR/$partition"
                 sudo python3 $(pwd)/bin/py_scripts/imgextractor.py "$imgfile" "$FIRM_DIR"
                 ;;
             erofs)
                 IMG_SIZE=$(stat -c%s -- "$imgfile")
-				echo "$partition.img Detected $fstype. Size: $IMG_SIZE bytes. Extracting..."
+				echo "- $partition.img Detected $fstype. Size: $IMG_SIZE bytes. Extracting..."
 				sudo rm -rf "$FIRM_DIR/$partition"
                 sudo $(pwd)/bin/erofs-utils/extract.erofs -i "$imgfile" -x -f -o "$FIRM_DIR" >/dev/null 2>&1
                 ;;
             *)
-                echo "$imgfile unsupported filesystem type ($fstype), exiting"
+                echo "- $imgfile unsupported filesystem type ($fstype), exiting"
                 exit 1
                 ;;
         esac
     done
 
     rm -rf "$FIRM_DIR"/*.img
+	
+	if ! ls "$FIRM_DIR"/system* >/dev/null 2>&1; then
+        echo "Maybe your firmware is not downloaded, is corrupt, or contains an unsupported image."
+        exit 1
+    fi
 
     sudo chown -R "$REAL_USER:$REAL_USER" "$FIRM_DIR"
     sudo chmod -R u+rwX "$FIRM_DIR"
@@ -328,58 +332,54 @@ EXTRACT_FIRMWARE_IMG() {
 
 DISABLE_FBE() {
     local EXTRACTED_FIRM_DIR="$1"
-    
-	if [ "$#" -ne 1 ]; then
+
+    if [ "$#" -ne 1 ]; then
         echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIRECTORY>"
         return 1
     fi
 
-    local md5
-    local i
-    fstab_files=`grep -lr 'fileencryption' $EXTRACTED_FIRM_DIR/vendor/etc`
+    if [ ! -d "$EXTRACTED_FIRM_DIR/vendor/etc" ]; then
+        echo "- $EXTRACTED_FIRM_DIR/vendor/etc directory not found. Skipping FBE disable."
+        return 1
+    fi
 
-    #
-    # Exynos devices = fstab.exynos*.
-    # MediaTek devices = fstab.mt*.
-    # Snapdragon devices = fstab.qcom, fstab.emmc, fstab.default
-    #
+    local fstab_files
+    fstab_files=$(grep -lr 'fileencryption' "$EXTRACTED_FIRM_DIR/vendor/etc" 2>/dev/null)
+
     for i in $fstab_files; do
-      if [ -f $i ]; then
-        echo "Disabling file-based encryption (FBE) for /data..."
-        echo "- Found $i."
-        # This comments out the offending line and adds an edited one.
-        sed -i -e 's/^\([^#].*\)fileencryption=[^,]*\(.*\)$/# &\n\1encryptable\2/g' $i
-      fi
+        if [ -f "$i" ]; then
+            echo "Disabling file-based encryption (FBE) for /data..."
+            echo "- Found $i."
+            sed -i -e 's/^\([^#].*\)fileencryption=[^,]*\(.*\)$/# &\n\1encryptable\2/g' "$i"
+        fi
     done
 }
 
 
 DISABLE_FDE() {
     local EXTRACTED_FIRM_DIR="$1"
- 	
-	if [ "$#" -ne 1 ]; then
+
+    if [ "$#" -ne 1 ]; then
         echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIRECTORY>"
         return 1
     fi
 
-    local md5
-    local i
-    fstab_files=`grep -lr 'forceencrypt' $EXTRACTED_FIRM_DIR/vendor/etc`
+    if [ ! -d "$EXTRACTED_FIRM_DIR/vendor/etc" ]; then
+        echo "- $EXTRACTED_FIRM_DIR/vendor/etc directory not found. Skipping FDE disable."
+        return 1
+    fi
 
-    #
-    # Exynos devices = fstab.exynos*.
-    # MediaTek devices = fstab.mt*.
-    # Snapdragon devices = fstab.qcom, fstab.emmc, fstab.default
-    #
+    local fstab_files
+    fstab_files=$(grep -lr 'forceencrypt' "$EXTRACTED_FIRM_DIR/vendor/etc" 2>/dev/null)
+
     for i in $fstab_files; do
-      if [ -f $i ]; then
-        echo "Disabling full-disk encryption (FDE) for /data..."
-        echo "- Found $i."
-        md5=$( md5 $i )
-        # This comments out the offending line and adds an edited one.
-        sed -i -e 's/^\([^#].*\)forceencrypt=[^,]*\(.*\)$/# &\n\1encryptable\2/g' $i
-        file_changed $i $md5
-      fi
+        if [ -f "$i" ]; then
+            echo "Disabling full-disk encryption (FDE) for /data..."
+            echo "- Found $i."
+            md5=$(md5 "$i")
+            sed -i -e 's/^\([^#].*\)forceencrypt=[^,]*\(.*\)$/# &\n\1encryptable\2/g' "$i"
+            file_changed "$i" "$md5"
+        fi
     done
 }
 
@@ -457,7 +457,7 @@ REPLACE_SMALI_METHOD() {
     local method_esc
     method_esc=$(printf '%s\n' "$METHOD_NAME" | sed -e 's/[.[\*^$/]/\\&/g')
 
-    echo "- Patching $FILE"
+    echo "- Patching: $FILE"
 
     sed -i "
 /^[[:space:]]*$method_esc\$/,/^[[:space:]]*\.end method/{
@@ -673,7 +673,7 @@ PATCH_SSRM() {
 
 	echo "Patching ssrm.jar"
 	echo "- Updating stock SIOP_FILENAME > $STOCK_SIOP_FILENAME and STOCK_DVFS_FILENAME > $STOCK_DVFS_FILENAME in ssrm.jar"
-	echo "  $FILE"
+	echo "- Patching: $FILE"
 
     sed -i "s/\(const-string v[0-9]\+,\s*\"\)siop_[^\"]*\"/\1$STOCK_SIOP_FILENAME\"/g" "$FILE"
     sed -i "/dvfs_policy_default/! s/\(const-string v[0-9]\+,\s*\"\)dvfs_policy_[^\"]*\"/\1$STOCK_DVFS_FILENAME\"/g" "$FILE"
@@ -1234,6 +1234,27 @@ BUILD_PROP() {
 }
 
 
+
+DISABLE_SECURITY() {
+    if [ "$#" -ne 1 ]; then
+        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        return 1
+    fi
+
+	local EXTRACTED_FIRM_DIR="$1"
+
+    echo "Disabling security related things..."
+    if [ -f "$EXTRACTED_FIRM_DIR/product/etc/build.prop" ]; then
+        REMOVE_LINE "ro.frp.pst=/dev/block/persistent" "$EXTRACTED_FIRM_DIR/product/etc/build.prop"
+    else
+        echo "build.prop not found in product/etc. Skipping FRP removal."
+    fi
+
+	DISABLE_FBE "$EXTRACTED_FIRM_DIR"
+	DISABLE_FDE "$EXTRACTED_FIRM_DIR"
+}
+
+
 APPLY_CUSTOM_FEATURES() {
     echo ""
     if [ "$#" -ne 1 ]; then
@@ -1244,8 +1265,9 @@ APPLY_CUSTOM_FEATURES() {
 	local EXTRACTED_FIRM_DIR="$1"
 
     echo "Applying usefull features."
+	DISABLE_SECURITY "$EXTRACTED_FIRM_DIR"
+	
 	echo "- Adding build prop tweak."
-	REMOVE_LINE "ro.frp.pst=/dev/block/persistent" "$EXTRACTED_FIRM_DIR/product/etc/build.prop"
     BUILD_PROP "$EXTRACTED_FIRM_DIR" "product" "product" "ro.product.locale" "en-US"
     BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "fw.max_users" "5"
     BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "fw.show_multiuserui" "1"
