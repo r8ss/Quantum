@@ -80,12 +80,12 @@ ption to True if your kernel BPF version is 5.4 (lower than 5.10).
 #### 6. OUTPUT_FILESYSTEM (erofs / ext4):
 - My tool can build images in two formats:
 - erofs
-- Recommended if your device partition size is small.
-- Saves storage space.
-- Your kernel must support EROFS.
+  - Recommended if your device partition size is small.
+  - Saves storage space.
+  - Your kernel must support EROFS.
 - ext4
-- Use this if your kernel does not support EROFS.
-- The generated image will be larger in size.
+  - Use this if your kernel does not support EROFS.
+  - The generated image will be larger in size.
 
 #### 7. Compress IMG to XZ (True / False):
 - If set to True:
