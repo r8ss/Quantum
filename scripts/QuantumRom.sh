@@ -1320,6 +1320,9 @@ APPLY_CUSTOM_FEATURES() {
 
 	# Remove power and data usage permissions for certain apps when Power Saver and Data Saver are always enabled.
 	# sed -i '/^[[:space:]]*<allow-in-power-save/d; /^[[:space:]]*<allow-in-data-usage-save/d' "$EXTRACTED_FIRM_DIR/product/etc/sysconfig/"*.xml "$EXTRACTED_FIRM_DIR/system/system/etc/sysconfig/"*.xml
+    
+	sudo chown -R "$REAL_USER:$REAL_USER" "$EXTRACTED_FIRM_DIR"
+    sudo chmod -R u+rwX "$EXTRACTED_FIRM_DIR"
 }
 
 
