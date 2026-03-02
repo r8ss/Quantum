@@ -1100,9 +1100,6 @@ APPLY_STOCK_CONFIG() {
 	# FIX VNDK.
 	FIX_VNDK
 
-	# FIX SELINUX.
-	FIX_SELINUX
-
     # Apply stock floating feature.
 	APPLY_STOCK_FLOATING_FEATURE
 
@@ -1263,6 +1260,9 @@ APPLY_CUSTOM_FEATURES() {
     fi
 
 	local EXTRACTED_FIRM_DIR="$1"
+
+	# FIX SELINUX.
+	FIX_SELINUX
 
     echo "Applying usefull features."
 	DISABLE_SECURITY "$EXTRACTED_FIRM_DIR"
