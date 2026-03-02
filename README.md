@@ -78,13 +78,14 @@
 - Required to download the target device firmware from the Samsung server.
 - Change the IMEI if you want to change the target device.
 
+
 6. OUTPUT_FILESYSTEM (erofs / ext4)
 - My tool can build images in two formats:
 - erofs
 - Recommended if your device partition size is small.
 - Saves storage space.
 - Your kernel must support EROFS.
--
+
 - ext4
 - Use this if your kernel does not support EROFS.
 - The generated image will be larger in size.
@@ -100,19 +101,21 @@ The generated image will be compressed to .xz format.
    - Search in YouTube how to make github secret token.
    - If you don't add token in secret, your Build rom will not upload in your repo release Center.
    
-9: How To Get Img From Splited File:
-   - Github Doesnt allow Single File UploaD MOre Than 2 Gb
-   Thats Why Any Img Larger img Than 2 Gb Will SplittEd
-   From release center Download All Files.
-   - If You Set Compress IMG to XZ Then First img Will Compress to Xz Format to Save File Size.
-   - If Xz Format Then First Need Make SinGle Img From SpliTed File.
-   - Split files Will Like:
+9. How to Get IMG from Split Files
+GitHub does not allow uploading a single file larger than 2GB.
+Therefore, any image file larger than 2GB will be automatically split.
+Example split files:
+- Split files Will Like:
    system.img.xz.part000
    system.img.xz.part001
-   - You Need TO Make Single Xz File FrOm SplittEd Files
-   With Linux Fo Termux.
-   Here Cmd
-   After That Extract all Xz Fils To Get Original Img
+
+- Steps to Recreate the Original File
+- Download all split files from the Release section.
+- Combine them into a single file.
+- On Linux or Termux:
+- cat system.img.xz.part* > system.img.xz
+
+  
 
 
 ## Licensing
