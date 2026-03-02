@@ -112,7 +112,8 @@ Example split files:
 - Download all split files from the Release section.
 - Combine them into a single file.
 - On Linux or Termux:
-- cat system.img.xz.part* > system.img.xz
+```bash
+cat system.img.xz.part* > system.img.xz
 
 ## Licensing
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
