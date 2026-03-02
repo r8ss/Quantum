@@ -94,10 +94,15 @@ The generated image will be compressed to .xz format.
 - If set to False:
 - The image will remain in its original format without compression.
    
-#### 8: Add git credentials:
-In You Forked Repo /Settings/Secret and VariableS/Action option > New repository secret Make A New secret and Set NamE GIT_TOKEN and add git token.
-- Search in YouTube how to make github secret token.
-- If you don't add token in secret, your Build rom will not upload in your repo release Center.
+#### 8️⃣ Add Git Credentials:
+In your forked repository, go to:
+-Settings → Secrets and variables → Actions
+- Click **New repository secret**, then create a new secret:
+- Name:
+  - GIT_TOKEN
+  - Add git secret token and save.
+- You can search on YouTube for a guide on how to create a GitHub Personal Access Token.
+- If you do not add the `GIT_TOKEN`, the built ROM will not be uploaded to your repository's Release section.
    
 #### 9. How to Get IMG from Split Files:
 GitHub does not allow uploading a single file larger than 2GB.
