@@ -48,9 +48,7 @@
 
 # How to Use:
 #### 1. Fork the Repository
-```md
 Give a ⭐ star to the repository.
-```md
 Fork the repository to your GitHub account.
 
 #### 2. Run the Workflow:
