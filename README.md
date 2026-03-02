@@ -46,6 +46,59 @@
 - Essential Features.
 - Clean User Experience.
 
+# How to Use:
+1. Fork the Repository
+- Give a ⭐ star to the repository.
+- Fork the repository to your GitHub account.
+
+# 2. Run the Workflow:
+- Open your forked repository.
+- Go to the Actions tab.
+- Select QuantumROM Tools.
+- Click Run workflow.
+
+# 3. Set Your Device Model:
+- Update your device model in the STOCK_DEVICE_MODEL option.
+- If your model is available in /QuantumROM/Device folder of this repository, the tool will work for your device.
+-If your model is not present, set STOCK_DEVICE_MODEL to None.
+
+# 4. Kernel BPF Version Option:
+- Set this option to True if your kernel BPF version is 5.4 (lower than 5.10).
+- Otherwise, set it to False.
+
+# 5. Set Target Device Information:
+- Configure the following options:
+- TARGET_DEVICE_MODEL
+- The device model from which you want to port the ROM.
+
+- TARGET_DEVICE_CSC
+- The country/region code used to download the target device firmware.
+
+- TARGET_DEVICE_IMEI
+- Required to download the target device firmware from the Samsung server.
+- Change the IMEI if you want to change the target device.
+
+# 6. OUTPUT_FILESYSTEM (erofs / ext4)
+- My tool can build images in two formats:
+- erofs
+- Recommended if your device partition size is small.
+- Saves storage space.
+- Your kernel must support EROFS.
+-
+- ext4
+- Use this if your kernel does not support EROFS.
+- The generated image will be larger in size.
+
+# 7. Compress IMG to XZ (True / False)
+- If set to True:
+The generated image will be compressed to .xz format.
+
+This reduces file size before uploading.
+
+If set to False:
+
+The image will remain in its original format without compression.
+
 ## Licensing
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 - **[android-tools](https://github.com/nmeum/android-tools)** - Licensed under Apache License 2.0
