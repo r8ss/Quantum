@@ -114,6 +114,7 @@ Example split files:
 - On Linux or Termux:
 ```bash
 cat system.img.xz.part* > system.img.xz
+```bash
 
 ## Licensing
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
