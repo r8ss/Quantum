@@ -95,11 +95,12 @@ The generated image will be compressed to .xz format.
 - If set to False:
 - The image will remain in its original format without compression.
    
-### 8: In You Forked Repo /Settings/Secret and VariableS/Action option > New repository secret Make A New secret and Set NamE GIT_TOKEN and add git token.
-   - Search in YouTube how to make github secret token.
-   - If you don't add token in secret, your Build rom will not upload in your repo release Center.
+### 8: Add git credentials
+In You Forked Repo /Settings/Secret and VariableS/Action option > New repository secret Make A New secret and Set NamE GIT_TOKEN and add git token.
+- Search in YouTube how to make github secret token.
+- If you don't add token in secret, your Build rom will not upload in your repo release Center.
    
-### 9. How to Get IMG from Split Files
+#### 9. How to Get IMG from Split Files
 GitHub does not allow uploading a single file larger than 2GB.
 Therefore, any image file larger than 2GB will be automatically split.
 Example split files:
