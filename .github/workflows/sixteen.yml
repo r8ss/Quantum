@@ -34,7 +34,7 @@ on:
 
 jobs:
   build:
-    name: Build QuantumROM
+    name: Build QuantumROM for ${{ github.event.inputs.STOCK_DEVICE }}
     runs-on: ubuntu-latest
 
     steps:
@@ -50,12 +50,12 @@ jobs:
           pip3 install git+https://github.com/martinetd/samloader.git >/dev/null 2>&1
           bash scripts/setup_directories.sh FIRMWARE WORK OUT
 
-      - name: Download firmware > (${{ github.event.inputs.TARGET_DEVICE }} - ${{ github.event.inputs.TARGET_DEVICE_CSC }})
+      - name: Download firmware > ${{ github.event.inputs.TARGET_DEVICE }} - ${{ github.event.inputs.TARGET_DEVICE_CSC }}
         run: |
           source scripts/QuantumRom.sh
           DOWNLOAD_FIRMWARE "${{ github.event.inputs.TARGET_DEVICE }}" "${{ github.event.inputs.TARGET_DEVICE_CSC }}" "${{ github.event.inputs.TARGET_DEVICE_IMEI }}" "FIRMWARE"
 
-      - name: Build Rom.
+      - name: Start Build Rom For ${{ github.event.inputs.STOCK_DEVICE }}
         run: |
           sudo bash sixteen.sh \
             "${{ github.event.inputs.STOCK_DEVICE }}" \
