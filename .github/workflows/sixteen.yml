@@ -50,7 +50,7 @@ jobs:
           pip3 install git+https://github.com/martinetd/samloader.git >/dev/null 2>&1
           bash scripts/setup_directories.sh FIRMWARE WORK OUT
 
-      - name: Download firmware.
+      - name: Download firmware: "${{ github.event.inputs.TARGET_DEVICE }}" "${{ github.event.inputs.TARGET_DEVICE_CSC }}"
         run: |
           source scripts/QuantumRom.sh
           DOWNLOAD_FIRMWARE "${{ github.event.inputs.TARGET_DEVICE }}" "${{ github.event.inputs.TARGET_DEVICE_CSC }}" "${{ github.event.inputs.TARGET_DEVICE_IMEI }}" "FIRMWARE"
@@ -89,7 +89,7 @@ jobs:
             fi
           done
 
-      - name: Uploading all files to GitHub Release.
+      - name: Upload files to GitHub Release.
         uses: softprops/action-gh-release@v2
         with:
           tag_name: "build-${{ github.run_id }}"
