@@ -1326,7 +1326,7 @@ APPLY_CUSTOM_FEATURES() {
 
 	echo "- Adding full OneUI and important apps."
 	if [ ! -d "$EXTRACTED_FIRM_DIR/product/priv-app/AiWallpaper" ]; then
-        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/AiWallpaper/"* "$EXTRACTED_FIRM_DIR/product/priv-app/AiWallpaper/"
+        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/AiWallpaper/"* "$EXTRACTED_FIRM_DIR/"
     fi
 
     if [ ! -d "$EXTRACTED_FIRM_DIR/system/system/app/ClockPackage" ]; then
@@ -1554,3 +1554,4 @@ BUILD_IMG() {
         fi
     done
 }
+
