@@ -1277,7 +1277,11 @@ DISABLE_SECURITY() {
 
     echo "- Disabling security related things..."
     if [ -f "$EXTRACTED_FIRM_DIR/product/etc/build.prop" ]; then
-        REMOVE_LINE "ro.frp.pst=/dev/block/persistent" "$EXTRACTED_FIRM_DIR/product/etc/build.prop"
+        BUILD_PROP "$EXTRACTED_FIRM_DIR" "product" "ro.frp.pst" ""
+    fi
+	
+	if [ -f "$EXTRACTED_FIRM_DIR/vendor/build.prop" ]; then
+		BUILD_PROP "$EXTRACTED_FIRM_DIR" "vendor" "ro.frp.pst" ""
     fi
 	
     if [ -f "$EXTRACTED_FIRM_DIR/vendor/recovery-from-boot.p" ]; then
@@ -1303,7 +1307,7 @@ APPLY_CUSTOM_FEATURES() {
 	DISABLE_SECURITY "$EXTRACTED_FIRM_DIR"
 	
 	echo "- Adding build prop tweak."
-    BUILD_PROP "$EXTRACTED_FIRM_DIR" "product" "product" "ro.product.locale" "en-US"
+    BUILD_PROP "$EXTRACTED_FIRM_DIR" "product" "ro.product.locale" "en-US"
     BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "fw.max_users" "5"
     BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "fw.show_multiuserui" "1"
     BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "wifi.interface=" "wlan0"
