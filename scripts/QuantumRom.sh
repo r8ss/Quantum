@@ -1308,6 +1308,7 @@ APPLY_CUSTOM_FEATURES() {
 	
 	echo "- Adding build prop tweak."
     BUILD_PROP "$EXTRACTED_FIRM_DIR" "product" "ro.product.locale" "en-US"
+	BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.product.locale" "en-US"
     BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "fw.max_users" "5"
     BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "fw.show_multiuserui" "1"
     BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "wifi.interface=" "wlan0"
@@ -1554,4 +1555,5 @@ BUILD_IMG() {
         fi
     done
 }
+
 
