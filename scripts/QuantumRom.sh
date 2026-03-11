@@ -1562,11 +1562,11 @@ BUILD_IMG() {
         sort -u "$FS_CONFIG" -o "$FS_CONFIG"
 
         if [[ "$FILE_SYSTEM" == "erofs" ]]; then
-            echo -e "\e[33mBuilding EROFS image:\e[0m $OUT_IMG"
+            echo -e "${YELLOW}Building EROFS image:${NC} $OUT_IMG"
             $(pwd)/bin/erofs-utils/mkfs.erofs --mount-point="$MOUNT_POINT" --fs-config-file="$FS_CONFIG" --file-contexts="$FILE_CONTEXTS" -z lz4hc -b 4096 -T 1199145600 "$OUT_IMG" "$SRC_DIR" >/dev/null 2>&1
 
         elif [[ "$FILE_SYSTEM" == "ext4" ]]; then
-            echo -e "\e[33mBuilding ext4 image:\e[0m $OUT_IMG"
+            echo -e "${YELLOW}Building ext4 image:${NC} $OUT_IMG"
             $(pwd)/bin/ext4/make_ext4fs -l "$(awk "BEGIN {printf \"%.0f\", $SIZE * 1.1}")" -J -b 4096 -S "$FILE_CONTEXTS" -C "$FS_CONFIG"  -a "$MOUNT_POINT" -L "$PARTITION" "$OUT_IMG" "$SRC_DIR"
 			# Resize img to reduce size.
 			resize2fs -M "$OUT_IMG"
