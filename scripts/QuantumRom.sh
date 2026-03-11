@@ -1,6 +1,10 @@
 #!/bin/bash
 
 ###################################################################################################
+
+YELLOW="\e[33m"
+NC="\e[0m"
+
 REAL_USER=${SUDO_USER:-$USER}
 
 # Binary
@@ -13,8 +17,8 @@ export TARGET_FLOATING_FEATURE="$FIRM_DIR/$TARGET_DEVICE/system/system/etc/float
 
 CHECK_FILE() {
     if [ ! -f "$1" ]; then
-        echo "[!] File not found: $1"
-        echo "- Skipping..."
+        echo -e "[!] File not found: $1"
+        echo -e "- Skipping..."
         return 1
     fi
     return 0
@@ -23,21 +27,21 @@ CHECK_FILE() {
 
 REMOVE_LINE() {
     if [ "$#" -ne 2 ]; then
-        echo "Usage: ${FUNCNAME[0]} <TARGET_LINE> <TARGET_FILE>"
+        echo -e "Usage: ${FUNCNAME[0]} <TARGET_LINE> <TARGET_FILE>"
         return 1
     fi
 
     local LINE="$1"
     local FILE="$2"
 
-    echo "- Deleting $LINE from $FILE"
+    echo -e "- Deleting $LINE from $FILE"
     grep -vxF "$LINE" "$FILE" > "$FILE.tmp" && mv "$FILE.tmp" "$FILE"
 }
 
 
 GET_PROP() {
     if [ "$#" -ne 3 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR> <PARTITION> <PROP>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR> <PARTITION> <PROP>"
         return 1
     fi
 
@@ -62,13 +66,13 @@ GET_PROP() {
             FILE="$EXTRACTED_FIRM_DIR/odm/etc/build.prop"
             ;;
         *)
-            echo "Unknown partition: $PARTITION"
+            echo -e "Unknown partition: $PARTITION"
             return 1
             ;;
     esac
 
     if [ ! -f "$FILE" ]; then
-        echo "$FILE not found."
+        echo -e "$FILE not found."
         return 1
     fi
 
@@ -79,13 +83,13 @@ GET_PROP() {
         return 1
     fi
 
-    echo "$VALUE"
+    echo -e "$VALUE"
 }
 
 
 DOWNLOAD_FIRMWARE() {
     if [ "$#" -ne 4 ]; then
-        echo "Usage: ${FUNCNAME[0]} <MODEL> <CSC> <IMEI> <DOWNLOAD_DIRECTORY>"
+        echo -e "Usage: ${FUNCNAME[0]} <MODEL> <CSC> <IMEI> <DOWNLOAD_DIRECTORY>"
         return 1
     fi
 
@@ -97,27 +101,27 @@ DOWNLOAD_FIRMWARE() {
 	rm -rf "$DOWN_DIR"
     mkdir -p "$DOWN_DIR"
 
-    echo "======================================"
-    echo "  Samsung FW Downloader   "
-    echo "======================================"
-    echo "MODEL: $MODEL | CSC: $CSC"
-    echo "- Fetching latest firmware..."
+    echo -e "======================================"
+    echo -e "${YELLOW}  Samsung FW Downloader   ${NC}"
+    echo -e "======================================"
+    echo -e "MODEL: $MODEL | CSC: $CSC"
+    echo -e "- Fetching latest firmware..."
     echo
 
     # --- Step 1: Check Update ---
     version=$(python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" checkupdate 2>&1)
     if [ $? -ne 0 ] || [ -z "$version" ]; then
-        echo "- ⛔️ MODEL/CSC/IMEI not valid or no update found."
-        echo "- Error: $version"
+        echo -e "- ⛔️ MODEL/CSC/IMEI not valid or no update found."
+        echo -e "- Error: $version"
         return 1
     else
-        echo "- ✅ Update found: $version"
+        echo -e "- ✅ Update found: $version"
     fi
 
     # --- Step 2: Download Firmware ---
     python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" download -v "$version" -O "$DOWN_DIR"
     if [ $? -ne 0 ]; then
-        echo "- ⛔️ Download failed. Check IMEI/MODEL/CSC."
+        echo -e "- ⛔️ Download failed. Check IMEI/MODEL/CSC."
         return 1
     fi
 
@@ -125,7 +129,7 @@ DOWNLOAD_FIRMWARE() {
     enc_file=$(find "$DOWN_DIR" -name "*.enc*" | head -n 1)
 
     if [ -z "$enc_file" ]; then
-        echo "- ⛔️ No encrypted firmware file found!"
+        echo -e "- ⛔️ No encrypted firmware file found!"
         return 1
     fi
 
@@ -135,15 +139,15 @@ DOWNLOAD_FIRMWARE() {
         -o "${DOWN_DIR}/${MODEL}.zip" >/dev/null 2>&1
 
     if [ $? -ne 0 ]; then
-        echo "- ⛔️ Decryption failed."
+        echo -e "- ⛔️ Decryption failed."
         exit 1
     fi
 
     # --- Show Firmware Info ---
     file_size=$(du -m "${DOWN_DIR}/${MODEL}.zip" | cut -f1)
     echo
-    echo "- ✅ Firmware decrypted successfully!. Firmware Size: ${file_size} MB"
-    echo "- Saved to: ${DOWN_DIR}/${MODEL}.zip"
+    echo -e "- ✅ Firmware decrypted successfully!. Firmware Size: ${file_size} MB"
+    echo -e "- Saved to: ${DOWN_DIR}/${MODEL}.zip"
 
     # --- Cleanup ---
     rm -f "$enc_file"
@@ -152,18 +156,18 @@ DOWNLOAD_FIRMWARE() {
 
 EXTRACT_FIRMWARE() {
     if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <FIRMWARE_DIRECTORY>"
+        echo -e "Usage: ${FUNCNAME[0]} <FIRMWARE_DIRECTORY>"
         return 1
     fi
 
     local FIRM_DIR="$1"
 
-    echo "Extracting downloaded firmware."
+    echo -e "${YELLOW}Extracting downloaded firmware.${NC}"
 
     # ---- ZIP ----
     for file in "$FIRM_DIR"/*.zip; do
         if [ -f "$file" ]; then
-            echo "- Extracting zip: $(basename "$file")"
+            echo -e "- Extracting zip: $(basename "$file")"
             7z x -y -bd -o"$FIRM_DIR" "$file" >/dev/null 2>&1
             rm -f "$file"
         fi
@@ -172,7 +176,7 @@ EXTRACT_FIRMWARE() {
     # ---- XZ ----
     for file in "$FIRM_DIR"/*.xz; do
         if [ -f "$file" ]; then
-            echo "- Extracting xz: $(basename "$file")"
+            echo -e "- Extracting xz: $(basename "$file")"
             7z x -y -bd -o"$FIRM_DIR" "$file" >/dev/null 2>&1
             rm -f "$file"
         fi
@@ -188,7 +192,7 @@ EXTRACT_FIRMWARE() {
     # ---- TAR ----
     for file in "$FIRM_DIR"/*.tar; do
         if [ -f "$file" ]; then
-            echo "- Extracting tar: $(basename "$file")"
+            echo -e "- Extracting tar: $(basename "$file")"
             tar -xvf "$file" -C "$FIRM_DIR" >/dev/null 2>&1
             rm -f "$file"
         fi
@@ -198,7 +202,7 @@ EXTRACT_FIRMWARE() {
 	rm -rf $FIRM_DIR/{cache.img.lz4,dtbo.img.lz4,efuse.img.lz4,gz-verified.img.lz4,lk-verified.img.lz4,md1img.img.lz4,md_udc.img.lz4,misc.bin.lz4,omr.img.lz4,param.bin.lz4,preloader.img.lz4,recovery.img.lz4,scp-verified.img.lz4,spmfw-verified.img.lz4,sspm-verified.img.lz4,tee-verified.img.lz4,tzar.img.lz4,up_param.bin.lz4,userdata.img.lz4,vbmeta.img.lz4,vbmeta_system.img.lz4,audio_dsp-verified.img.lz4,cam_vpu1-verified.img.lz4,cam_vpu2-verified.img.lz4,cam_vpu3-verified.img.lz4,dpm-verified.img.lz4,init_boot.img.lz4,mcupm-verified.img.lz4,pi_img-verified.img.lz4,uh.bin.lz4,vendor_boot.img.lz4}
     for file in "$FIRM_DIR"/*.lz4; do
         if [ -f "$file" ]; then
-            echo "- Extracting lz4: $(basename "$file")"
+            echo -e "- Extracting lz4: $(basename "$file")"
             lz4 -d "$file" "${file%.lz4}" >/dev/null 2>&1
             rm -f "$file"
         fi
@@ -213,14 +217,14 @@ EXTRACT_FIRMWARE() {
 
     # ---- SUPER.IMG ----
     if [ -f "$FIRM_DIR/super.img" ]; then
-        echo "- Extracting super.img"
+        echo -e "- Extracting super.img"
         simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
         rm -f "$FIRM_DIR/super.img"
 
         sudo "$(pwd)/bin/lp/lpunpack" "$FIRM_DIR/super_raw.img" "$FIRM_DIR"
         rm -f "$FIRM_DIR/super_raw.img"
 
-        echo "- Extraction complete"
+        echo -e "- Extraction complete"
     fi
 }
 
@@ -231,24 +235,24 @@ PREPARE_PARTITIONS() {
     fi
 
     if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
     fi
 
     local EXTRACTED_FIRM_DIR="$1"
 
     [[ -z "$EXTRACTED_FIRM_DIR" || ! -d "$EXTRACTED_FIRM_DIR" ]] && {
-        echo "Invalid directory: $EXTRACTED_FIRM_DIR"
+        echo -e "Invalid directory: $EXTRACTED_FIRM_DIR"
         return 1
     }
 
     IFS=',' read -r -a KEEP <<< "$BUILD_PARTITIONS"
 
     for i in "${!KEEP[@]}"; do
-        KEEP[$i]=$(echo "${KEEP[$i]}" | xargs)
+        KEEP[$i]=$(echo -e "${KEEP[$i]}" | xargs)
     done
 
-    echo "Preparing partitinos."
+    echo -e "${YELLOW}Preparing partitinos.${NC} $STOCK_DEVICE"
 	
     find "$EXTRACTED_FIRM_DIR" -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} +
 
@@ -274,16 +278,16 @@ PREPARE_PARTITIONS() {
 
 
 EXTRACT_FIRMWARE_IMG() {
-    echo ""
+    echo -e ""
 	if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <FIRMWARE_DIRECTORY>"
+        echo -e "Usage: ${FUNCNAME[0]} <FIRMWARE_DIRECTORY>"
         return 1
     fi
 
 	local FIRM_DIR="$1"
 
     PREPARE_PARTITIONS "$FIRM_DIR"
-	echo "Extracting imges from $FIRM_DIR"
+	echo -e "${YELLOW}Extracting imges from:${NC} $FIRM_DIR"
     for imgfile in "$FIRM_DIR"/*.img; do
         [ -e "$imgfile" ] || continue
 
@@ -301,18 +305,18 @@ EXTRACT_FIRMWARE_IMG() {
         case "$fstype" in
             ext4)
                 IMG_SIZE=$(stat -c%s -- "$imgfile")
-				echo "- $partition.img Detected $fstype. Size: $IMG_SIZE bytes. Extracting..."
+				echo -e "- $partition.img Detected $fstype. Size: $IMG_SIZE bytes. Extracting..."
 				sudo rm -rf "$FIRM_DIR/$partition"
                 sudo python3 $(pwd)/bin/py_scripts/imgextractor.py "$imgfile" "$FIRM_DIR"
                 ;;
             erofs)
                 IMG_SIZE=$(stat -c%s -- "$imgfile")
-				echo "- $partition.img Detected $fstype. Size: $IMG_SIZE bytes. Extracting..."
+				echo -e "- $partition.img Detected $fstype. Size: $IMG_SIZE bytes. Extracting..."
 				sudo rm -rf "$FIRM_DIR/$partition"
                 sudo $(pwd)/bin/erofs-utils/extract.erofs -i "$imgfile" -x -f -o "$FIRM_DIR" >/dev/null 2>&1
                 ;;
             *)
-                echo "- $imgfile unsupported filesystem type ($fstype), exiting"
+                echo -e "- $imgfile unsupported filesystem type ($fstype), exiting"
                 exit 1
                 ;;
         esac
@@ -321,7 +325,7 @@ EXTRACT_FIRMWARE_IMG() {
     rm -rf "$FIRM_DIR"/*.img
 	
 	if ! ls "$FIRM_DIR"/system* >/dev/null 2>&1; then
-        echo "Maybe your firmware is not downloaded, is corrupt, or contains an unsupported image."
+        echo -e "Maybe your firmware is not downloaded, is corrupt, or contains an unsupported image."
         exit 1
     fi
 
@@ -334,12 +338,12 @@ DISABLE_FBE() {
     local EXTRACTED_FIRM_DIR="$1"
 
     if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIRECTORY>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIRECTORY>"
         return 1
     fi
 
     if [ ! -d "$EXTRACTED_FIRM_DIR/vendor/etc" ]; then
-        echo "- $EXTRACTED_FIRM_DIR/vendor/etc directory not found. Skipping FBE disable."
+        echo -e "- $EXTRACTED_FIRM_DIR/vendor/etc directory not found. Skipping FBE disable."
         return 1
     fi
 
@@ -348,8 +352,8 @@ DISABLE_FBE() {
 
     for i in $fstab_files; do
         if [ -f "$i" ]; then
-            echo "- Disabling file-based encryption (FBE) for /data..."
-            echo "- Found $i."
+            echo -e "- Disabling file-based encryption (FBE) for /data."
+            echo -e "- Found $i."
             sed -i -e 's/^\([^#].*\)fileencryption=[^,]*\(.*\)$/# &\n\1encryptable\2/g' "$i"
         fi
     done
@@ -360,12 +364,12 @@ DISABLE_FDE() {
     local EXTRACTED_FIRM_DIR="$1"
 
     if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIRECTORY>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIRECTORY>"
         return 1
     fi
 
     if [ ! -d "$EXTRACTED_FIRM_DIR/vendor/etc" ]; then
-        echo "- $EXTRACTED_FIRM_DIR/vendor/etc directory not found. Skipping FDE disable."
+        echo -e "- $EXTRACTED_FIRM_DIR/vendor/etc directory not found. Skipping FDE disable."
         return 1
     fi
 
@@ -374,8 +378,8 @@ DISABLE_FDE() {
 
     for i in $fstab_files; do
         if [ -f "$i" ]; then
-            echo "- Disabling full-disk encryption (FDE) for /data..."
-            echo "- Found $i."
+            echo -e "- Disabling full-disk encryption (FDE) for /data..."
+            echo -e "- Found $i."
             md5=$(md5 "$i")
             sed -i -e 's/^\([^#].*\)forceencrypt=[^,]*\(.*\)$/# &\n\1encryptable\2/g' "$i"
             file_changed "$i" "$md5"
@@ -386,21 +390,21 @@ DISABLE_FDE() {
 
 INSTALL_FRAMEWORK() {
     if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <framework-res.apk>"
+        echo -e "Usage: ${FUNCNAME[0]} <framework-res.apk>"
         return 1
     fi
 
-    echo ""
+    echo -e ""
     local framework_res_apk="$1"
-    echo "Installing Framework."
+    echo -e "${YELLOW}Installing Framework.${NC}"
     java -jar "$APKTOOL" install-framework "$framework_res_apk"
 }
 
 
 DECOMPILE() {
-    echo ""
+    echo -e ""
     if [ "$#" -ne 3 ]; then
-        echo "Usage: DECOMPILE <APKTOOL_JAR_DIR> <FILE> <DECOMPILE_DIR>"
+        echo -e "Usage: DECOMPILE <APKTOOL_JAR_DIR> <FILE> <DECOMPILE_DIR>"
         return 1
     fi
 
@@ -410,16 +414,16 @@ DECOMPILE() {
     local BASENAME="$(basename "${FILE%.*}")"
     local OUT="$DECOMPILE_DIR/$BASENAME"
 
-    echo "Decompiling: $FILE"
+    echo -e "${YELLOW}Decompiling:${NC} $FILE"
 	rm -rf "$OUT"
     java -jar "$APKTOOL" d -f "$FILE" -o "$OUT"
 }
 
 
 RECOMPILE() {
-    echo ""
+    echo -e ""
 	if [ "$#" -ne 4 ]; then
-        echo "Usage: ${FUNCNAME[0]} <APKTOOL_JAR_DIR> <FRAMEWORK_DIR> <DECOMPILED_DIR> <RECOMPILE_DIR>"
+        echo -e "Usage: ${FUNCNAME[0]} <APKTOOL_JAR_DIR> <FRAMEWORK_DIR> <DECOMPILED_DIR> <RECOMPILE_DIR>"
         return 1
     fi
 
@@ -435,13 +439,13 @@ RECOMPILE() {
     local built_file="$WORK_DIR/${name}_unsigned.$ext"
     local final_file="$WORK_DIR/$org_file_name"
 
-    echo "Recompiling: $DECOMPILED_DIR"
+    echo -e "${YELLOW}Recompiling:${NC} $DECOMPILED_DIR"
     java -jar "$APKTOOL" b "$DECOMPILED_DIR" --copy-original -p "$FRAMEWORK_DIR" -o "$built_file"
 
     # Zipalign
-	echo ""
+	echo -e ""
 	if [[ "$ext" == "jar" ]]; then
-	    echo "Zipaligning: $built_file to $final_file"
+	    echo -e "${YELLOW}Zipaligning:${NC} $built_file to $final_file"
         zipalign -v 4 "$built_file" "$final_file" >/dev/null 2>&1
 		rm -rf "$built_file" "$DECOMPILED_DIR"
     fi
@@ -451,13 +455,13 @@ RECOMPILE() {
 REPLACE_SMALI_METHOD() {
     local FILE="$1"
     local METHOD_NAME="$2"
-    local NEW_BODY=$(echo "$3" | tail -n +2)
+    local NEW_BODY=$(echo -e "$3" | tail -n +2)
 
     # Escape special chars in method name for sed
     local method_esc
     method_esc=$(printf '%s\n' "$METHOD_NAME" | sed -e 's/[.[\*^$/]/\\&/g')
 
-    echo "- Patching: $FILE"
+    echo -e "- Patching: $FILE"
 
     sed -i "
 /^[[:space:]]*$method_esc\$/,/^[[:space:]]*\.end method/{
@@ -473,50 +477,50 @@ REPLACE_SMALI_METHOD() {
 
 
 HEX_PATCH() {
-    echo ""
+    echo -e ""
 	if [ "$#" -ne 3 ]; then
-        echo "Usage: ${FUNCNAME[0]} <FILE> <TARGET_VALUE> <REPLACE_VALUE>"
+        echo -e "Usage: ${FUNCNAME[0]} <FILE> <TARGET_VALUE> <REPLACE_VALUE>"
         return 1
     fi
 
     local FILE="$1"
-    local FROM="$(echo "$2" | tr '[:upper:]' '[:lower:]')"
-    local TO="$(echo "$3" | tr '[:upper:]' '[:lower:]')"
+    local FROM="$(echo -e "$2" | tr '[:upper:]' '[:lower:]')"
+    local TO="$(echo -e "$3" | tr '[:upper:]' '[:lower:]')"
 
-    [ ! -f "$FILE" ] && { echo "File not found: $FILE"; return 1; }
+    [ ! -f "$FILE" ] && { echo -e "File not found: $FILE"; return 1; }
 
     xxd -p -c 0 "$FILE" | grep -q "$FROM" || {
-        echo "- Pattern not found: $FROM"
+        echo -e "- Pattern not found: $FROM"
         return 1
     }
 
-    echo "- Patching: $FILE"
-    echo "- From $FROM to $TO"
+    echo -e "- Patching: $FILE"
+    echo -e "- From $FROM to $TO"
     [ -f "$FILE.bak" ] || cp "$FILE" "$FILE.bak"
 
     xxd -p -c 0 "$FILE" | sed "s/$FROM/$TO/" | xxd -r -p > "$FILE.tmp" &&
     mv "$FILE.tmp" "$FILE"
 
     xxd -p -c 0 "$FILE" | grep -q "$TO" && {
-        echo "- Patch success"
+        echo -e "- Patch success"
         rm -rf "$FILE.bak"        
         return 0
     }
 
-    echo "- Patch failed, restoring backup"
+    echo -e "- Patch failed, restoring backup"
     mv "$FILE.bak" "$FILE"
     return 1
 }
 
 
 PATCH_FLAG_SECURE() {
-	echo ""
+	echo -e ""
 	if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_SERVICES_DIRECTORY>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_SERVICES_DIRECTORY>"
         return 1
     fi
 
-	echo "Patching flag secure."
+	echo -e "${YELLOW}Patching flag secure.${NC}"
 	local FILE="${1}/smali_classes2/com/android/server/wm/WindowState.smali"
     local METHOD_NAME_1=".method public final isSecureLocked()Z"
     local REPLACE_BODY_1='
@@ -572,13 +576,13 @@ PATCH_FLAG_SECURE() {
 
 
 PATCH_SECURE_FOLDER() {
-    echo ""
+    echo -e ""
 	if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_SERVICES_DIRECTORY>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_SERVICES_DIRECTORY>"
         return 1
     fi
 
-    echo "Patching secure folder."
+    echo -e "${YELLOW}Patching secure folder.${NC}"
     local FILE="${1}/smali/com/android/server/knox/dar/DarManagerService.smali"
     # patch isDeviceRootKeyInstalled
     local METHOD_NAME_1=".method public final isDeviceRootKeyInstalled()Z"
@@ -605,13 +609,13 @@ PATCH_SECURE_FOLDER() {
 
 
 PATCH_KNOX_GUARD() {
-    echo ""
+    echo -e ""
 	if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_SERVICES_DIRECTORY>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_SERVICES_DIRECTORY>"
         return 1
     fi
 
-    echo "Patching knox guard."
+    echo -e "${YELLOW}Patching knox guard.${NC}"
     local FILE="${1}/smali_classes2/com/samsung/android/knoxguard/service/KnoxGuardSeService.smali"
     # patch .method public constructor <init>(Landroid/content/Context;)V
     local METHOD_NAME_1=".method public constructor <init>(Landroid/content/Context;)V"
@@ -639,9 +643,9 @@ PATCH_KNOX_GUARD() {
 
 
 UPDATE_SDHMS() {
-    echo ""
+    echo -e ""
     if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIRECTORY>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIRECTORY>"
         return 1
     fi
 
@@ -650,30 +654,29 @@ UPDATE_SDHMS() {
     local ALT_APK="$(pwd)/QuantumROM/Mods/SDHMS/system/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk"
 
     if [ -f "$TARGET_APK" ] && zipinfo -1 "$TARGET_APK" 2>/dev/null | grep -q "^res/raw/${STOCK_DVFS_FILENAME}\.xml$"; then
-        echo "$STOCK_DEVICE Dynamic Voltage and Frequency Scaling table: ${STOCK_DVFS_FILENAME}.xml found in current SDHMS app"
+        echo -e "$STOCK_DEVICE Dynamic Voltage and Frequency Scaling table: ${STOCK_DVFS_FILENAME}.xml found in current SDHMS app"
     elif [ -f "$ALT_APK" ] && zipinfo -1 "$ALT_APK" 2>/dev/null | grep -q "^res/raw/${STOCK_DVFS_FILENAME}\.xml$"; then
-        echo "$STOCK_DEVICE Dynamic Voltage and Frequency Scaling table: ${STOCK_DVFS_FILENAME}.xml found in alternative APK. Replacing in target ROM"
+        echo -e "$STOCK_DEVICE Dynamic Voltage and Frequency Scaling table: ${STOCK_DVFS_FILENAME}.xml found in alternative APK. Replacing in target ROM"
         rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/SamsungDeviceHealthManagerService"
         cp -a "$(pwd)/QuantumROM/Mods/SDHMS/." "$EXTRACTED_FIRM_DIR/"
     else
-        echo "$STOCK_DEVICE Dynamic Voltage and Frequency Scaling table: ${STOCK_DVFS_FILENAME}.xml not found anywhere"
+        echo -e "$STOCK_DEVICE Dynamic Voltage and Frequency Scaling table: ${STOCK_DVFS_FILENAME}.xml not found anywhere"
     fi
 }
 
 
 PATCH_SSRM() {
-    echo ""
+    echo -e ""
 	if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_SSRM_DIRECTORY>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_SSRM_DIRECTORY>"
         return 1
     fi
 
     local SSRM_DIR="$1"
 	local FILE="$SSRM_DIR/smali/com/android/server/ssrm/Feature.smali"
 
-	echo "Patching ssrm.jar"
-	echo "- Updating stock SIOP_FILENAME > $STOCK_SIOP_FILENAME and STOCK_DVFS_FILENAME > $STOCK_DVFS_FILENAME in ssrm.jar"
-	echo "- Patching: $FILE"
+	echo -e "${YELLOW}Patching ssrm.jar${NC}"
+	echo -e "- Patching: $FILE"
 
     sed -i "s/\(const-string v[0-9]\+,\s*\"\)siop_[^\"]*\"/\1$STOCK_SIOP_FILENAME\"/g" "$FILE"
     sed -i "/dvfs_policy_default/! s/\(const-string v[0-9]\+,\s*\"\)dvfs_policy_[^\"]*\"/\1$STOCK_DVFS_FILENAME\"/g" "$FILE"
@@ -683,9 +686,9 @@ PATCH_SSRM() {
 
 
 PATCH_BT_LIB() {
-    echo ""
+    echo -e ""
 	if [ "$#" -ne 2 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIRECTORY> <WORK_DIR>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIRECTORY> <WORK_DIR>"
         return 1
     fi
 
@@ -693,7 +696,7 @@ PATCH_BT_LIB() {
 	local WORK_DIR="$2"
 	local BT_LIB_FILE="$WORK_DIR/libbluetooth_jni.so"
 
-    echo "Patching Bluetooth library."
+    echo -e "${YELLOW}Patching Bluetooth library.${NC}"
     # Get libbluetooth_jni.so
     unzip "$EXTRACTED_FIRM_DIR/system/system/apex/com.android.bt.apex" "apex_payload.img" -d "$WORK_DIR" >/dev/null 2>&1
 	debugfs -R "dump /lib64/libbluetooth_jni.so $WORK_DIR/libbluetooth_jni.so" "$WORK_DIR/apex_payload.img" >/dev/null 2>&1
@@ -748,8 +751,8 @@ PATCH_BT_LIB() {
         # convert wildcard .... → regex
         local from_regex="${from//./[0-9a-f]}"
 
-        if echo "$HEXDATA" | grep -qiE "$from_regex"; then
-            echo "- Found Bluetooth patch pattern [$idx]"
+        if echo -e "$HEXDATA" | grep -qiE "$from_regex"; then
+            echo -e "- Found Bluetooth patch pattern [$idx]"
             HEX_PATCH "$BT_LIB_FILE" "$from" "$to" || return 1
             PATCHED=1
 			mv -f "$WORK_DIR/libbluetooth_jni.so" "$EXTRACTED_FIRM_DIR/system/system/lib64/"
@@ -758,7 +761,7 @@ PATCH_BT_LIB() {
     done
 
     if [ "$PATCHED" -eq 0 ]; then
-        echo "- No known Bluetooth patch pattern matched."
+        echo -e "- No known Bluetooth patch pattern matched."
 		rm -rf "$BT_LIB_FILE"
         return 1
     fi
@@ -768,13 +771,13 @@ PATCH_BT_LIB() {
 
 
 FIX_VNDK() {
-    echo "- Checking $STOCK_DEVICE and $TARGET_DEVICE vndk version."
+    echo -e "- Checking $STOCK_DEVICE and $TARGET_DEVICE vndk version."
     export SDK="$(GET_PROP "$EXTRACTED_FIRM_DIR" "system" ro.system.build.version.sdk_full)"
-	echo "- Target rom SDK version: $SDK"
+	echo -e "- Target rom SDK version: $SDK"
     if [ -f "$TARGET_ROM_SYSTEM_EXT_DIR/apex/com.android.vndk.v${STOCK_VNDK_VERSION}.apex" ]; then
-        echo "- VNDK matched."
+        echo -e "- VNDK matched."
     else
-        echo "- VNDK mismatch. Adding SDK $SDK com.android.vndk.v${STOCK_VNDK_VERSION}.apex"
+        echo -e "- VNDK mismatch. Adding SDK $SDK com.android.vndk.v${STOCK_VNDK_VERSION}.apex"
         rm -rf "$TARGET_ROM_SYSTEM_EXT_DIR/apex/"*.apex
         cp -rfa "$VNDKS_COLLECTION/$SDK/$STOCK_VNDK_VERSION/system_ext/"* "$TARGET_ROM_SYSTEM_EXT_DIR/"
     fi
@@ -783,7 +786,7 @@ FIX_VNDK() {
 
 FIX_SYSTEM_EXT() {
     if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
     fi
 
@@ -795,11 +798,11 @@ FIX_SYSTEM_EXT() {
 	fi
 
     if [ "$STOCK_HAS_SEPARATE_SYSTEM_EXT" = "FALSE" ] && [[ -d "$EXTRACTED_FIRM_DIR/system_ext" ]]; then
-        echo "- Copying system_ext content into system root"
+        echo -e "- Copying system_ext content into system root"
 		rm -rf "$EXTRACTED_FIRM_DIR/system/system_ext"
         cp -a --preserve=all "$EXTRACTED_FIRM_DIR/system_ext" "$EXTRACTED_FIRM_DIR/system"
 
-        echo "- Cleaning and merging system_ext file contexts and configs"
+        echo -e "- Cleaning and merging system_ext file contexts and configs"
         # File paths
         SYSTEM_EXT_CONFIG_FILE="$EXTRACTED_FIRM_DIR/config/system_ext_fs_config"
         SYSTEM_EXT_CONTEXTS_FILE="$EXTRACTED_FIRM_DIR/config/system_ext_file_contexts"
@@ -854,11 +857,11 @@ FIX_SYSTEM_EXT() {
 
 FIX_SELINUX() {
     if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
     fi
 
-    echo "- Fixing selinux"
+    echo -e "- Fixing selinux"
 
 	local EXTRACTED_FIRM_DIR="$1"
 
@@ -871,30 +874,30 @@ FIX_SELINUX() {
     fi
 
     if [ -n "$STOCK_VNDK_VERSION" ]; then
-	    echo "- Fixing selinux for $STOCK_DEVICE."
+	    echo -e "- Fixing selinux for $STOCK_DEVICE."
         SELINUX_FILE="$TARGET_ROM_SYSTEM_EXT_DIR/etc/selinux/mapping/${STOCK_VNDK_VERSION}.0.cil"
     else
         MANIFEST_FILE="$TARGET_ROM_SYSTEM_EXT_DIR/etc/vintf/manifest.xml"
 
         if [ ! -f "$MANIFEST_FILE" ]; then
-            echo "- manifest.xml not found. Cannot determine VNDK version."
+            echo -e "- manifest.xml not found. Cannot determine VNDK version."
             return 1
         fi
 
         STOCK_VNDK_VERSION=$(grep -oP '(?<=<version>)[0-9]+' "$MANIFEST_FILE" | head -n1)
 
         if [ -z "$STOCK_VNDK_VERSION" ]; then
-            echo "- Failed to extract VNDK version from manifest."
+            echo -e "- Failed to extract VNDK version from manifest."
             return 1
         fi
 
         SELINUX_FILE="$TARGET_ROM_SYSTEM_EXT_DIR/etc/selinux/mapping/${STOCK_VNDK_VERSION}.0.cil"
     fi
 
-    echo "- Using SELinux mapping file: $SELINUX_FILE"
+    echo -e "- Using SELinux mapping file: $SELINUX_FILE"
 
     if [ ! -f "$SELINUX_FILE" ]; then
-        echo "- Error: SELinux file not found at $SELINUX_FILE"
+        echo -e "- Error: SELinux file not found at $SELINUX_FILE"
         exit 1
     fi
 
@@ -916,7 +919,7 @@ UPDATE_FLOATING_FEATURE() {
     local key="$1"
     local value="$2"
     if [[ -z "$value" ]]; then
-        echo "- Skipping $key — no value found."
+        echo -e "- Skipping $key — no value found."
         return
     fi
 
@@ -924,28 +927,28 @@ UPDATE_FLOATING_FEATURE() {
         local current_line
         current_line=$(grep "<${key}>.*</${key}>" "$TARGET_FLOATING_FEATURE")
         local current_value
-        current_value=$(echo "$current_line" | sed -E "s/.*<${key}>(.*)<\/${key}>.*/\1/")
+        current_value=$(echo -e "$current_line" | sed -E "s/.*<${key}>(.*)<\/${key}>.*/\1/")
 
         if [[ "$current_value" == "$value" ]]; then
             return
         fi
 
         local indent
-        indent=$(echo "$current_line" | sed -E "s/(<${key}>.*<\/${key}>).*//")
+        indent=$(echo -e "$current_line" | sed -E "s/(<${key}>.*<\/${key}>).*//")
         local line="${indent}<${key}>${value}</${key}>"
         sed -i "s|${indent}<${key}>.*</${key}>|$line|" "$TARGET_FLOATING_FEATURE"
-        # echo "- Updated $key with ▶️ $value"
+        # echo -e "- Updated $key with ▶️ $value"
     else
         local line="    <$key>$value</$key>"
         sed -i "3i\\$line" "$TARGET_FLOATING_FEATURE"
-        # echo "- Added $key with value ▶️ $value"
+        # echo -e "- Added $key with value ▶️ $value"
     fi
 }
 
 
 APPLY_CUSTOM_FLOATING_FEATURE() {
-    echo ""
-	echo "Applying Custom Floating Feature."
+    echo -e ""
+	echo -e "${YELLOW}Applying Custom Floating Feature.${NC}"
     #========== COMMON ==========#
     UPDATE_FLOATING_FEATURE "SEC_FLOATING_FEATURE_COMMON_CONFIG_SEP_CATEGORY" "sep_basic"
 
@@ -1003,8 +1006,8 @@ APPLY_CUSTOM_FLOATING_FEATURE() {
 
 
 APPLY_STOCK_FLOATING_FEATURE() {
-    echo " "
-    echo "Applying Stock Floating Feature."
+    echo -e " "
+    echo -e "${YELLOW}Applying Stock Floating Feature.${NC}"
     #========== AUDIO ==========#
     UPDATE_FLOATING_FEATURE "SEC_FLOATING_FEATURE_AUDIO_CONFIG_VOLUMEMONITOR_STAGE" "$(awk -F'[<>]' '$2 == "SEC_FLOATING_FEATURE_AUDIO_CONFIG_VOLUMEMONITOR_STAGE" {print $3}' "$STOCK_FLOATING_FEATURE")"
     UPDATE_FLOATING_FEATURE "SEC_FLOATING_FEATURE_AUDIO_SUPPORT_VOLUME_MONITOR" "$(awk -F'[<>]' '$2 == "SEC_FLOATING_FEATURE_AUDIO_SUPPORT_VOLUME_MONITOR" {print $3}' "$STOCK_FLOATING_FEATURE")"
@@ -1055,12 +1058,12 @@ APPLY_STOCK_FLOATING_FEATURE() {
 
 REMOVE_ESIM_FILES() {
     if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
     fi
 
 	local EXTRACTED_FIRM_DIR="$1"
-    echo "- Removing ESIM files."
+    echo -e "- Removing ESIM files."
 	rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/autoinstalls/autoinstalls-com.google.android.euicc"
 	rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/default-permissions/default-permissions-com.google.android.euicc.xml"
 	rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/permissions/privapp-permissions-com.samsung.euicc.xml"
@@ -1078,12 +1081,12 @@ REMOVE_ESIM_FILES() {
 
 REMOVE_FABRIC_CRYPTO() {
     if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
     fi
 
 	local EXTRACTED_FIRM_DIR="$1"
-    echo "- Removing fabric crypto."
+    echo -e "- Removing fabric crypto."
     rm -rf "$EXTRACTED_FIRM_DIR/system/system/bin/fabric_crypto"
     rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/init/fabric_crypto.rc"
     rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/permissions/FabricCryptoLib.xml"
@@ -1100,27 +1103,27 @@ REMOVE_FABRIC_CRYPTO() {
 
 
 APPLY_STOCK_CONFIG() {
-    echo ""
+    echo -e ""
 	if [ -z "$STOCK_DEVICE" ] || [ "$STOCK_DEVICE" = "None" ]; then
-        echo "No target device is set. Just modifying ROM without any device config."
+        echo -e "No target device is set. Just modifying ROM without any device config."
         return 1
     fi
 
-	echo "Applying $STOCK_DEVICE device config."
+	echo -e "${YELLOW}Applying $STOCK_DEVICE device config.${NC}"
     if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
     fi
 
     local EXTRACTED_FIRM_DIR="$1"
 
     if [ ! -f "$DEVICES_DIR/$STOCK_DEVICE/config" ]; then
-        echo "- Config file for $STOCK_DEVICE not found in $DEVICES_DIR"
+        echo -e "- Config file for $STOCK_DEVICE not found in $DEVICES_DIR"
         return 1
 	fi
 
     if [ -f "$DEVICES_DIR/$STOCK_DEVICE/config" ]; then
-        echo "- $STOCK_DEVICE config found."
+        echo -e "- $STOCK_DEVICE config found."
         export STOCK_VNDK_VERSION="$(grep -m1 '^STOCK_VNDK_VERSION=' "$DEVICES_DIR/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
         export STOCK_HAS_SEPARATE_SYSTEM_EXT="$(grep -m1 '^STOCK_HAS_SEPARATE_SYSTEM_EXT=' "$DEVICES_DIR/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
 		export STOCK_DVFS_FILENAME="$(grep -m1 '^STOCK_DVFS_FILENAME=' "$DEVICES_DIR/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
@@ -1156,13 +1159,13 @@ DEBLOAT_APPS=("Duo" "Photos" "FactoryCameraFB" "WlanTest" "AssistantShell" "Hotw
 
 KICK() {
     if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
     fi
     
 	local EXTRACTED_FIRM_DIR="$1"
 
-    echo "- Debloating apps."
+    echo -e "- Debloating apps."
     local APP_DIRS=(
         "$EXTRACTED_FIRM_DIR/system/system/app"
         "$EXTRACTED_FIRM_DIR/system/system/priv-app"
@@ -1175,7 +1178,7 @@ KICK() {
             target="$dir/$app"
 
             if [[ -d "$target" ]]; then
-                rm -rf "$target" || echo "[WARN] Failed to remove $target"
+                rm -rf "$target" || echo -e "[WARN] Failed to remove $target"
             fi
         done
     done
@@ -1183,18 +1186,18 @@ KICK() {
 
 
 DEBLOAT() {
-    echo ""
+    echo -e ""
     if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
     fi
 
 	local EXTRACTED_FIRM_DIR="$1"
-    echo "Debloating."
+    echo -e "${YELLOW}Debloating apps and files.${NC}"
     KICK "$EXTRACTED_FIRM_DIR"
     REMOVE_ESIM_FILES "$EXTRACTED_FIRM_DIR"
 	REMOVE_FABRIC_CRYPTO "$EXTRACTED_FIRM_DIR"
-	echo "- Deleting unnecessary files and folders."
+	echo -e "- Deleting unnecessary files and folders."
     rm -rf "$EXTRACTED_FIRM_DIR/system/system/app"/SamsungTTSVoice_*
 	rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app"/GameDriver-*
     rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/init/boot-image.bprof"
@@ -1209,7 +1212,7 @@ DEBLOAT() {
 
 BUILD_PROP() {
     if [ "$#" -lt 3 ]; then
-        echo "Usage: BUILD_PROP <EXTRACTED_FIRM_DIR> <PARTITION> <KEY> [VALUE]"
+        echo -e "Usage: BUILD_PROP <EXTRACTED_FIRM_DIR> <PARTITION> <KEY> [VALUE]"
         return 1
     fi
 
@@ -1237,13 +1240,13 @@ BUILD_PROP() {
             FILE="$EXTRACTED_FIRM_DIR/odm/etc/build.prop"
             ;;
         *)
-            echo "Unknown partition: $PARTITION"
+            echo -e "Unknown partition: $PARTITION"
             return 1
             ;;
     esac
 
     if [ ! -f "$FILE" ]; then
-        echo "build.prop not found: $FILE"
+        echo -e "build.prop not found: $FILE"
         return 1
     fi
 
@@ -1258,9 +1261,9 @@ BUILD_PROP() {
     else
         # Append if not exists
         if [ -z "$VALUE" ]; then
-            echo "${KEY}=" >> "$FILE"
+            echo -e "${KEY}=" >> "$FILE"
         else
-            echo "${KEY}=${VALUE}" >> "$FILE"
+            echo -e "${KEY}=${VALUE}" >> "$FILE"
         fi
     fi
 }
@@ -1268,7 +1271,7 @@ BUILD_PROP() {
 
 REMOVE_TLC_ICC() {
     if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
     fi
 
@@ -1286,13 +1289,13 @@ REMOVE_TLC_ICC() {
 
 DISABLE_SECURITY() {
     if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
     fi
 
 	local EXTRACTED_FIRM_DIR="$1"
 
-    echo "- Disabling security related things..."
+    echo -e "- Disabling security related things..."
     if [ -f "$EXTRACTED_FIRM_DIR/product/etc/build.prop" ]; then
         BUILD_PROP "$EXTRACTED_FIRM_DIR" "product" "ro.frp.pst" ""
     fi
@@ -1312,19 +1315,19 @@ DISABLE_SECURITY() {
 
 
 APPLY_CUSTOM_FEATURES() {
-    echo ""
+    echo -e ""
     if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
     fi
 
 	local EXTRACTED_FIRM_DIR="$1"
 
-    echo "Applying usefull features."
+    echo -e "${YELLOW}Applying usefull features.${NC}"
 	FIX_SELINUX "$EXTRACTED_FIRM_DIR"
 	DISABLE_SECURITY "$EXTRACTED_FIRM_DIR"
 	
-	echo "- Adding build prop tweak."
+	echo -e "- Adding build prop tweak."
     BUILD_PROP "$EXTRACTED_FIRM_DIR" "product" "ro.product.locale" "en-US"
 	BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.product.locale" "en-US"
     BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "fw.max_users" "5"
@@ -1335,7 +1338,7 @@ APPLY_CUSTOM_FEATURES() {
 	BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.telephony.sim_slots.count" "2"
     BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.surface_flinger.protected_contents" "true"
 
-	echo "- Adding China smart manager."
+	echo -e "- Adding China smart manager."
 	rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/AppLock"
     rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/Firewall"
     rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/SmartManager_v5"
@@ -1343,7 +1346,7 @@ APPLY_CUSTOM_FEATURES() {
 	cp -rfa "$(pwd)/QuantumROM/Mods/SMART_MANAGER_CN/." "$EXTRACTED_FIRM_DIR/"
 	UPDATE_FLOATING_FEATURE "SEC_FLOATING_FEATURE_SMARTMANAGER_CONFIG_PACKAGE_NAME" "com.samsung.android.sm_cn"
 
-	echo "- Adding full OneUI and important apps."
+	echo -e "- Adding full OneUI and important apps."
 	if [ ! -d "$EXTRACTED_FIRM_DIR/product/priv-app/AiWallpaper" ]; then
         cp -rfa "$(pwd)/QuantumROM/Mods/Apps/AiWallpaper/"* "$EXTRACTED_FIRM_DIR/"
     fi
@@ -1386,19 +1389,19 @@ APPLY_CUSTOM_FEATURES() {
 
 GEN_FS_CONFIG() {
     if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
     fi
 
     local EXTRACTED_FIRM_DIR="$1"
 
     [ ! -d "$EXTRACTED_FIRM_DIR" ] && {
-        echo "- $EXTRACTED_FIRM_DIR not found."
+        echo -e "- $EXTRACTED_FIRM_DIR not found."
         return 1
     }
 
     [ ! -d "$EXTRACTED_FIRM_DIR/config" ] && {
-        echo "[ERROR] config directory missing"
+        echo -e "[ERROR] config directory missing"
         return 1
     }
 
@@ -1413,8 +1416,8 @@ GEN_FS_CONFIG() {
 
         touch "$FS_CONFIG"
 
-        echo ""
-        echo "Generating fs_config for partition: $PARTITION"
+        echo -e ""
+        echo -e "${YELLOW}Generating fs_config for partition:${NC} $PARTITION"
 
         awk '{print $1}' "$FS_CONFIG" | sort -u > "$TMP_EXISTING"
 
@@ -1426,15 +1429,15 @@ GEN_FS_CONFIG() {
             grep -qxF "$PATH_ENTRY" "$TMP_EXISTING" && continue
 
             if [ -d "$item" ]; then
-                echo "- Adding: $PATH_ENTRY 0 0 0755"
+                echo -e "- Adding: $PATH_ENTRY 0 0 0755"
                 printf "%s 0 0 0755\n" "$PATH_ENTRY" >> "$FS_CONFIG"
 
             else
                 if [[ "$REL_PATH" == */bin/* ]]; then
-                    echo "- Adding: $PATH_ENTRY 0 2000 0755"
+                    echo -e "- Adding: $PATH_ENTRY 0 2000 0755"
                     printf "%s 0 2000 0755\n" "$PATH_ENTRY" >> "$FS_CONFIG"
                 else
-                    echo "- Adding: $PATH_ENTRY 0 0 0644"
+                    echo -e "- Adding: $PATH_ENTRY 0 0 0644"
                     printf "%s 0 0 0644\n" "$PATH_ENTRY" >> "$FS_CONFIG"
                 fi
             fi
@@ -1442,20 +1445,20 @@ GEN_FS_CONFIG() {
         done
 
         rm -f "$TMP_EXISTING"
-        echo "- $PARTITION fs_config generated"
+        echo -e "- $PARTITION fs_config generated"
     done
 }
 
 
 GEN_FILE_CONTEXTS() {
     if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
     fi
 
     local EXTRACTED_FIRM_DIR="$1"
-    [ ! -d "$EXTRACTED_FIRM_DIR" ] && { echo "- $EXTRACTED_FIRM_DIR not found."; return 1; }
-    [ ! -d "$EXTRACTED_FIRM_DIR/config" ] && { echo "[ERROR] config directory missing"; return 1; }
+    [ ! -d "$EXTRACTED_FIRM_DIR" ] && { echo -e "- $EXTRACTED_FIRM_DIR not found."; return 1; }
+    [ ! -d "$EXTRACTED_FIRM_DIR/config" ] && { echo -e "[ERROR] config directory missing"; return 1; }
 
     escape_path() {
         local path="$1"
@@ -1484,14 +1487,14 @@ GEN_FILE_CONTEXTS() {
         local FILE_CONTEXTS="$EXTRACTED_FIRM_DIR/config/${PARTITION}_file_contexts"
         touch "$FILE_CONTEXTS"
 
-        echo ""
-        echo "Generating file_contexts for partition: $PARTITION"
+        echo -e ""
+        echo -e "${YELLOW}Generating file_contexts for partition:${NC} $PARTITION"
 
         declare -A EXISTING=()
         while IFS= read -r line || [[ -n "$line" ]]; do
             [ -z "$line" ] && continue
             local PATH_ONLY
-            PATH_ONLY=$(echo "$line" | awk '{print $1}')
+            PATH_ONLY=$(echo -e "$line" | awk '{print $1}')
             EXISTING["$PATH_ONLY"]=1
         done < "$FILE_CONTEXTS"
 
@@ -1515,12 +1518,12 @@ GEN_FILE_CONTEXTS() {
             fi
 
             printf "%s %s\n" "$ESCAPED_PATH" "$CONTEXT" >> "$FILE_CONTEXTS"
-            echo "- Added: $ESCAPED_PATH"
+            echo -e "- Added: $ESCAPED_PATH"
 
             EXISTING["$ESCAPED_PATH"]=1
         done
 
-        echo "- $PARTITION file_contexts generated"
+        echo -e "- $PARTITION file_contexts generated"
         unset EXISTING
     done
 }
@@ -1528,7 +1531,7 @@ GEN_FILE_CONTEXTS() {
 
 BUILD_IMG() {
     if [ "$#" -ne 3 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR> <FILE_SYSTEM> <OUT_DIR>"
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR> <FILE_SYSTEM> <OUT_DIR>"
         return 1
     fi
 
@@ -1551,9 +1554,9 @@ BUILD_IMG() {
         local SIZE=$(du -sb --apparent-size "$SRC_DIR" | awk '{printf "%.0f", $1 * 1.2}')
 		MOUNT_POINT="/$PARTITION"
 
-        echo ""
-        [[ -f "$FS_CONFIG" ]] || { echo "Warning: $FS_CONFIG missing, skipping $PARTITION"; continue; }
-        [[ -f "$FILE_CONTEXTS" ]] || { echo "Warning: $FILE_CONTEXTS missing, skipping $PARTITION"; continue; }
+        echo -e ""
+        [[ -f "$FS_CONFIG" ]] || { echo -e "Warning: $FS_CONFIG missing, skipping $PARTITION"; continue; }
+        [[ -f "$FILE_CONTEXTS" ]] || { echo -e "Warning: $FILE_CONTEXTS missing, skipping $PARTITION"; continue; }
 
         sort -u "$FILE_CONTEXTS" -o "$FILE_CONTEXTS"
         sort -u "$FS_CONFIG" -o "$FS_CONFIG"
@@ -1568,7 +1571,7 @@ BUILD_IMG() {
 			# Resize img to reduce size.
 			resize2fs -M "$OUT_IMG"
         else
-            echo "Unknown filesystem: $FILE_SYSTEM, skipping $PARTITION"
+            echo -e "Unknown filesystem: $FILE_SYSTEM, skipping $PARTITION"
             continue
         fi
     done
