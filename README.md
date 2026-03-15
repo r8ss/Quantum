@@ -4,7 +4,7 @@
 This Custom ROM is built by combining and refining features from multiple projects, including UNICA, Legacy-UI, and AstroRom.
 - The goal of this ROM is to provide a clean, optimized, and stable One UI experience with enhanced usability and performance.
 
-## Tools features.
+## 🛠️ Tools features.
 Download firmware directly from samsung server.
 - File config and file contexts generate.
 - Extract and img build ( erofs and ext4 supported).
