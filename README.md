@@ -142,7 +142,8 @@ cat system.img.xz.part* > system.img.xz
 - Secure Folder Patch (method copied from UN1CA)
 - Knox Guard Patch (method copied from UN1CA)
 - Secure Flag Patch (method copied from UN1CA)
-- Some SELinux patches followed the UN1CA implementation
+- SSRM Patch (followed from UN1CA)
+- Some SELinux patches [like genfscon remove] followed the UN1CA implementation
 
 #### ChatGPT:
 - https://chat.openai.com
