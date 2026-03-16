@@ -46,7 +46,7 @@ Secure Folder support.
 - Essential Features.
 - Clean User Experience.
 
-# How to Use:
+## How to Use:
 #### 1. Fork the Repository
 Give a ⭐ star to the repository.
 Fork the repository to your GitHub account.
