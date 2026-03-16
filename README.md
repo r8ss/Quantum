@@ -119,22 +119,22 @@ Example split files:
 cat system.img.xz.part* > system.img.xz
 ```
 
-## Credits
-#### 1. Samsung Firmware Downloader
-- Project: https://github.com/martinetd/samloader
+## Credits:
+#### 1. Samsung Firmware Downloader:
+- Project Repository: https://github.com/martinetd/samloader
 - Used for downloading Samsung firmware.
 
-#### 2. Multi Disabler
-- Project: https://github.com/ianmacd/multidisabler-samsung
+#### 2. Multi Disabler:
+- Project Repository: https://github.com/ianmacd/multidisabler-samsung
 - Used for disabling Samsung security and data encryption.
 
-#### 3. Bluetooth Library Patcher
-- Project: https://github.com/3arthur6/BluetoothLibraryPatcher
+#### 3. Bluetooth Library Patcher:
+- Project Repository: https://github.com/3arthur6/BluetoothLibraryPatcher
 - Used for patching Samsung Bluetooth libraries.
 
-#### 4. UN1CA Project
+#### 4. UN1CA Project:
 - Owner: https://github.com/salvogiangri
-- Repository: https://github.com/salvogiangri/UN1CA
+- Project Repository: https://github.com/salvogiangri/UN1CA
 
 #### Components Used from UN1CA
 - `HEX_PATCH` function (modified from UN1CA implementation)
