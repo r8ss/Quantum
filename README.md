@@ -144,7 +144,11 @@ cat system.img.xz.part* > system.img.xz
 - Secure Flag Patch (method copied from UN1CA)
 - Some SELinux patches followed the UN1CA implementation
 
-## Licensing:
+#### ChatGPT:
+- https://chat.openai.com
+- For providing bash commands and bash functions according to the project requirements and instructions.
+
+### Licensing:
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 - **[android-tools](https://github.com/nmeum/android-tools)** - Licensed under Apache License 2.0
 - **[apktool](https://github.com/iBotPeaches/Apktool)** - Licensed under Apache License 2.0  
