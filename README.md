@@ -119,17 +119,29 @@ Example split files:
 cat system.img.xz.part* > system.img.xz
 ```
 
-## Credits:
-- 1: Samsung Firmware Downloader:
-- https://github.com/martinetd/samloader
-- 2: Multi Disabler: 
-- 3: Blueooth Library Patcher: https://github.com/3arthur6/BluetoothLibraryPatcher
-- 4: From UN1CA:
- - [ https://github.com/salvogiangri]
- -[https://github.com/salvogiangri/UN1CA]
- - Hex Patch Function: Modified from UN1CA HEX_PATCH Function
- - Knox Patch, Secure Folder Patch, Secure Flag Patch: method copied from UN1CA
- - Some selinux Patch followed by UN1CA 
+## Credits
+
+### 1. Samsung Firmware Downloader
+- Project: https://github.com/martinetd/samloader
+- Used for downloading Samsung firmware.
+
+### 2. Multi Disabler
+- Used for disabling Samsung security restrictions.
+
+### 3. Bluetooth Library Patcher
+- Project: https://github.com/3arthur6/BluetoothLibraryPatcher
+- Used for patching Samsung Bluetooth libraries.
+
+### 4. UN1CA Project
+- Owner: https://github.com/salvogiangri
+- Repository: https://github.com/salvogiangri/UN1CA
+
+#### Components Used from UN1CA
+- `HEX_PATCH` function (modified from UN1CA implementation)
+- Knox Patch (method inspired/copied from UN1CA)
+- Secure Folder Patch (method inspired/copied from UN1CA)
+- Secure Flag Patch (method inspired/copied from UN1CA)
+- Some SELinux patches followed the UN1CA implementation
 
 ## Licensing:
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
