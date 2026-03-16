@@ -120,13 +120,13 @@ cat system.img.xz.part* > system.img.xz
 ```
 
 ## Credits
-
 #### 1. Samsung Firmware Downloader
 - Project: https://github.com/martinetd/samloader
 - Used for downloading Samsung firmware.
 
 #### 2. Multi Disabler
-- Used for disabling Samsung security restrictions.
+- Project: https://github.com/ianmacd/multidisabler-samsung
+- Used for disabling Samsung security and data encryption.
 
 #### 3. Bluetooth Library Patcher
 - Project: https://github.com/3arthur6/BluetoothLibraryPatcher
