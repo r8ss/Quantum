@@ -121,26 +121,26 @@ cat system.img.xz.part* > system.img.xz
 
 ## Credits
 
-### 1. Samsung Firmware Downloader
+#### 1. Samsung Firmware Downloader
 - Project: https://github.com/martinetd/samloader
 - Used for downloading Samsung firmware.
 
-### 2. Multi Disabler
+#### 2. Multi Disabler
 - Used for disabling Samsung security restrictions.
 
-### 3. Bluetooth Library Patcher
+#### 3. Bluetooth Library Patcher
 - Project: https://github.com/3arthur6/BluetoothLibraryPatcher
 - Used for patching Samsung Bluetooth libraries.
 
-### 4. UN1CA Project
+#### 4. UN1CA Project
 - Owner: https://github.com/salvogiangri
 - Repository: https://github.com/salvogiangri/UN1CA
 
 #### Components Used from UN1CA
 - `HEX_PATCH` function (modified from UN1CA implementation)
-- Knox Patch (method inspired/copied from UN1CA)
-- Secure Folder Patch (method inspired/copied from UN1CA)
-- Secure Flag Patch (method inspired/copied from UN1CA)
+- Knox Patch (method copied from UN1CA)
+- Secure Folder Patch (method copied from UN1CA)
+- Secure Flag Patch (method copied from UN1CA)
 - Some SELinux patches followed the UN1CA implementation
 
 ## Licensing:
