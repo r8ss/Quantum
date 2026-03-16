@@ -119,7 +119,16 @@ Example split files:
 cat system.img.xz.part* > system.img.xz
 ```
 
-## Licensing
+## Credits:
+1: Samsung Firmware Downloader: https://github.com/martinetd/samloader
+2: Multi Disabler: 
+3: Blueooth Library Patcher: https://github.com/3arthur6/BluetoothLibraryPatcher
+4: From UN1CA:  [ https://github.com/salvogiangri] [https://github.com/salvogiangri/UN1CA]
+- Hex Patch Function: Modified from UN1CA HEX_PATCH Function
+- Knox Patch, Secure Folder Patch, Secure Flag Patch: method copied from UN1CA
+- Some selinux Patch followed by UN1CA 
+
+## Licensing:
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 - **[android-tools](https://github.com/nmeum/android-tools)** - Licensed under Apache License 2.0
 - **[apktool](https://github.com/iBotPeaches/Apktool)** - Licensed under Apache License 2.0  
