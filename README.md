@@ -140,6 +140,7 @@ cat system.img.xz.part* > system.img.xz
 - `HEX_PATCH` function (modified from UN1CA implementation)
 - Knox Patch (method copied from UN1CA)
 - Secure Folder Patch (method copied from UN1CA)
+- Knox Guard Patch (method copied from UN1CA)
 - Secure Flag Patch (method copied from UN1CA)
 - Some SELinux patches followed the UN1CA implementation
 
