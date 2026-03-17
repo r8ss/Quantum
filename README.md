@@ -145,6 +145,10 @@ cat system.img.xz.part* > system.img.xz
 - SSRM Patch (from UN1CA)
 - Some SELinux patches followed the UN1CA implementation.
 
+#### 5. Bootanimation fix
+-  ExtremeXT :https://github.com/ExtremeXT
+- For bootanimation then reboot bug fix.
+
 #### ChatGPT:
 - https://chat.openai.com
 - For providing bash commands and bash functions according to the project requirements and instructions.
