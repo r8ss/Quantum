@@ -146,7 +146,8 @@ cat system.img.xz.part* > system.img.xz
 - Some SELinux patches followed the UN1CA implementation.
 
 #### 5. Bootanimation fix
--  ExtremeXT :https://github.com/ExtremeXT
+-  ExtremeXT
+-  https://github.com/ExtremeXT
 - For bootanimation then reboot bug fix.
 
 #### ChatGPT:
