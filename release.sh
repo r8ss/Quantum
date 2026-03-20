@@ -16,9 +16,6 @@ GOFILE_LINK=$(sudo bash upload.sh "$ZIP_PATH")
 FILE_SIZE=$(du -h "$ZIP_PATH" | cut -f1)
 MD5_SUM=$(md5sum "$ZIP_PATH" | awk '{print $1}')
 
-echo "Size: $FILE_SIZE"
-echo "MD5: $MD5_SUM"
-
 # Release body
 RELEASE_BODY="#### 📦 Download:
 $GOFILE_LINK
@@ -26,7 +23,6 @@ $GOFILE_LINK
 #### 📊 File Info:
 • Size: $FILE_SIZE
 • MD5: $MD5_SUM
-• SHA256: $SHA256_SUM
 • Build Time: $BUILD_TIME
 
 #### 📱 Rom Device Info:
