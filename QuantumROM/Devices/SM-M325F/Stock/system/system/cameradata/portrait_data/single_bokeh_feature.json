@@ -28,7 +28,7 @@
         "Version": "008",
         "ComputeUnit": "COMPUTE_GPU",
         "ExecutionDataType": "QASYMM8",
-        "ModelType": "MODEL_TYPE_INSTANCE_CAPTURE",
+        "ModelType": "MODEL_TYPE_OBJ_INSTANCE_CAPTURE",
         "ModelFormat": "SNF",
         "Encryption": "false",
         "input_size": [[384, 384], [384, 384], [384, 384], [384, 384]]

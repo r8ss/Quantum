@@ -28,7 +28,7 @@
         "Version": "300",
         "ComputeUnit": "COMPUTE_NPU",
         "ExecutionDataType": "FLOAT16",
-        "ModelType": "MODEL_TYPE_INSTANCE_CAPTURE",
+        "ModelType": "MODEL_TYPE_OBJ_INSTANCE_CAPTURE",
         "ModelFormat": "MNP",
         "Encryption": "false",
         "input_size": [[768, 768], [768, 768], [768, 768], [768, 768]]
