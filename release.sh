@@ -22,7 +22,7 @@ echo "MD5: $MD5_SUM"
 echo "SHA256: $SHA256_SUM"
 
 # Release body
-RELEASE_BODY="### 📦 Download
+RELEASE_BODY="### 📦 Download:
 $GOFILE_LINK
 
 ### 📊 File Info:
