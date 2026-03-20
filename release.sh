@@ -20,20 +20,20 @@ echo "Size: $FILE_SIZE"
 echo "MD5: $MD5_SUM"
 
 # Release body
-RELEASE_BODY="### 📦 Download:
+RELEASE_BODY="#### 📦 Download:
 $GOFILE_LINK
 
-### 📊 File Info:
+#### 📊 File Info:
 • Size: $FILE_SIZE
 • MD5: $MD5_SUM
 • SHA256: $SHA256_SUM
 • Build Time: $BUILD_TIME
 
-### 📱 Rom Device Info:
+#### 📱 Rom Device Info:
 • STOCK_DEVICE: $STOCK_DEVICE
 • TARGET_DEVICE: $TARGET_DEVICE
 
-### ⚙️ Build Options:
+#### ⚙️ Build Options:
 • Filesystem: $OUTPUT_FILESYSTEM
 • Compressed IMG: $COMPRESS_IMG_TO_XZ
 • Used UI8 Tethering APEX: $USE_UI_8_TETHERING_APEX
