@@ -79,9 +79,9 @@ jobs:
               echo "Compressing $img"
               sudo xz -9 -T0 "$img"
             done
+            sudo rm -f "$OUT_DIR"/*.img
           fi
-          
-          sudo rm -f "$OUT_DIR"/*.img
+  
           echo "Creating zip: $ZIP_NAME"
           7z a -tzip "$ZIP_PATH" "$OUT_DIR"/* -mx=5
           echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
