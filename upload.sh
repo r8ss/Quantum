@@ -17,7 +17,6 @@ SERVER=$(curl -s https://api.gofile.io/servers | jq -r '.data.servers[0].name')
 # -# shows a progress bar
 # -F specifies form data, "file=@$FILE" uploads the file content
 # Use jq to parse JSON response and extract the download page URL
-echo "Uploading $FILE"
 LINK=$(curl -# -F "file=@$FILE" "https://${SERVER}.gofile.io/uploadFile" | jq -r '.data|.downloadPage') 2>&1
 
 # Display the download link
