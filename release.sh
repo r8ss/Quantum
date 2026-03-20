@@ -15,11 +15,9 @@ GOFILE_LINK=$(sudo bash upload.sh "$ZIP_PATH")
 # File info
 FILE_SIZE=$(du -h "$ZIP_PATH" | cut -f1)
 MD5_SUM=$(md5sum "$ZIP_PATH" | awk '{print $1}')
-SHA256_SUM=$(sha256sum "$ZIP_PATH" | awk '{print $1}')
 
 echo "Size: $FILE_SIZE"
 echo "MD5: $MD5_SUM"
-echo "SHA256: $SHA256_SUM"
 
 # Release body
 RELEASE_BODY="### 📦 Download:
