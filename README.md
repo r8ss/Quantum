@@ -100,24 +100,9 @@ In your forked repository, go to:
 - Click **New repository secret**, then create a new secret:
 - Name:
   - GIT_TOKEN
-- Add git secret token and save.
-- You can search on YouTube for a guide on how to create a GitHub Personal Access Token.
-- If you do not add the `GIT_TOKEN`, the built ROM will not be uploaded to your repository's Release section.
-   
-#### 9. How to Get IMG from Split Files:
-GitHub does not allow uploading a single file larger than 2GB.
-Therefore, any image file larger than 2GB will be automatically split.
-Example split files:
-- Split files will look like:
-   - system.img.xz.part000
-   - system.img.xz.part001
-- Steps to Recreate the Original File.
-- Download all split files from the Release section.
-- Combine them into a single file.
-- On Linux or Termux:
-```bash
-cat system.img.xz.part* > system.img.xz
-```
+  - Add git secret token and save.
+  - You can search on YouTube for a guide on how to create a GitHub Personal Access Token.
+  - If you do not add the `GIT_TOKEN`, the built ROM info and link will not be added to your repository's Release section. You will get link only in runner output.
 
 ## Credits:
 #### 1. Samsung Firmware Downloader:
