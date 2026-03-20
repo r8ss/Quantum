@@ -65,7 +65,7 @@ jobs:
             "${{ github.event.inputs.TARGET_DEVICE_IMEI }}" \
             "${{ github.event.inputs.OUTPUT_FILESYSTEM }}"
 
-      - name: Compress and make files before upload.
+      - name: Compress *.img & make zip file before upload.
         run: |
           echo "BUILD_TIME=$(TZ='Asia/Dhaka' date '+%Y-%m-%d %I:%M:%S %p UTC+6')" >> $GITHUB_ENV
           OUT_DIR="$(pwd)/OUT"
@@ -86,7 +86,7 @@ jobs:
           sudo 7z a -tzip "$ZIP_PATH" "$OUT_DIR"/*
           echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
 
-      - name: Create GitHub Release with download link
+      - name: Upload zip to GoFile.
         env:
           GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
         run: |
