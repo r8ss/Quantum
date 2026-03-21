@@ -4,12 +4,12 @@
 This Custom ROM is built by combining and refining features from multiple projects, including UNICA, Legacy-UI, and AstroRom.
 - The goal of this ROM is to provide a clean, optimized, and stable One UI experience with enhanced usability and performance.
 
-## 🛠️ Tools features.
+### 🛠️ Tools features.
 Download firmware directly from samsung server.
 - File config and file contexts generate.
 - Extract and img build ( erofs and ext4 supported).
 
-## ✨ Key Features.
+### ✨ Key Features.
 - System Optimization.
 - Heavy debloated system (removed unnecessary apps & services).
 - Improved performance and smoother UI experience.
@@ -27,18 +27,18 @@ Download firmware directly from samsung server.
 - Camera privacy toggle support
 - [BluetoothLibraryPatcher](https://github.com/3arthur6/BluetoothLibraryPatcher) integrated
 
-## 🔐 Security & Privacy.
+### 🔐 Security & Privacy.
 Secure Folder support.
 - Essential security components retained.
 - Stable and safe daily-driver experience.
 
-## 📱 One UI Experience.
+### 📱 One UI Experience.
 - Full One UI apps included.
 - Important system apps preserved.
 - China Smart Manager support.
 - AI features enabled.
 
-## 🎯 Project Goal.
+### 🎯 Project Goal.
 - To deliver a lightweight yet fully featured Samsung One UI ROM that balances.
 - Performance.
 - Stability.
@@ -103,22 +103,25 @@ In your forked repository, go to:
   - You can search on YouTube for a guide on how to create a GitHub Personal Access Token.
   - If you do not add the `GIT_TOKEN`, the built ROM info and link will not be added to your repository's Release section. You will get link only in runner output.
 
-## Credits:
+### Credits:
 #### 1. Samsung Firmware Downloader.
-- Project Repository: https://github.com/martinetd/samloader
+- martinetd
+- https://github.com/martinetd/samloader
 - Used for downloading Samsung firmware.
 
 #### 2. Multi Disabler.
-- Project Repository: https://github.com/ianmacd/multidisabler-samsung
+- ianmacd
+- https://github.com/ianmacd/multidisabler-samsung
 - Used for disabling Samsung security and data encryption.
 
 #### 3. Bluetooth Library Patcher.
-- Project Repository: https://github.com/3arthur6/BluetoothLibraryPatcher
+- 3arthur6
+- https://github.com/3arthur6/BluetoothLibraryPatcher
 - Used for patching Samsung Bluetooth libraries.
 
 #### 4. UN1CA Project.
-- Owner: https://github.com/salvogiangri
-- Project Repository: https://github.com/salvogiangri/UN1CA
+- salvogiangri
+- https://github.com/salvogiangri/UN1CA
 
 #### Components Used from UN1CA.
 - `HEX_PATCH` function (modified from UN1CA implementation)
@@ -139,6 +142,7 @@ In your forked repository, go to:
 - For providing bash commands and bash functions according to the project requirements and instructions.
 
 #### 7. GoFile Uploader.
+- Sushrut1101
 - https://github.com/Sushrut1101/GoFile-Upload
 
 ### Licensing.
