@@ -26,7 +26,6 @@ Download firmware directly from samsung server.
 - Multi user support.
 - Camera privacy toggle support
 - [BluetoothLibraryPatcher](https://github.com/3arthur6/BluetoothLibraryPatcher) integrated
-- [KnoxPatch](https://github.com/salvogiangri/KnoxPatch) integrated
 
 ## 🔐 Security & Privacy.
 Secure Folder support.
