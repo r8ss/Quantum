@@ -90,6 +90,7 @@ My tool can build images in two formats:
 If set to True:
  - The generated image will be compressed to .xz format.
  - This reduces file size before uploading.
+
 If set to False:
  - The image will remain in its original format without compression.
    
