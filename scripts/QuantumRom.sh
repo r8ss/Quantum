@@ -521,6 +521,12 @@ PATCH_FLAG_SECURE() {
     fi
 
 	echo -e "${YELLOW}Patching flag secure.${NC}"
+    #
+	# For android 13
+	# local FILE="${1}/smali_classes3/com/android/server/wm/WindowState.smali"
+	# local METHOD_NAME_1=".method public isSecureLocked()Z"
+	# Only one method.
+
 	local FILE="${1}/smali_classes2/com/android/server/wm/WindowState.smali"
     local METHOD_NAME_1=".method public final isSecureLocked()Z"
     local REPLACE_BODY_1='
