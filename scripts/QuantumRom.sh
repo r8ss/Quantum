@@ -614,6 +614,30 @@ PATCH_SECURE_FOLDER() {
 }
 
 
+PATCH_PRIVATE_SHARE() {
+    echo -e ""
+	if [ "$#" -ne 1 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_SERVICES_DIRECTORY>"
+        return 1
+    fi
+
+    echo -e "${YELLOW}Patching sprivate share.${NC}"
+	# https://forum.xda-developers.com/t/mods-samsung-not-android-mods-collection-exynos.3772017/post-86805769
+	
+    local FILE="${1}/smali/com/samsung/android/security/keystore/AttestParameterSpec.smali"
+    # patch .method public isVerifiableIntegrity()Z
+    local METHOD_NAME=".method public isVerifiableIntegrity()Z"
+    local REPLACE_BODY='
+    .locals 1
+ 
+    const/4 v0, 0x1
+ 
+    return v0
+    '
+	REPLACE_SMALI_METHOD "$FILE" "$METHOD_NAME" "$REPLACE_BODY"
+}
+
+
 PATCH_KNOX_GUARD() {
     echo -e ""
 	if [ "$#" -ne 1 ]; then
@@ -1137,6 +1161,7 @@ APPLY_STOCK_CONFIG() {
 
     export STOCK_FLOATING_FEATURE="$DEVICES_DIR/$STOCK_DEVICE/floating_feature.xml"
 	export STOCK_SIOP_FILENAME="$(awk -F'[<>]' '$2 == "SEC_FLOATING_FEATURE_SYSTEM_CONFIG_SIOP_POLICY_FILENAME" {print $3}' "$STOCK_FLOATING_FEATURE" | tr -d '\r' | xargs)"
+	export DEVICE_TYPE="$(awk -F'[<>]' '$2 == "SEC_FLOATING_FEATURE_COMMON_CONFIG_DEVICE_MANUFACTURING_TYPE" {print $3}' "$STOCK_FLOATING_FEATURE")"
 
 	# FIX SYSTEM_EXT.
     FIX_SYSTEM_EXT "$EXTRACTED_FIRM_DIR"
@@ -1152,8 +1177,13 @@ APPLY_STOCK_CONFIG() {
         cp -rfa "$(pwd)/QuantumROM/Mods/Tethering_Apex/UI-8/." "$EXTRACTED_FIRM_DIR/"
     fi
 
-	# Replace Stock Files.
-	rm -rf "$EXTRACTED_FIRM_DIR/system/system/cameradata/portrait_data"
+    if [ "DEVICE_TYPE" = "jdm" ]; then
+	    echo -e "- Applying jdm device feature"
+	    APPLY_JDM_SPECIAL "$EXTRACTED_FIRM_DIR"
+    else
+	    rm -rf "$EXTRACTED_FIRM_DIR/system/system/cameradata/portrait_data"
+	fi
+
 	rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/init"/rscmgr*.rc
 	find "$EXTRACTED_FIRM_DIR/system/system/media" -maxdepth 1 -type f \( -iname "*.spi" -o -iname "*.qmg" -o -iname "*.txt" \) -delete
 	rm -rf $EXTRACTED_FIRM_DIR/product/overlay/framework-res*auto_generated_rro_product.apk
@@ -1297,6 +1327,7 @@ REMOVE_TLC_ICC() {
     fi
 }
 
+
 DISABLE_SECURITY() {
     if [ "$#" -ne 1 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
@@ -1321,6 +1352,18 @@ DISABLE_SECURITY() {
 	DISABLE_FBE "$EXTRACTED_FIRM_DIR"
 	DISABLE_FDE "$EXTRACTED_FIRM_DIR"
 	REMOVE_TLC_ICC "$EXTRACTED_FIRM_DIR"
+}
+
+
+APPLY_JDM_SPECIAL() {
+    if [ "$#" -ne 1 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        return 1
+    fi
+
+	local EXTRACTED_FIRM_DIR="$1"
+	rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/SamSungCamera"
+    cp -rfa "$(pwd)/QuantumROM/JDM_Special/SamSungCamera/." "$EXTRACTED_FIRM_DIR/"
 }
 
 
@@ -1391,9 +1434,6 @@ APPLY_CUSTOM_FEATURES() {
 
 	# Remove power and data usage permissions for certain apps when Power Saver and Data Saver are always enabled.
 	# sed -i '/^[[:space:]]*<allow-in-power-save/d; /^[[:space:]]*<allow-in-data-usage-save/d' "$EXTRACTED_FIRM_DIR/product/etc/sysconfig/"*.xml "$EXTRACTED_FIRM_DIR/system/system/etc/sysconfig/"*.xml
-    
-	sudo chown -R "$REAL_USER:$REAL_USER" "$EXTRACTED_FIRM_DIR"
-    sudo chmod -R u+rwX "$EXTRACTED_FIRM_DIR"
 }
 
 
