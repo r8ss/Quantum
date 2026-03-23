@@ -231,7 +231,7 @@ EXTRACT_FIRMWARE() {
 
 PREPARE_PARTITIONS() {
 	if [ -z "$STOCK_DEVICE" ] || [ "$STOCK_DEVICE" = "None" ]; then
-        export BUILD_PARTITIONS="odm,product,system_ext,system,vendor"
+        export BUILD_PARTITIONS="odm,product,system_ext,system,vendor,odm_a,product_a,system_ext_a,system_a,vendor_a"
     fi
 
     if [ "$#" -ne 1 ]; then
@@ -1036,8 +1036,8 @@ APPLY_CUSTOM_FLOATING_FEATURE() {
 
 
 APPLY_STOCK_FLOATING_FEATURE() {
-    echo -e " "
-    echo -e "${YELLOW}Applying Stock Floating Feature.${NC}"
+    echo -e "- Applying Stock Floating Feature."
+
     #========== AUDIO ==========#
     UPDATE_FLOATING_FEATURE "SEC_FLOATING_FEATURE_AUDIO_CONFIG_VOLUMEMONITOR_STAGE" "$(awk -F'[<>]' '$2 == "SEC_FLOATING_FEATURE_AUDIO_CONFIG_VOLUMEMONITOR_STAGE" {print $3}' "$STOCK_FLOATING_FEATURE")"
     UPDATE_FLOATING_FEATURE "SEC_FLOATING_FEATURE_AUDIO_SUPPORT_VOLUME_MONITOR" "$(awk -F'[<>]' '$2 == "SEC_FLOATING_FEATURE_AUDIO_SUPPORT_VOLUME_MONITOR" {print $3}' "$STOCK_FLOATING_FEATURE")"
@@ -1177,8 +1177,8 @@ APPLY_STOCK_CONFIG() {
         cp -rfa "$(pwd)/QuantumROM/Mods/Tethering_Apex/UI-8/." "$EXTRACTED_FIRM_DIR/"
     fi
 
-    if [ "DEVICE_TYPE" = "jdm" ]; then
-	    echo -e "- Applying jdm device feature"
+    if [ "$DEVICE_TYPE" = "jdm" ]; then
+	    echo -e "- Applying jdm device feature."
 	    APPLY_JDM_SPECIAL "$EXTRACTED_FIRM_DIR"
     else
 	    rm -rf "$EXTRACTED_FIRM_DIR/system/system/cameradata/portrait_data"
@@ -1363,7 +1363,7 @@ APPLY_JDM_SPECIAL() {
 
 	local EXTRACTED_FIRM_DIR="$1"
 	rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/SamSungCamera"
-    cp -rfa "$(pwd)/QuantumROM/JDM_Special/SamSungCamera/." "$EXTRACTED_FIRM_DIR/"
+    cp -rfa "$(pwd)/QuantumROM/Mods/Apps/JDM_Special/SamSungCamera/." "$EXTRACTED_FIRM_DIR/"
 }
 
 
