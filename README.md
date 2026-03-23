@@ -24,7 +24,10 @@ This Custom ROM is built by combining and refining features from multiple projec
 - Extra brightness support.
 - Object, shadow and reflection remover support.
 - Multi user support.
-- Camera privacy toggle support
+- Camera privacy toggle support.
+- Private share patch.
+- Google photos unlimited backup.
+- JDM device support.
 - [BluetoothLibraryPatcher](https://github.com/3arthur6/BluetoothLibraryPatcher) integrated
 
 ### 🔐 Security & Privacy.
@@ -138,13 +141,18 @@ In your forked repository, go to:
 -  https://github.com/ExtremeXT
 - For bootanimation then reboot bug fix.
 
-#### 6. ChatGPT.
+#### 6. Google photos unlimited backup.
+- VehanRajintha
+- https://github.com/VehanRajintha/Free-Unlimited-Google-Cloud-Backup-Magisk-Module
+
+#### 7. ChatGPT.
 - https://chat.openai.com
 - For providing bash commands and bash functions according to the project requirements and instructions.
 
-#### 7. GoFile Uploader.
+#### 8. GoFile Uploader.
 - Sushrut1101
 - https://github.com/Sushrut1101/GoFile-Upload
+- 
 
 ### Licensing.
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
