@@ -621,7 +621,7 @@ PATCH_PRIVATE_SHARE() {
         return 1
     fi
 
-    echo -e "${YELLOW}Patching sprivate share.${NC}"
+    echo -e "${YELLOW}Patching private share.${NC}"
 	# https://forum.xda-developers.com/t/mods-samsung-not-android-mods-collection-exynos.3772017/post-86805769
 	
     local FILE="${1}/smali/com/samsung/android/security/keystore/AttestParameterSpec.smali"
@@ -1428,6 +1428,10 @@ APPLY_CUSTOM_FEATURES() {
 
     # Apply custom floating feature.
 	APPLY_CUSTOM_FLOATING_FEATURE
+
+	# Google photos unlimited backup.
+	# https://github.com/VehanRajintha/Free-Unlimited-Google-Cloud-Backup-Magisk-Module/releases/tag/Assets
+	cp -rfa "$(pwd)/QuantumROM/Mods/GPhotos/." "$EXTRACTED_FIRM_DIR/"
 
     # Fix Samsung AI Photo Editor Crash.
 	sed -i '0,/"ModelType": "MODEL_TYPE_INSTANCE_CAPTURE"/s//"ModelType": "MODEL_TYPE_OBJ_INSTANCE_CAPTURE"/' "$EXTRACTED_FIRM_DIR/system/system/cameradata/portrait_data/single_bokeh_feature.json"
