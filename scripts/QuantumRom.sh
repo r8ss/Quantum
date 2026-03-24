@@ -930,7 +930,6 @@ FIX_SELINUX() {
     fi
 
     if [ -n "$STOCK_VNDK_VERSION" ]; then
-	    echo -e "- Fixing selinux for $STOCK_DEVICE."
         SELINUX_FILE="$TARGET_ROM_SYSTEM_EXT_DIR/etc/selinux/mapping/${STOCK_VNDK_VERSION}.0.cil"
     else
         MANIFEST_FILE="$TARGET_ROM_SYSTEM_EXT_DIR/etc/vintf/manifest.xml"
