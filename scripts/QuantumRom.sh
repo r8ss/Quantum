@@ -638,6 +638,32 @@ PATCH_PRIVATE_SHARE() {
 }
 
 
+DISABLE_SIGNATURE_VERIFICATION() {
+    echo -e ""
+	if [ "$#" -ne 1 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_SERVICES_DIRECTORY>"
+        return 1
+    fi
+
+    echo -e "${YELLOW}Disabling signature verification.${NC}"
+	# https://github.com/ShaDisNX255/NcX_Stock/commit/e9fca1cedf2405c9f84dc2ee4aafa018e59de464
+    # https://forum.xda-developers.com/t/mods-samsung-not-android-mods-collection-exynos.3772017/post-87773529
+    # https://forum.xda-developers.com/t/mods-samsung-not-android-mods-collection-exynos.3772017/post-87773543
+
+    local FILE="${1}/smali_classes4/android/util/apk/ApkSignatureVerifier.smali"
+    # patch .method public static blacklist getMinimumSignatureSchemeVersionForTargetSdk(I)I
+    local METHOD_NAME=".method public static blacklist getMinimumSignatureSchemeVersionForTargetSdk(I)I"
+    local REPLACE_BODY='
+    .locals 1
+
+    const/4 v0, 0x1
+ 
+    return v0
+    '
+	REPLACE_SMALI_METHOD "$FILE" "$METHOD_NAME" "$REPLACE_BODY"
+}
+
+
 PATCH_KNOX_GUARD() {
     echo -e ""
 	if [ "$#" -ne 1 ]; then
