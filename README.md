@@ -152,7 +152,6 @@ In your forked repository, go to:
 #### 8. GoFile Uploader.
 - Sushrut1101
 - https://github.com/Sushrut1101/GoFile-Upload
-- 
 
 ### Licensing.
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
