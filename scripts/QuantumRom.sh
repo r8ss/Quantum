@@ -1687,7 +1687,7 @@ BUILD_IMG() {
 
         if [[ "$FILE_SYSTEM" == "erofs" ]]; then
             echo -e "${YELLOW}Building EROFS image:${NC} $OUT_IMG"
-            $(pwd)/bin/erofs-utils/mkfs.erofs --mount-point="$MOUNT_POINT" --fs-config-file="$FS_CONFIG" --file-contexts="$FILE_CONTEXTS" -z lz4hc -b 4096 -T 1199145600 "$OUT_IMG" "$SRC_DIR" >/dev/null 2>&1
+            $(pwd)/bin/erofs-utils/mkfs.erofs --mount-point="$MOUNT_POINT" --fs-config-file="$FS_CONFIG" --file-contexts="$FILE_CONTEXTS" -z lz4hc -b 4096 -T 1199145600 "$OUT_IMG" "$SRC_DIR"
 
         elif [[ "$FILE_SYSTEM" == "ext4" ]]; then
             echo -e "${YELLOW}Building ext4 image:${NC} $OUT_IMG"
