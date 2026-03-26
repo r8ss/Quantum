@@ -466,20 +466,21 @@ REPLACE_SMALI_METHOD() {
     local METHOD_NAME="$2"
     local NEW_BODY=$(echo -e "$3" | tail -n +2)
 
-    # Escape special chars in method name for sed
-    local method_esc
-    method_esc=$(printf '%s\n' "$METHOD_NAME" | sed -e 's/[.[\*^$/]/\\&/g')
-
     echo -e "- Patching: $FILE"
-	echo -e "  Method: $METHOD_NAME"
+    echo -e "  Method: $METHOD_NAME"
 
-    if ! grep -q "$METHOD_NAME" "$FILE"; then
+    if ! grep -Fq "$METHOD_NAME" "$FILE"; then
         echo -e "- ${YELLOW}Method not found → Skipped${NC}"
         return 0
     fi
+
+    # Extract method key (safe match)
+    local METHOD_KEY
+    METHOD_KEY=$(echo "$METHOD_NAME" | sed -E 's/.* ([^ ]+\().*/\1/')
+
     sed -i "
-/^[[:space:]]*$method_esc\$/,/^[[:space:]]*\.end method/{
-    /^[[:space:]]*$method_esc\$/{
+/^[[:space:]]*\.method.*$METHOD_KEY/,/^[[:space:]]*\.end method/{
+    /^[[:space:]]*\.method/{
         p
         r /dev/stdin
         d
@@ -541,6 +542,8 @@ PATCH_FLAG_SECURE() {
 	# local METHOD_NAME_1=".method public isSecureLocked()Z"
 	# Only one method.
 
+    # https://github.com/ShaDisNX255/NcX_Stock/commit/c2cc85818df4fe040b4f89ca8f9b78e939b211b4
+    # https://forum.xda-developers.com/t/mods-samsung-not-android-mods-collection-exynos.3772017/post-86811691
 	local FILE_1="${1}/smali_classes2/com/android/server/wm/WindowState.smali"
     local METHOD_NAME_1=".method public final isSecureLocked()Z"
     local REPLACE_BODY_1='
@@ -604,28 +607,35 @@ PATCH_SECURE_FOLDER() {
     fi
 
     echo -e "${YELLOW}Patching secure folder.${NC}"
-    local FILE="${1}/smali/com/android/server/knox/dar/DarManagerService.smali"
-    # patch isDeviceRootKeyInstalled
-    local METHOD_NAME_1=".method public final isDeviceRootKeyInstalled()Z"
+
+	#https://forum.xda-developers.com/t/mods-samsung-not-android-mods-collection-exynos.3772017/post-86770885
+	local FILE_1="${1}/smali/com/android/server/knox/dar/DarManagerService.smali"
+	local METHOD_NAME_1=".method public final checkDeviceIntegrity([Ljava/security/cert/Certificate;)Z"
+	local METHOD_NAME_2=".method public final isDeviceRootKeyInstalled()Z"
+    local METHOD_NAME_3=".method public final isKnoxKeyInstallable()Z"
+    
     local REPLACE_BODY_1='
     .locals 0
-
-    const/4 v0, 0x1
-
-    return v0
+ 
+    const/4 p0, 0x1
+ 
+    return p0
     '
-    REPLACE_SMALI_METHOD "$FILE" "$METHOD_NAME_1" "$REPLACE_BODY_1"
 
-    # patch isKnoxKeyInstallable
-    local METHOD_NAME_2=".method public final isKnoxKeyInstallable()Z"
+    REPLACE_SMALI_METHOD "$FILE_1" "$METHOD_NAME_1" "$REPLACE_BODY_1"
+    REPLACE_SMALI_METHOD "$FILE_1" "$METHOD_NAME_2" "$REPLACE_BODY_1"
+	REPLACE_SMALI_METHOD "$FILE_1" "$METHOD_NAME_3" "$REPLACE_BODY_1"
+
+    local FILE_2="${1}/smali/com/android/server/StorageManagerService.smali"
+    local METHOD_NAME_4=".method public static isRootedDevice()Z"
     local REPLACE_BODY_2='
-    .locals 0
-
-    const/4 v0, 0x1
-
+    .locals 1
+ 
+    const/4 v0, 0x0
+ 
     return v0
     '
-    REPLACE_SMALI_METHOD "$FILE" "$METHOD_NAME_2" "$REPLACE_BODY_2"
+    REPLACE_SMALI_METHOD "$FILE_2" "$METHOD_NAME_4" "$REPLACE_BODY_2"
 }
 
 
@@ -1053,7 +1063,7 @@ APPLY_CUSTOM_FLOATING_FEATURE() {
 
     #========== SCREEN RECORDER ==========#
     UPDATE_FLOATING_FEATURE "SEC_FLOATING_FEATURE_FRAMEWORK_SUPPORT_SCREEN_RECORDER" "TRUE"
-	
+
 	#========== VOICE RECORDER ==========#
     UPDATE_FLOATING_FEATURE "SEC_FLOATING_FEATURE_VOICERECORDER_CONFIG_DEF_MODE" "normal,interview,voicememo"
 
