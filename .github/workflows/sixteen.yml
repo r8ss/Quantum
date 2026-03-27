@@ -53,7 +53,13 @@ jobs:
       - name: Download firmware ▶️ ${{ github.event.inputs.TARGET_DEVICE }} - ${{ github.event.inputs.TARGET_DEVICE_CSC }}
         run: |
           source scripts/QuantumRom.sh
-          DOWNLOAD_FIRMWARE "${{ github.event.inputs.TARGET_DEVICE }}" "${{ github.event.inputs.TARGET_DEVICE_CSC }}" "${{ github.event.inputs.TARGET_DEVICE_IMEI }}" "FIRMWARE"
+          sudo DOWNLOAD_FIRMWARE "${{ github.event.inputs.TARGET_DEVICE }}" "${{ github.event.inputs.TARGET_DEVICE_CSC }}" "${{ github.event.inputs.TARGET_DEVICE_IMEI }}" "FIRMWARE"
+
+      - name: Extracting ▶️ "${{ github.event.inputs.TARGET_DEVICE }}" firmware.
+        run: |
+          source scripts/QuantumRom.sh
+          sudo EXTRACT_FIRMWARE "FIRMWARE/${{ github.event.inputs.TARGET_DEVICE }}"
+          sudo EXTRACT_FIRMWARE_IMG "FIRMWARE/${{ github.event.inputs.TARGET_DEVICE }}"
 
       - name: Start Rom Build For ${{ github.event.inputs.STOCK_DEVICE }}
         run: |
