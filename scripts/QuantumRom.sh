@@ -332,6 +332,15 @@ EXTRACT_FIRMWARE_IMG() {
                 sudo rm -rf "$FIRM_DIR/$partition"
                 sudo "$(pwd)/bin/erofs-utils/extract.erofs" -i "$imgfile" -x -f -o "$FIRM_DIR" >/dev/null 2>&1
                 ;;
+
+			f2fs)
+                IMG_SIZE=$(stat -c%s -- "$imgfile")
+                echo -e "- $partition.img Detected f2fs. Size: $IMG_SIZE bytes. Converting to ext4"
+				sudo bash "$(pwd)/scripts/convert_to_ext4.sh" "$imgfile"
+
+				sudo rm -rf "$FIRM_DIR/$partition"
+                sudo python3 "$(pwd)/bin/py_scripts/imgextractor.py" "$imgfile" "$FIRM_DIR"
+                ;;
             *)
                 echo -e "- $partition.img unsupported filesystem type ($fstype), skipping"
                 continue
