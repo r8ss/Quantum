@@ -442,7 +442,7 @@ DECOMPILE() {
 
     echo -e "${YELLOW}Decompiling:${NC} $FILE"
 	rm -rf "$OUT"
-    java -jar "$APKTOOL" d -f --match-original "$FILE" -o "$OUT"
+    java -jar "$APKTOOL" d --force --match-original "$FILE" -o "$OUT"
 }
 
 
