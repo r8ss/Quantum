@@ -77,7 +77,7 @@ jobs:
           OUT_DIR="$(pwd)/OUT"
           ZIP_NAME="${{ github.event.inputs.TARGET_DEVICE }}_Port_For_${{ github.event.inputs.STOCK_DEVICE }}.zip"
           ZIP_PATH="$OUT_DIR/$ZIP_NAME"
-    
+
           if [ "${{ github.event.inputs.COMPRESS_IMG_TO_XZ }}" = "True" ]; then
             echo "Compressing all .img files to .xz (level 9)..."
             for img in "$OUT_DIR"/*.img; do
@@ -87,7 +87,7 @@ jobs:
             done
             sudo rm -f "$OUT_DIR"/*.img
           fi
-  
+
           echo "Creating zip: $ZIP_NAME"
           7z a -tzip "$ZIP_PATH" "$OUT_DIR"/* -mx=5
           echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
@@ -102,6 +102,6 @@ jobs:
           USE_UI_8_TETHERING_APEX: ${{ github.event.inputs.USE_UI_8_TETHERING_APEX }}
         run: |
            bash release.sh
-  
+
       - name: Clean everything.
         run: sudo rm -rf *
