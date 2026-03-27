@@ -17,10 +17,6 @@ if [ ! -f "$IMG_PATH" ]; then
     exit 1
 fi
 
-# Detect filesystem
-fstype=$(blkid -o value -s TYPE "$IMG_PATH")
-[ -z "$fstype" ] && fstype=$(file -b "$IMG_PATH")
-
 # Clean previous mounts
 umount "$DEST_DIR/$IMG_NAME_BASE" 2>/dev/null
 rm -rf "$DEST_DIR/$IMG_NAME_BASE"
@@ -30,14 +26,8 @@ rm -rf "$DEST_DIR/${IMG_NAME_BASE}_mount"
 # Create mount point
 mkdir -p "$DEST_DIR/${IMG_NAME_BASE}_mount"
 
-# 🔥 Mount depending on FS
-if echo "$FS_TYPE" | grep -qi "f2fs"; then
-    echo "[*] F2FS detected → using fuse2fs"
-    fuse2fs "$IMG_PATH" "$DEST_DIR/${IMG_NAME_BASE}_mount"
-else
-    echo "[*] Using loop mount"
-    mount -o loop,ro "$IMG_PATH" "$DEST_DIR/${IMG_NAME_BASE}_mount"
-fi
+# 🔥 Mount
+fuse2fs "$IMG_PATH" "$DEST_DIR/${IMG_NAME_BASE}_mount"
 
 # Calculate size
 MOUNT_SIZE=$(du -sb "$DEST_DIR/${IMG_NAME_BASE}_mount" | awk '{print int($1 * 1.3)}')
@@ -63,10 +53,5 @@ rm -rf "$DEST_DIR/${IMG_NAME_BASE}_mount"
 
 # 🔥 Rename back to original name
 FINAL_IMG="$DEST_DIR/${IMG_NAME_BASE}.img"
-
-echo "[*] Replacing original image..."
 rm -f "$FINAL_IMG"
 mv "$NEW_IMG_NAME" "$FINAL_IMG"
-
-echo ""
-echo "Final image: $FINAL_IMG"
