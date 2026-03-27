@@ -41,6 +41,15 @@ jobs:
       - name: Checkout repository.
         uses: actions/checkout@v4
 
+      - name: Validate STOCK_DEVICE
+        run: |
+          STOCK_DEVICE="${{ github.event.inputs.STOCK_DEVICE }}"
+          DEVICE_PATH="QuantumROM/Devices/$STOCK_DEVICE"
+          if [ "$STOCK_DEVICE" != "None" ] && [ ! -d "$DEVICE_PATH" ]; then
+            echo "❌ $STOCK_DEVICE is not supported with this tool."
+            exit 1
+          fi
+
       - name: Cleaning junk files
         uses: rokibhasansagar/slimhub_actions@v25.42.5
 
