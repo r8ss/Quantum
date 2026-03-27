@@ -18,7 +18,8 @@ if [ ! -f "$IMG_PATH" ]; then
 fi
 
 # Detect filesystem
-FS_TYPE=$(file "$IMG_PATH")
+fstype=$(blkid -o value -s TYPE "$IMG_PATH")
+[ -z "$fstype" ] && fstype=$(file -b "$IMG_PATH")
 
 # Clean previous mounts
 umount "$DEST_DIR/$IMG_NAME_BASE" 2>/dev/null
