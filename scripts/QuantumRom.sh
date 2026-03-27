@@ -1428,11 +1428,11 @@ DISABLE_SECURITY() {
     if [ -f "$EXTRACTED_FIRM_DIR/product/etc/build.prop" ]; then
         BUILD_PROP "$EXTRACTED_FIRM_DIR" "product" "ro.frp.pst" ""
     fi
-	
+
 	if [ -f "$EXTRACTED_FIRM_DIR/vendor/build.prop" ]; then
 		BUILD_PROP "$EXTRACTED_FIRM_DIR" "vendor" "ro.frp.pst" ""
     fi
-	
+
     if [ -f "$EXTRACTED_FIRM_DIR/vendor/recovery-from-boot.p" ]; then
         rm -rf "$EXTRACTED_FIRM_DIR/vendor/recovery-from-boot.p"
     fi
