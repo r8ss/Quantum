@@ -289,15 +289,18 @@ PREPARE_PARTITIONS() {
 
 EXTRACT_FIRMWARE_IMG() {
     echo -e ""
-	if [ "$#" -ne 1 ]; then
+
+    if [ "$#" -ne 1 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <FIRMWARE_DIRECTORY>"
         return 1
     fi
 
-	local FIRM_DIR="$1"
+    local FIRM_DIR="$1"
 
     PREPARE_PARTITIONS "$FIRM_DIR"
-	echo -e "${YELLOW}Extracting imges from:${NC} $FIRM_DIR"
+
+    echo -e "${YELLOW}Extracting images from:${NC} $FIRM_DIR"
+
     for imgfile in "$FIRM_DIR"/*.img; do
         [ -e "$imgfile" ] || continue
 
@@ -311,31 +314,91 @@ EXTRACT_FIRMWARE_IMG() {
 
         partition="$(basename "${imgfile%.img}")"
         fstype=$(blkid -o value -s TYPE "$imgfile")
+        [ -z "$fstype" ] && fstype=$(file -b "$imgfile")
 
         case "$fstype" in
             ext4)
                 IMG_SIZE=$(stat -c%s -- "$imgfile")
-				echo -e "- $partition.img Detected $fstype. Size: $IMG_SIZE bytes. Extracting..."
-				sudo rm -rf "$FIRM_DIR/$partition"
-                sudo python3 $(pwd)/bin/py_scripts/imgextractor.py "$imgfile" "$FIRM_DIR"
+                echo -e "- $partition.img Detected ext4. Size: $IMG_SIZE bytes. Extracting..."
+
+                sudo rm -rf "$FIRM_DIR/$partition"
+                sudo python3 "$(pwd)/bin/py_scripts/imgextractor.py" "$imgfile" "$FIRM_DIR"
                 ;;
+
             erofs)
                 IMG_SIZE=$(stat -c%s -- "$imgfile")
-				echo -e "- $partition.img Detected $fstype. Size: $IMG_SIZE bytes. Extracting..."
-				sudo rm -rf "$FIRM_DIR/$partition"
-                sudo $(pwd)/bin/erofs-utils/extract.erofs -i "$imgfile" -x -f -o "$FIRM_DIR" >/dev/null 2>&1
+                echo -e "- $partition.img Detected erofs. Size: $IMG_SIZE bytes. Extracting..."
+
+                sudo rm -rf "$FIRM_DIR/$partition"
+                sudo "$(pwd)/bin/erofs-utils/extract.erofs" -i "$imgfile" -x -f -o "$FIRM_DIR" >/dev/null 2>&1
                 ;;
+
+            f2fs)
+                IMG_SIZE=$(stat -c%s -- "$imgfile")
+                echo -e "- $partition.img Detected f2fs. Converting → ext4..."
+
+                # --- Start inline f2fs → ext4 conversion ---
+                IMG_NAME="$imgfile"
+                IMG_DIR=$(dirname "$IMG_NAME")
+                IMG_FILE=$(basename "$IMG_NAME")
+                IMG_NAME_BASE="${IMG_FILE%.img}"
+                NEW_IMG_NAME="${IMG_DIR}/${IMG_FILE}.new"
+                SRC_MOUNT="${IMG_DIR}/${IMG_NAME_BASE}_mount"
+                DST_MOUNT="${IMG_DIR}/${IMG_NAME_BASE}"
+
+                # Clean previous mounts
+                sudo umount "$DST_MOUNT" 2>/dev/null
+                sudo rm -rf "$DST_MOUNT"
+                sudo umount "$SRC_MOUNT" 2>/dev/null
+                sudo rm -rf "$SRC_MOUNT"
+
+                # Mount source image
+                sudo mkdir -p "$SRC_MOUNT"
+                sudo mount -o loop,ro "$IMG_NAME" "$SRC_MOUNT"
+
+                # Calculate size (+10%)
+                MOUNT_SIZE=$(du -sb "$SRC_MOUNT" | awk '{print int($1 * 1.1)}')
+                echo "[*] Source image size (+10% buffer): $MOUNT_SIZE bytes"
+
+                # Create new ext4 image
+                dd if=/dev/zero of="$NEW_IMG_NAME" bs=1 count=0 seek="$MOUNT_SIZE"
+                mkfs.ext4 -F -b 4096 "$NEW_IMG_NAME"
+
+                # Mount new ext4 image
+                sudo mkdir -p "$DST_MOUNT"
+                sudo mount -o loop "$NEW_IMG_NAME" "$DST_MOUNT"
+
+                # Copy data
+                sudo cp -a --preserve "$SRC_MOUNT"/. "$DST_MOUNT"/
+
+                # Cleanup mounts
+                sudo umount "$DST_MOUNT"
+                sudo rm -rf "$DST_MOUNT"
+                sudo umount "$SRC_MOUNT"
+                sudo rm -rf "$SRC_MOUNT"
+
+                # Replace original image
+                sudo rm -f "$IMG_NAME"
+                sudo mv "$NEW_IMG_NAME" "$IMG_NAME"
+                echo "- $partition.img Converted to ext4."
+                # --- End inline f2fs → ext4 conversion ---
+
+                # Extract as ext4
+                sudo rm -rf "$FIRM_DIR/$partition"
+                sudo python3 "$(pwd)/bin/py_scripts/imgextractor.py" "$imgfile" "$FIRM_DIR"
+                ;;
+
             *)
-                echo -e "- $imgfile unsupported filesystem type ($fstype), exiting"
-                exit 1
+                echo -e "- $partition.img unsupported filesystem type ($fstype), skipping"
+                continue
                 ;;
         esac
     done
 
     rm -rf "$FIRM_DIR"/*.img
-	
-	if ! ls "$FIRM_DIR"/system* >/dev/null 2>&1; then
-        echo -e "Maybe your firmware is not downloaded, is corrupt, or contains an unsupported image."
+
+    if ! ls "$FIRM_DIR"/system* >/dev/null 2>&1; then
+        echo -e "❌ Firmware may be corrupt or unsupported."
         exit 1
     fi
 
