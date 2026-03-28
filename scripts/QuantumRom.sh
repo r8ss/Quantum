@@ -421,9 +421,9 @@ INSTALL_FRAMEWORK() {
     fi
 
     echo -e ""
-    local framework-res_apk="$1"
-    echo -e "${YELLOW}Installing Framework.${NC}"
-    java -jar "$APKTOOL" install-framework "$framework-res_apk"
+    local framework_apk="$1"
+    echo -e "${YELLOW}Installing $framework_apk ${NC}"
+    java -jar "$APKTOOL" install-framework "$framework_apk"
 }
 
 
