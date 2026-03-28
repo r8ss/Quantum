@@ -434,7 +434,15 @@ DECOMPILE() {
         return 1
     fi
 
-    local APKTOOL="$1"
+    # apktool version-3
+	# d = decompile
+	# --force = force delete target decompile directory before decompile
+	# --no-src = don't decompile dex file
+	# --no-res = don't decode resources
+	# --match-original = decompile everything as original
+	# --frame-path = framework path
+	# -o = decompile directory
+	local APKTOOL="$1"
     local FILE="$2"
     local DECOMPILE_DIR="$3"
     local BASENAME="$(basename "${FILE%.*}")"
