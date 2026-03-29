@@ -476,19 +476,19 @@ RECOMPILE() {
     org_file_name=$(awk '/^apkFileName:/ {print $2}' "$DECOMPILED_DIR/apktool.yml")
     local name="${org_file_name%.*}"
     local ext="${org_file_name##*.}"
-    local built_file="$WORK_DIR/${name}_unsigned.$ext"
-    local final_file="$WORK_DIR/$org_file_name"
-
+    local built_file="$WORK_DIR/${name}.$ext"
+	
     echo -e "${YELLOW}Recompiling:${NC} $DECOMPILED_DIR"
     java -jar "$APKTOOL" b "$DECOMPILED_DIR" --copy-original --frame-path "$FRAMEWORK_DIR" -o "$built_file"
-
-    # Zipalign
-	echo -e ""
-	if [[ "$ext" == "apk" ]]; then
-	    echo -e "${YELLOW}Zipaligning:${NC} $built_file to $final_file"
-        zipalign -v 4 "$built_file" "$final_file" >/dev/null 2>&1
-		rm -rf "$built_file" "$DECOMPILED_DIR"
-    fi
+    rm -rf "$DECOMPILED_DIR"
+    
+	# Zipalign
+	# echo -e ""
+	# if [[ "$ext" == "apk" ]]; then
+	    # echo -e "${YELLOW}Zipaligning:${NC} $built_file to $final_file"
+        # zipalign -v 4 "$built_file" "$final_file" >/dev/null 2>&1
+		# rm -rf "$built_file"
+    # fi
 }
 
 
