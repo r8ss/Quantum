@@ -484,7 +484,7 @@ RECOMPILE() {
 
     # Zipalign
 	echo -e ""
-	if [[ "$ext" == "jar" ]]; then
+	if [[ "$ext" == "apk" ]]; then
 	    echo -e "${YELLOW}Zipaligning:${NC} $built_file to $final_file"
         zipalign -v 4 "$built_file" "$final_file" >/dev/null 2>&1
 		rm -rf "$built_file" "$DECOMPILED_DIR"
