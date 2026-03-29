@@ -1545,6 +1545,10 @@ APPLY_CUSTOM_FEATURES() {
 	# sed -i '/^[[:space:]]*<allow-in-power-save/d; /^[[:space:]]*<allow-in-data-usage-save/d' "$EXTRACTED_FIRM_DIR/product/etc/sysconfig/"*.xml "$EXTRACTED_FIRM_DIR/system/system/etc/sysconfig/"*.xml
 	sudo chown -R "$REAL_USER:$REAL_USER" "$EXTRACTED_FIRM_DIR"
     sudo chmod -R u+rwX "$EXTRACTED_FIRM_DIR"
+	
+	if [ -d "$(pwd)/QuantumROM/usefull_things" ]; then
+        cp -a "$(pwd)/QuantumROM/usefull_things/." "$(pwd)/OUT"
+    fi
 }
 
 
