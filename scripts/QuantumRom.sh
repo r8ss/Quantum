@@ -1040,28 +1040,34 @@ SEPARATE_SYSTEM_EXT() {
 
 ADJUST_SYSTEM_EXT() {
     if [ "$#" -ne 1 ]; then
-        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
     fi
 
     local EXTRACTED_FIRM_DIR="$1"
 
-	if [ "$STOCK_HAS_SEPARATE_SYSTEM_EXT" = "TRUE" ] && [ -d "$EXTRACTED_FIRM_DIR/system_ext/apex" ]; then
-        export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system_ext"
-		return 1
-	fi
+    if [ "$STOCK_HAS_SEPARATE_SYSTEM_EXT" = "FALSE" ]; then
+        echo "- STOCK_HAS_SEPARATE_SYSTEM_EXT: $STOCK_HAS_SEPARATE_SYSTEM_EXT"
 
-    if [ "$STOCK_HAS_SEPARATE_SYSTEM_EXT" = "TRUE" ] && [ -d "$EXTRACTED_FIRM_DIR/system/system/system_ext/apex" ]; then
-	    SEPARATE_SYSTEM_EXT "$EXTRACTED_FIRM_DIR"
-	fi
+        if [ -d "$EXTRACTED_FIRM_DIR/system/system/system_ext/apex" ]; then
+            export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system/system_ext"
 
-	if [ "$STOCK_HAS_SEPARATE_SYSTEM_EXT" = "FALSE" ] && [[ -d "$EXTRACTED_FIRM_DIR/system_ext/apex" ]]; then
-	    ADD_SYSTEM_EXT_IN_SYSTEM_ROOT "$EXTRACTED_FIRM_DIR"
-	fi
+        elif [ -d "$EXTRACTED_FIRM_DIR/system/system_ext/apex" ]; then
+            export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system_ext"
+			
+		elif [ -d "$EXTRACTED_FIRM_DIR/system_ext/apex" ]; then
+		    ADD_SYSTEM_EXT_IN_SYSTEM_ROOT "$EXTRACTED_FIRM_DIR"
+        fi
 
-	if [ "$STOCK_HAS_SEPARATE_SYSTEM_EXT" = "FALSE" ] && [[ -d "$EXTRACTED_FIRM_DIR/system/system/system_ext/apex" ]]; then
-	    export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system/system_ext"
-	fi
+	elif [ "$STOCK_HAS_SEPARATE_SYSTEM_EXT" = "TRUE" ]; then
+        echo "STOCK_HAS_SEPARATE_SYSTEM_EXT: $STOCK_HAS_SEPARATE_SYSTEM_EXT"
+
+        if [ -d "$EXTRACTED_FIRM_DIR/system/system/system_ext/apex" ]; then
+            SEPARATE_SYSTEM_EXT "$EXTRACTED_FIRM_DIR"
+        fi
+    fi
+
+    echo "- TARGET_ROM_SYSTEM_EXT_DIR set to: $TARGET_ROM_SYSTEM_EXT_DIR"
 }
 
 
