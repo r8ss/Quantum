@@ -1589,6 +1589,7 @@ APPLY_CUSTOM_FEATURES() {
         cp -rfa "$(pwd)/QuantumROM/Mods/Apps/SecCalculator_R/"* "$EXTRACTED_FIRM_DIR/"
     fi
 
+    # Photo editor full
 	if [ ! -d "$EXTRACTED_FIRM_DIR/system/system/priv-app/PhotoEditor_AIFull" ]; then
 	    rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/ailasso"
 		rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/ailassomatting"
@@ -1601,6 +1602,11 @@ APPLY_CUSTOM_FEATURES() {
         cp -rfa "$(pwd)/QuantumROM/Mods/Apps/PhotoEditor_AIFull/"* "$EXTRACTED_FIRM_DIR"
 		unzip -o "$EXTRACTED_FIRM_DIR/system/system/priv-app/PhotoEditor_AIFull.zip" -d "$EXTRACTED_FIRM_DIR/system/system/priv-app/" >/dev/null 2>&1
 		rm -f "$EXTRACTED_FIRM_DIR/system/system/priv-app/PhotoEditor_AIFull.zip"
+    fi
+
+    # Text recognition: The full OCR app cannot be included in this repository due to GitHub’s file size limitations.
+	if [ ! -d "$EXTRACTED_FIRM_DIR/system/system/saiv/textrecognition" ]; then
+	    cp -rfa "$(pwd)/QuantumROM/Mods/Apps/OCR/." "$EXTRACTED_FIRM_DIR/"
     fi
 
     # Apply custom floating feature.
