@@ -159,13 +159,14 @@ REMOVE_FABRIC_CRYPTO() {
 
 
 KICK() {
-    if [ "$#" -ne 2 ]; then
-        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR> <APPS_LIST>"
+    if [ "$#" -lt 2 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR> <APPS...>"
         return 1
     fi
     
-	local EXTRACTED_FIRM_DIR="$1"
-    local APPS_LIST="$2"
+    local EXTRACTED_FIRM_DIR="$1"
+    shift
+    local APPS_LIST=("$@")
 
     local APP_DIRS=(
         "$EXTRACTED_FIRM_DIR/system/system/app"
@@ -179,7 +180,7 @@ KICK() {
             target="$dir/$app"
 
             if [[ -d "$target" ]]; then
-                rm -rf "$target" || echo -e "[WARN] Failed to remove $target"
+                rm -rf "$target" || echo -e "${RED}[WARN] Failed to delete $target${NC}"
             fi
         done
     done
@@ -198,15 +199,15 @@ DEBLOAT() {
 
 	# Debloat apps
 	echo "- Debloating apps."
-	KICK "$EXTRACTED_FIRM_DIR" $DEBLOAT_APPS
-	KICK "$EXTRACTED_FIRM_DIR" $CARRIER_APPS
-	KICK "$EXTRACTED_FIRM_DIR" $SAMSUNG_APPS
-	KICK "$EXTRACTED_FIRM_DIR" $SAMSUNG_AI
-	KICK "$EXTRACTED_FIRM_DIR" $GOOGLE_APPS
-	KICK "$EXTRACTED_FIRM_DIR" $FACEBOOK_APPS
-	KICK "$EXTRACTED_FIRM_DIR" $HARDWARE_DRIVERS
-	KICK "$EXTRACTED_FIRM_DIR" $MISC_SERVICES
-	KICK "$EXTRACTED_FIRM_DIR" $KNOX_APPS
+    KICK "$EXTRACTED_FIRM_DIR" "${DEBLOAT_APPS[@]}"
+    KICK "$EXTRACTED_FIRM_DIR" "${CARRIER_APPS[@]}"
+    KICK "$EXTRACTED_FIRM_DIR" "${SAMSUNG_APPS[@]}"
+    KICK "$EXTRACTED_FIRM_DIR" "${SAMSUNG_AI[@]}"
+    KICK "$EXTRACTED_FIRM_DIR" "${GOOGLE_APPS[@]}"
+    KICK "$EXTRACTED_FIRM_DIR" "${FACEBOOK_APPS[@]}"
+    KICK "$EXTRACTED_FIRM_DIR" "${HARDWARE_DRIVERS[@]}"
+    KICK "$EXTRACTED_FIRM_DIR" "${MISC_SERVICES[@]}"
+    KICK "$EXTRACTED_FIRM_DIR" "${KNOX_APPS[@]}"
 
     REMOVE_ESIM_FILES "$EXTRACTED_FIRM_DIR"
 	REMOVE_FABRIC_CRYPTO "$EXTRACTED_FIRM_DIR"
