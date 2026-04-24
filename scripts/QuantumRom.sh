@@ -124,7 +124,7 @@ DOWNLOAD_FIRMWARE() {
     else
         echo -e "- Fetching latest firmware..."
 
-        export VERSION=$(python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" checkupdate 2>&1)
+        VERSION=$(python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" checkupdate 2>&1)
 
         if [ $? -ne 0 ] || [ -z "$VERSION" ]; then
             echo -e "- ⛔️ MODEL/CSC/IMEI not valid or no update found."
@@ -133,9 +133,10 @@ DOWNLOAD_FIRMWARE() {
         fi
 
         echo -e "- ✅ Latest version found: $VERSION"
+        if [ -n "$GITHUB_ENV" ]; then
+            echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+        fi
     fi
-
-    echo
 
     # --- Step 2: Download Firmware ---
     python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" download -v "$VERSION" -O "$DOWN_DIR"
