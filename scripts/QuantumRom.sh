@@ -428,13 +428,14 @@ DISABLE_FDE() {
 
 
 INSTALL_FRAMEWORK() {
-    if [ "$#" -ne 1 ]; then
-        echo -e "Usage: ${FUNCNAME[0]} <framework-res.apk>"
+    if [ "$#" -ne 2 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <APKTOOL_JAR_DIR> <framework-res.apk>"
         return 1
     fi
 
     echo -e ""
-    local framework_apk="$1"
+	local APKTOOL="$1"
+    local framework_apk="$2"
     echo -e "${YELLOW}Installing $framework_apk ${NC}"
     java -jar "$APKTOOL" install-framework "$framework_apk"
 }
