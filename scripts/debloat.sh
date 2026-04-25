@@ -75,9 +75,8 @@ GOOGLE_APPS=(
 
 
 # FACEBOOK
-FACEBOOK_APPS=(
-"FBAppManager_NS" "FBInstaller_NS" "FBServices"
-)
+FACEBOOK_APPS=("FBAppManager_NS" "FBInstaller_NS" "FBServices")
+
 
 # DRIVERS
 HARDWARE_DRIVERS=("DevGPUDriver-EX2200" "GameDriver-EX2100" "GameDriver-EX2200" "GameDriver-SM8150")
