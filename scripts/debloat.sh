@@ -80,11 +80,7 @@ FACEBOOK_APPS=(
 )
 
 # DRIVERS
-HARDWARE_DRIVERS=(
-"DevGPUDriver-EX2200"
-"GameDriver-EX2100" "GameDriver-EX2200" "GameDriver-SM8150"
-"GpuWatchApp"
-)
+HARDWARE_DRIVERS=("DevGPUDriver-EX2200" "GameDriver-EX2100" "GameDriver-EX2200" "GameDriver-SM8150")
 
 
 # MISC / SERVICES
