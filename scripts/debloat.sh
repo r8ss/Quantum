@@ -195,6 +195,12 @@ DEBLOAT() {
     fi
 
 	local EXTRACTED_FIRM_DIR="$1"
+
+	if [ ! -d "$EXTRACTED_FIRM_DIR/system" ]; then
+	    echo -e "No extracted firmware found."
+        return 1
+    fi
+
     echo -e "${YELLOW}Debloating apps and files.${NC}"
 
 	# Debloat apps

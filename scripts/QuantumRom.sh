@@ -1084,13 +1084,18 @@ ADJUST_SYSTEM_EXT() {
 }
 
 
-FIX_SELINUX() {
+PATCH_SELINUX() {
     if [ "$#" -ne 1 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
     fi
 
 	local EXTRACTED_FIRM_DIR="$1"
+	
+    if [ ! -d "$EXTRACTED_FIRM_DIR/system" ]; then
+	    echo -e "No extracted firmware found."
+        return 1
+    fi
 
     echo -e "- Patching selinux"
 	
@@ -1580,6 +1585,11 @@ APPLY_CUSTOM_FEATURES() {
 
 	local EXTRACTED_FIRM_DIR="$1"
 	local FLOATING_FEATURE_FILE_DIRECTORY="$EXTRACTED_FIRM_DIR/system/system/etc/floating_feature.xml"
+
+	if [ ! -d "$EXTRACTED_FIRM_DIR/system" ]; then
+		echo -e "No extracted firmware found."
+        return 1
+    fi
 
     echo -e "${YELLOW}Applying usefull features.${NC}"
 	DISABLE_SECURITY "$EXTRACTED_FIRM_DIR"
