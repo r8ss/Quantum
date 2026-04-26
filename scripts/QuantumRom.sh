@@ -512,7 +512,7 @@ REPLACE_SMALI_METHOD() {
     local NEW_BODY=$(echo -e "$3" | tail -n +2)
 
     echo -e "- Patching: $FILE"
-    echo -e "  Method: $METHOD_NAME"
+    echo -e "- Method: $METHOD_NAME"
 
     if ! grep -Fq "$METHOD_NAME" "$FILE"; then
         echo -e "- ${YELLOW}Method not found → Skipped${NC}"
