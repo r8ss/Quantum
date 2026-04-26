@@ -8,11 +8,21 @@ NC="\e[0m"
 
 REAL_USER=${SUDO_USER:-$USER}
 
+# QT DIR
+QT_DIR="$(pwd)"
+
 # Binary
-chmod +x $(pwd)/bin/lp/lpunpack
-chmod +x $(pwd)/bin/ext4/make_ext4fs
-chmod +x $(pwd)/bin/erofs-utils/extract.erofs
-chmod +x $(pwd)/bin/erofs-utils/mkfs.erofs
+chmod +x $QT_DIR/bin/lp/lpmake
+chmod +x $QT_DIR/bin/lp/lpunpack
+chmod +x $QT_DIR/bin/ext4/make_ext4fs
+chmod +x $QT_DIR/bin/erofs-utils/mkfs.erofs
+chmod +x $QT_DIR/bin/erofs-utils/extract.erofs
+
+export lpmake="$QT_DIR/bin/lp/lpmake"
+export lpunpack="$QT_DIR/bin/lp/lpunpack"
+export make_ext4fs="$QT_DIR/bin/ext4/make_ext4fs"
+export mkfs_erofs="$QT_DIR/bin/erofs-utils/mkfs.erofs"
+export extract_erofs="$QT_DIR/bin/erofs-utils/extract.erofs"
 
 
 CHECK_FILE() {
@@ -246,7 +256,7 @@ EXTRACT_FIRMWARE() {
         simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
         rm -f "$FIRM_DIR/super.img"
 
-        "$(pwd)/bin/lp/lpunpack" "$FIRM_DIR/super_raw.img" "$FIRM_DIR"
+        "$lpunpack" "$FIRM_DIR/super_raw.img" "$FIRM_DIR"
         rm -f "$FIRM_DIR/super_raw.img"
 
         echo -e "- Extraction complete"
@@ -345,7 +355,7 @@ EXTRACT_FIRMWARE_IMG() {
                 echo -e "- $partition.img Detected erofs. Size: $IMG_SIZE bytes. Extracting..."
 
                 rm -rf "$FIRM_DIR/$partition"
-                "$(pwd)/bin/erofs-utils/extract.erofs" -i "$imgfile" -x -f -o "$FIRM_DIR" >/dev/null 2>&1
+                "$extract_erofs" -i "$imgfile" -x -f -o "$FIRM_DIR" >/dev/null 2>&1
                 ;;
 
 			f2fs)
@@ -1849,11 +1859,11 @@ BUILD_IMG() {
 
         if [[ "$FILE_SYSTEM" == "erofs" ]]; then
             echo -e "${YELLOW}Building EROFS image:${NC} $OUT_IMG"
-            $(pwd)/bin/erofs-utils/mkfs.erofs --mount-point="$MOUNT_POINT" --fs-config-file="$FS_CONFIG" --file-contexts="$FILE_CONTEXTS" -z lz4hc -b 4096 -T 1199145600 "$OUT_IMG" "$SRC_DIR" >/dev/null 2>&1
+            $mkfs_erofs --mount-point="$MOUNT_POINT" --fs-config-file="$FS_CONFIG" --file-contexts="$FILE_CONTEXTS" -z lz4hc -b 4096 -T 1199145600 "$OUT_IMG" "$SRC_DIR" >/dev/null 2>&1
 
         elif [[ "$FILE_SYSTEM" == "ext4" ]]; then
             echo -e "${YELLOW}Building ext4 image:${NC} $OUT_IMG"
-            $(pwd)/bin/ext4/make_ext4fs -l "$(awk "BEGIN {printf \"%.0f\", $SIZE * 1.1}")" -J -b 4096 -S "$FILE_CONTEXTS" -C "$FS_CONFIG"  -a "$MOUNT_POINT" -L "$PARTITION" "$OUT_IMG" "$SRC_DIR"
+            $make_ext4fs -l "$(awk "BEGIN {printf \"%.0f\", $SIZE * 1.1}")" -J -b 4096 -S "$FILE_CONTEXTS" -C "$FS_CONFIG"  -a "$MOUNT_POINT" -L "$PARTITION" "$OUT_IMG" "$SRC_DIR"
 			# Resize img to reduce size.
 			resize2fs -M "$OUT_IMG"
         else
