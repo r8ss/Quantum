@@ -853,7 +853,7 @@ PATCH_BT_LIB() {
 
     echo -e "${YELLOW}Patching Bluetooth library.${NC}"
     # Get libbluetooth_jni.so
-    unzip "$EXTRACTED_FIRM_DIR/system/system/apex/com.android.bt.apex" "apex_payload.img" -d "$WORK_DIR" >/dev/null 2>&1
+    unzip "$EXTRACTED_FIRM_DIR/system/system/apex/com.android.bt*.apex" "apex_payload.img" -d "$WORK_DIR" >/dev/null 2>&1
 	debugfs -R "dump /lib64/libbluetooth_jni.so $WORK_DIR/libbluetooth_jni.so" "$WORK_DIR/apex_payload.img" >/dev/null 2>&1
 	rm -rf "$WORK_DIR/apex_payload.img"
 
