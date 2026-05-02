@@ -270,7 +270,7 @@ EXTRACT_FIRMWARE() {
 
 PREPARE_PARTITIONS() {
 	if [ -z "$STOCK_DEVICE" ] || [ "$STOCK_DEVICE" = "None" ]; then
-        export BUILD_PARTITIONS="odm,product,system_ext,system,vendor,odm_a,product_a,system_ext_a,system_a,vendor_a"
+        export BUILD_PARTITIONS="odm,odm_dlkm,product,system,system_ext,system_dlkm,vendor,vendor_dlkm,odm_a,odm_dlkm_a,product_a,system_a,system_ext_a,system_dlkm_a,vendor_a,vendor_dlkm_a"
     fi
 
     if [ "$#" -ne 1 ]; then
@@ -1882,7 +1882,7 @@ BUILD_IMG() {
 
         elif [[ "$FILE_SYSTEM" == "ext4" ]]; then
             echo -e "${YELLOW}Building ext4 image:${NC} $OUT_IMG"
-            $make_ext4fs -l "$(awk "BEGIN {printf \"%.0f\", $SIZE * 1.4}")" -J -b 4096 -S "$FILE_CONTEXTS" -C "$FS_CONFIG"  -a "$MOUNT_POINT" -L "$PARTITION" "$OUT_IMG" "$SRC_DIR"
+            $make_ext4fs -l "$(awk "BEGIN {printf \"%.0f\", $SIZE * 1.1}")" -J -b 4096 -S "$FILE_CONTEXTS" -C "$FS_CONFIG"  -a "$MOUNT_POINT" -L "$PARTITION" "$OUT_IMG" "$SRC_DIR"
 			# Resize img to reduce size.
 			resize2fs -M "$OUT_IMG"
         else
