@@ -175,7 +175,7 @@ DOWNLOAD_FIRMWARE() {
     # --- Show Firmware Info ---
     file_size=$(du -m "${DOWN_DIR}/${MODEL}.zip" | cut -f1)
 
-    echo
+    echo " "
     echo -e "- ✅ Firmware decrypted successfully! Firmware Size: ${file_size} MB"
     echo -e "- Saved to: ${DOWN_DIR}/${MODEL}.zip"
 
@@ -1588,7 +1588,8 @@ APPLY_JDM_SPECIAL() {
 
 
 APPLY_CUSTOM_FEATURES() {
-    echo -e ""
+    echo " "
+
     if [ "$#" -ne 1 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
@@ -1826,6 +1827,8 @@ GEN_FILE_CONTEXTS() {
 
 
 BUILD_IMG() {
+    echo " "
+
     if [ "$#" -ne 3 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR> <FILE_SYSTEM> <OUT_DIR>"
         return 1
@@ -1863,7 +1866,7 @@ BUILD_IMG() {
 
         elif [[ "$FILE_SYSTEM" == "ext4" ]]; then
             echo -e "${YELLOW}Building ext4 image:${NC} $OUT_IMG"
-            $make_ext4fs -l "$(awk "BEGIN {printf \"%.0f\", $SIZE * 1.1}")" -J -b 4096 -S "$FILE_CONTEXTS" -C "$FS_CONFIG"  -a "$MOUNT_POINT" -L "$PARTITION" "$OUT_IMG" "$SRC_DIR"
+            $make_ext4fs -l "$(awk "BEGIN {printf \"%.0f\", $SIZE * 1.4}")" -J -b 4096 -S "$FILE_CONTEXTS" -C "$FS_CONFIG"  -a "$MOUNT_POINT" -L "$PARTITION" "$OUT_IMG" "$SRC_DIR"
 			# Resize img to reduce size.
 			resize2fs -M "$OUT_IMG"
         else
