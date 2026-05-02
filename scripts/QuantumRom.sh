@@ -108,6 +108,8 @@ GET_FF_VALUE() {
 
 
 DOWNLOAD_FIRMWARE() {
+    echo " "
+
     if [ "$#" -lt 4 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <MODEL> <CSC> <IMEI> <DOWNLOAD_DIRECTORY> [VERSION]"
         return 1
@@ -185,6 +187,8 @@ DOWNLOAD_FIRMWARE() {
 
 
 EXTRACT_FIRMWARE() {
+    echo " "
+
     if [ "$#" -ne 1 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <FIRMWARE_DIRECTORY>"
         return 1
@@ -313,7 +317,7 @@ PREPARE_PARTITIONS() {
 
 
 EXTRACT_FIRMWARE_IMG() {
-    echo -e ""
+    echo " "
 
     if [ "$#" -ne 1 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <FIRMWARE_DIRECTORY>"
@@ -452,7 +456,8 @@ INSTALL_FRAMEWORK() {
 
 
 DECOMPILE() {
-    echo -e ""
+    echo " "
+
     if [ "$#" -ne 4 ]; then
         echo -e "Usage: DECOMPILE <APKTOOL_JAR_DIR> <FRAMEWORK_DIR> <FILE> <DECOMPILE_DIR>"
         return 1
@@ -480,7 +485,8 @@ DECOMPILE() {
 
 
 RECOMPILE() {
-    echo -e ""
+    echo " "
+
 	if [ "$#" -ne 4 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <APKTOOL_JAR_DIR> <FRAMEWORK_DIR> <DECOMPILED_DIR> <RECOMPILE_DIR>"
         return 1
@@ -547,7 +553,8 @@ REPLACE_SMALI_METHOD() {
 
 
 HEX_PATCH() {
-    echo -e ""
+    echo " "
+
 	if [ "$#" -ne 3 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <FILE> <TARGET_VALUE> <REPLACE_VALUE>"
         return 1
@@ -584,7 +591,8 @@ HEX_PATCH() {
 
 
 PATCH_FLAG_SECURE() {
-	echo -e ""
+	echo " "
+
 	if [ "$#" -ne 1 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_SERVICES_DIRECTORY>"
         return 1
@@ -655,7 +663,8 @@ PATCH_FLAG_SECURE() {
 
 
 PATCH_SECURE_FOLDER() {
-    echo -e ""
+    echo " "
+
 	if [ "$#" -ne 1 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_SERVICES_DIRECTORY>"
         return 1
@@ -695,7 +704,8 @@ PATCH_SECURE_FOLDER() {
 
 
 PATCH_PRIVATE_SHARE() {
-    echo -e ""
+    echo " "
+
 	if [ "$#" -ne 1 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_SERVICES_DIRECTORY>"
         return 1
@@ -719,7 +729,8 @@ PATCH_PRIVATE_SHARE() {
 
 
 DISABLE_SIGNATURE_VERIFICATION() {
-    echo -e ""
+    echo " "
+
 	if [ "$#" -ne 1 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_SERVICES_DIRECTORY>"
         return 1
@@ -745,7 +756,8 @@ DISABLE_SIGNATURE_VERIFICATION() {
 
 
 PATCH_KNOX_GUARD() {
-    echo -e ""
+    echo " "
+
 	if [ "$#" -ne 1 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_SERVICES_DIRECTORY>"
         return 1
@@ -779,7 +791,8 @@ PATCH_KNOX_GUARD() {
 
 
 UPDATE_SDHMS() {
-    echo -e ""
+    echo " "
+
     if [ "$#" -ne 1 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIRECTORY>"
         return 1
@@ -802,7 +815,7 @@ UPDATE_SDHMS() {
 
 
 PATCH_SSRM() {
-    echo -e ""
+    echo " "
 
     if [ "$#" -ne 1 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_SSRM_DIRECTORY>"
@@ -841,7 +854,8 @@ PATCH_SSRM() {
 
 
 PATCH_BT_LIB() {
-    echo -e ""
+    echo " "
+
 	if [ "$#" -ne 2 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIRECTORY> <WORK_DIR>"
         return 1
@@ -931,7 +945,8 @@ PATCH_BT_LIB() {
 
 
 FIX_VNDK() {
-    echo -e ""
+    echo " "
+
 	if [ "$#" -ne 1 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIRECTORY>"
         return 1
@@ -1178,7 +1193,8 @@ UPDATE_FLOATING_FEATURE() {
 
 
 APPLY_CUSTOM_FLOATING_FEATURE() {
-    echo -e ""
+    echo " "
+
     if [ "$#" -ne 1 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <FLOATING_FEATURE_FILE_DIRECTORY> <FLOATING_FEATURE_LINE> <VALUE>"
         return 1
