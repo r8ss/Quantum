@@ -339,37 +339,25 @@ EXTRACT_FIRMWARE_IMG() {
             continue
         fi
 
-        local partition
-        local fstype
-        local IMG_SIZE
-
-        partition="$(basename "${imgfile%.img}")"
-        fstype=$(blkid -o value -s TYPE "$imgfile")
+        local partition="$(basename "${imgfile%.img}")"
+        local fstype=$(blkid -o value -s TYPE "$imgfile")
         [ -z "$fstype" ] && fstype=$(file -b "$imgfile")
+		local IMG_SIZE=$(stat -c%s -- "$imgfile")
+
+		rm -rf "$FIRM_DIR/$partition"
 
         case "$fstype" in
             ext4)
-                IMG_SIZE=$(stat -c%s -- "$imgfile")
                 echo -e "- $partition.img Detected ext4. Size: $IMG_SIZE bytes."
-
-                rm -rf "$FIRM_DIR/$partition"
                 python3 "$(pwd)/bin/py_scripts/imgextractor.py" "$imgfile" "$FIRM_DIR"
                 ;;
-
             erofs)
-                IMG_SIZE=$(stat -c%s -- "$imgfile")
                 echo -e "- $partition.img Detected erofs. Size: $IMG_SIZE bytes. Extracting..."
-
-                rm -rf "$FIRM_DIR/$partition"
                 "$extract_erofs" -i "$imgfile" -x -f -o "$FIRM_DIR" >/dev/null 2>&1
                 ;;
-
 			f2fs)
-                IMG_SIZE=$(stat -c%s -- "$imgfile")
                 echo -e "- $partition.img Detected f2fs. Size: $IMG_SIZE bytes. Converting to ext4"
 				bash "$(pwd)/scripts/convert_to_ext4.sh" "$imgfile"
-
-				rm -rf "$FIRM_DIR/$partition"
                 python3 "$(pwd)/bin/py_scripts/imgextractor.py" "$imgfile" "$FIRM_DIR"
                 ;;
             *)
