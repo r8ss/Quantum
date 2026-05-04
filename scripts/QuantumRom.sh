@@ -12,17 +12,19 @@ REAL_USER=${SUDO_USER:-$USER}
 QT_DIR="$(pwd)"
 
 # Binary
-chmod +x $QT_DIR/bin/lp/lpmake
-chmod +x $QT_DIR/bin/lp/lpunpack
-chmod +x $QT_DIR/bin/ext4/make_ext4fs
-chmod +x $QT_DIR/bin/erofs-utils/mkfs.erofs
-chmod +x $QT_DIR/bin/erofs-utils/extract.erofs
-
 export lpmake="$QT_DIR/bin/lp/lpmake"
 export lpunpack="$QT_DIR/bin/lp/lpunpack"
 export make_ext4fs="$QT_DIR/bin/ext4/make_ext4fs"
+export e2fsdroid="$QT_DIR/bin/e2fsdroid/e2fsdroid"
 export mkfs_erofs="$QT_DIR/bin/erofs-utils/mkfs.erofs"
 export extract_erofs="$QT_DIR/bin/erofs-utils/extract.erofs"
+
+chmod +x $lpmake
+chmod +x $lpunpack
+chmod +x $e2fsdroid
+chmod +x $mkfs_erofs
+chmod +x $make_ext4fs
+chmod +x $extract_erofs
 
 
 CHECK_FILE() {
