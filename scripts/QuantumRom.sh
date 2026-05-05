@@ -1660,8 +1660,6 @@ APPLY_CUSTOM_FEATURES() {
 		rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/style_transfer"
 	    rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app"/PhotoEditor_*
         cp -rfa "$(pwd)/QuantumROM/Mods/Apps/PhotoEditor_AIFull/"* "$EXTRACTED_FIRM_DIR"
-		unzip -o "$EXTRACTED_FIRM_DIR/system/system/priv-app/PhotoEditor_AIFull.zip" -d "$EXTRACTED_FIRM_DIR/system/system/priv-app/" >/dev/null 2>&1
-		rm -f "$EXTRACTED_FIRM_DIR/system/system/priv-app/PhotoEditor_AIFull.zip"
     fi
 
     # Text recognition: The full OCR app cannot be included in this repository due to GitHub’s file size limitations.
