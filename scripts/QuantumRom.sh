@@ -1188,7 +1188,7 @@ PATCH_SELINUX() {
 		REMOVE_LINE '(genfscon proc "/sys/vm/compaction_proactiveness" (u object_r proc_compaction_proactiveness ((s0) (s0))))' \
 		    "$EXTRACTED_FIRM_DIR/system/system/etc/selinux/plat_sepolicy.cil" >/dev/null 2>&1
     else
-        echo -e "- No system found."
+        echo -e "- No system dir found."
         return 1
     fi
 
