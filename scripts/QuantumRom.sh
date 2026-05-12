@@ -322,44 +322,60 @@ PREPARE_PARTITIONS() {
 EXTRACT_FIRMWARE_IMG() {
     echo " "
 
-    if [ "$#" -ne 1 ]; then
-        echo -e "Usage: ${FUNCNAME[0]} <FIRMWARE_DIRECTORY>"
+    if [ "$#" -ne 2 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <FIRMWARE_DIRECTORY> all|img_name"
         return 1
     fi
 
     local FIRM_DIR="$1"
+    local MODE="$2"
 
-    PREPARE_PARTITIONS "$FIRM_DIR"
+    if ! ls "$FIRM_DIR"/*.img >/dev/null 2>&1; then
+        echo -e "No .img files found in: $FIRM_DIR"
+        return 1
+    fi
 
     echo -e "${YELLOW}Extracting images from:${NC} $FIRM_DIR"
 
-    for imgfile in "$FIRM_DIR"/*.img; do
-        [ -e "$imgfile" ] || continue
+    extract_img() {
+        local imgfile="$1"
 
-        if [[ "$(basename "$imgfile")" == "boot.img" ]]; then
-            continue
+        [ -e "$imgfile" ] || return
+
+        local img_name="$(basename "$imgfile")"
+
+        if [[ "$img_name" == "boot.img" || "$img_name" == "recovery.img" ]]; then
+            echo -e "- Skipping $img_name"
+            return
         fi
 
         local partition="$(basename "${imgfile%.img}")"
+
         local ORG_IMG_SIZE=$(stat -c%s -- "$imgfile")
 
         rm -rf "$FIRM_DIR/$partition"
 
-        if file -b "$imgfile" | grep -q "Android sparse image"; then
+        if file -b "$imgfile" | grep -qi "Android sparse"; then
             echo -e "- $partition.img is SPARSE. Converting to raw..."
 
             local tmp_raw="${imgfile}.raw"
 
-            simg2img "$imgfile" "$tmp_raw" || {
-                echo "Failed to convert sparse image: $imgfile"
-                continue
-            }
+            if ! simg2img "$imgfile" "$tmp_raw" >/dev/null 2>&1; then
+                echo -e "- Failed to convert sparse image: $img_name"
+                return
+            fi
+
+            if [ ! -f "$tmp_raw" ]; then
+                echo -e "- Sparse conversion output missing: $tmp_raw"
+                return
+            fi
 
             rm -f "$imgfile"
             mv "$tmp_raw" "$imgfile"
         fi
 
-        local fstype=$(blkid -o value -s TYPE "$imgfile")
+        local fstype=$(blkid -o value -s TYPE "$imgfile" 2>/dev/null)
+
         [ -z "$fstype" ] && fstype=$(file -b "$imgfile")
 
         case "$fstype" in
@@ -373,19 +389,36 @@ EXTRACT_FIRMWARE_IMG() {
                 "$extract_erofs" -i "$imgfile" -x -f -o "$FIRM_DIR"
                 ;;
 
-            f2fs)
-                echo -e "- $partition.img Detected f2fs. Size: $ORG_IMG_SIZE bytes"
-                bash "$QT_DIR/scripts/extract_img.sh" "$imgfile" "$FIRM_DIR"
-                ;;
+            #f2fs)
+                #echo -e "- $partition.img Detected f2fs. Size: $ORG_IMG_SIZE bytes. Extracting..."
+                #bash "$QT_DIR/scripts/extract_img.sh" "$imgfile" "$FIRM_DIR"
+                #;;
 
             *)
-                echo -e "- $imgfile unsupported filesystem type ($fstype), skipping"
-                continue
+                echo -e "- $img_name unsupported filesystem type ($fstype), skipping"
                 ;;
         esac
-    done
+    }
 
-    rm -rf "$FIRM_DIR"/*.img
+    if [ "$MODE" = "all" ]; then
+	    PREPARE_PARTITIONS "$FIRM_DIR"
+        for imgfile in "$FIRM_DIR"/*.img; do
+            [ -e "$imgfile" ] || continue
+            extract_img "$imgfile"
+        done
+
+	rm -rf "$FIRM_DIR"/*.img
+
+    else
+        local TARGET_IMG="$FIRM_DIR/$MODE"
+
+        if [ ! -f "$TARGET_IMG" ]; then
+            echo -e "- Image not found: $TARGET_IMG"
+            return 1
+        fi
+
+        extract_img "$TARGET_IMG"
+    fi
 
     if ! ls "$FIRM_DIR"/system* >/dev/null 2>&1; then
         echo -e "❌ Firmware may be corrupt or unsupported."
@@ -1136,14 +1169,9 @@ PATCH_SELINUX() {
     fi
 
 	local EXTRACTED_FIRM_DIR="$1"
-	
-    if [ ! -d "$EXTRACTED_FIRM_DIR/system" ]; then
-	    echo -e "No extracted firmware found."
-        return 1
-    fi
 
     echo -e "- Patching selinux"
-	
+
 	UNSUPPORTED_SELINUX=("audiomirroring" "fabriccrypto" "hal_dsms_default" "qb_id_prop" "hal_dsms_service" "proc_compaction_proactiveness" "sbauth" "ker_app" "kpp_app" "kpp_data" "attiqi_app" "kpoc_charger" "sec_diag")
 
 	if [ -d "$EXTRACTED_FIRM_DIR/system_ext/apex" ]; then
@@ -1152,6 +1180,16 @@ PATCH_SELINUX() {
         export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system_ext"
     elif [ -d "$EXTRACTED_FIRM_DIR/system/system/system_ext/apex" ]; then
             export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system/system_ext"
+    fi
+
+    if [ ! -d "$EXTRACTED_FIRM_DIR/system" ]; then
+	    echo -e "- No extracted firmware found."
+        return 1
+    fi
+
+    if [ ! -d "$TARGET_ROM_SYSTEM_EXT_DIR" ]; then
+        echo -e "${RED} - No system_ext_dir found. ${NC}"
+        return 1
     fi
 
     find "$TARGET_ROM_SYSTEM_EXT_DIR/etc/selinux/mapping/" -type f -name "*.0.cil" | while read -r SELINUX_FILE; do
