@@ -1931,9 +1931,10 @@ BUILD_IMG() {
         local FS_CONFIG="$EXTRACTED_FIRM_DIR/config/${PARTITION}_fs_config"
         local FILE_CONTEXTS="$EXTRACTED_FIRM_DIR/config/${PARTITION}_file_contexts"
         local SIZE=$(du -sb --apparent-size "$SOURCE_DIR" | awk '{printf "%.0f", $1 * 1.2}')
-		MOUNT_POINT="/$PARTITION"
+		local MOUNT_POINT="/$PARTITION"
 
-        echo -e ""
+        rm -rf "$OUT_IMG"
+
         [[ -f "$FS_CONFIG" ]] || { echo -e "Warning: $FS_CONFIG missing, skipping $PARTITION"; continue; }
         [[ -f "$FILE_CONTEXTS" ]] || { echo -e "Warning: $FILE_CONTEXTS missing, skipping $PARTITION"; continue; }
 
