@@ -918,13 +918,14 @@ PATCH_BT_LIB() {
 
     echo -e "${YELLOW}Patching Bluetooth library.${NC}"
     # Get libbluetooth_jni.so
-	if [ ! -f "$EXTRACTED_FIRM_DIR/system/system/apex/com.android.bt*.apex" ]; then
+	if ! ls "$EXTRACTED_FIRM_DIR"/system/system/apex/com.android.bt*.apex >/dev/null 2>&1; then
         echo -e "- ${RED} No bluetooth apex file found.${NC}"
         return 1
     fi
 
-    unzip "$EXTRACTED_FIRM_DIR/system/system/apex/com.android.bt*.apex" "apex_payload.img" -d "$WORK_DIR" >/dev/null 2>&1
-	debugfs -R "dump /lib64/libbluetooth_jni.so $WORK_DIR/libbluetooth_jni.so" "$WORK_DIR/apex_payload.img" >/dev/null 2>&1
+    7z e "$EXTRACTED_FIRM_DIR/system/system/apex/"com.android.bt*.apex "apex_payload.img" -o"$WORK_DIR" -y
+	debugfs -R "dump /lib64/libbluetooth_jni.so $WORK_DIR/libbluetooth_jni.so" "$WORK_DIR/apex_payload.img
+
 	rm -rf "$WORK_DIR/apex_payload.img"
 
     declare -A hex=(
@@ -1018,7 +1019,7 @@ FIX_VNDK() {
     else
         echo -e "  - VNDK mismatch. Adding SDK $SDK com.android.vndk.v${STOCK_VNDK_VERSION}.apex"
         rm -rf "$TARGET_ROM_SYSTEM_EXT_DIR/apex/"*.apex
-        unzip -o "$VNDKS_COLLECTION/$SDK/${STOCK_VNDK_VERSION}.zip" -d "$TARGET_ROM_SYSTEM_EXT_DIR/" >/dev/null 2>&1
+        7z x "$VNDKS_COLLECTION/$SDK/${STOCK_VNDK_VERSION}.zip" -o"$TARGET_ROM_SYSTEM_EXT_DIR/" -y >/dev/null 2>&1
     fi
 }
 
