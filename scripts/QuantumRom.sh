@@ -265,7 +265,6 @@ EXTRACT_FIRMWARE() {
 
         "$lpunpack" "$FIRM_DIR/super_raw.img" "$FIRM_DIR"
         rm -f "$FIRM_DIR/super_raw.img"
-
         echo -e "- Extraction complete"
     fi
 }
