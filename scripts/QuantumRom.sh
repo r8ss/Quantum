@@ -1926,11 +1926,11 @@ BUILD_IMG() {
         PARTITION="$(basename "$PART")"
         [[ "$PARTITION" == "config" ]] && continue 
 
-        local SRC_DIR="$EXTRACTED_FIRM_DIR/$PARTITION"
+        local SOURCE_DIR="$EXTRACTED_FIRM_DIR/$PARTITION"
         local OUT_IMG="$OUT_DIR/${PARTITION}.img"
         local FS_CONFIG="$EXTRACTED_FIRM_DIR/config/${PARTITION}_fs_config"
         local FILE_CONTEXTS="$EXTRACTED_FIRM_DIR/config/${PARTITION}_file_contexts"
-        local SIZE=$(du -sb --apparent-size "$SRC_DIR" | awk '{printf "%.0f", $1 * 1.2}')
+        local SIZE=$(du -sb --apparent-size "$SOURCE_DIR" | awk '{printf "%.0f", $1 * 1.2}')
 		MOUNT_POINT="/$PARTITION"
 
         echo -e ""
@@ -1942,11 +1942,11 @@ BUILD_IMG() {
 
         if [[ "$FILE_SYSTEM" == "erofs" ]]; then
             echo -e "${YELLOW}Building EROFS image:${NC} $OUT_IMG"
-            $mkfs_erofs --mount-point="$MOUNT_POINT" --fs-config-file="$FS_CONFIG" --file-contexts="$FILE_CONTEXTS" -z lz4hc -b 4096 -T 1199145600 "$OUT_IMG" "$SRC_DIR" >/dev/null 2>&1
+            $mkfs_erofs --mount-point="$MOUNT_POINT" --fs-config-file="$FS_CONFIG" --file-contexts="$FILE_CONTEXTS" -z lz4hc -b 4096 -T 1199145600 "$OUT_IMG" "$SOURCE_DIR" >/dev/null 2>&1
 
         elif [[ "$FILE_SYSTEM" == "ext4" ]]; then
             echo -e "${YELLOW}Building ext4 image:${NC} $OUT_IMG"
-            $make_ext4fs -l "$(awk "BEGIN {printf \"%.0f\", $SIZE * 1.1}")" -J -b 4096 -S "$FILE_CONTEXTS" -C "$FS_CONFIG"  -a "$MOUNT_POINT" -L "$PARTITION" "$OUT_IMG" "$SRC_DIR"
+            $make_ext4fs -l "$(awk "BEGIN {printf \"%.0f\", $SIZE * 1.1}")" -J -b 4096 -S "$FILE_CONTEXTS" -C "$FS_CONFIG"  -a "$MOUNT_POINT" -L "$PARTITION" "$OUT_IMG" "$SOURCE_DIR"
 			# Resize img to reduce size.
 			resize2fs -M "$OUT_IMG"
         else
