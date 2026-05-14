@@ -372,11 +372,6 @@ EXTRACT_FIRMWARE_IMG() {
     local FIRM_DIR="$1"
     local MODE="$2"
 
-    if ! ls "$FIRM_DIR"/*.img >/dev/null 2>&1; then
-        echo -e "No .img files found in: $FIRM_DIR"
-        return 1
-    fi
-
     echo -e "${YELLOW}Extracting images from:${NC} $FIRM_DIR"
 
     extract_img() {
