@@ -636,8 +636,7 @@ REPLACE_SMALI_METHOD() {
     fi
 
     # Extract method key (safe match)
-    local METHOD_KEY
-    METHOD_KEY=$(echo "$METHOD_NAME" | sed -E 's/.* ([^ ]+\().*/\1/')
+    local METHOD_KEY=$(echo "$METHOD_NAME" | sed -E 's/.* ([^ ]+\().*/\1/')
 
     sed -i "
 /^[[:space:]]*\.method.*$METHOD_KEY/,/^[[:space:]]*\.end method/{
@@ -2129,7 +2128,7 @@ BUILD_SUPER_IMG() {
         part_name="${name%.img}"
         size=$(stat -c%s "$img")
 
-        echo "${YELLOW}Adding:${NC} $part_name ($size bytes)"
+        echo -e "${YELLOW}Adding:${NC} $part_name ($size bytes)"
 
         PARTITIONS="$PARTITIONS --partition ${part_name}:readonly:${size}:main"
         IMAGES="$IMAGES --image ${part_name}=$img"
