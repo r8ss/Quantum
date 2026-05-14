@@ -246,7 +246,7 @@ EXTRACT_FIRMWARE() {
     for file in "$FIRM_DIR"/*.zip; do
         if [ -f "$file" ]; then
             echo -e "- Extracting zip: $(basename "$file")"
-            7z x -y -bd -o"$FIRM_DIR" "$file"
+            7z x -y -bd -o"$FIRM_DIR" "$file" >/dev/null 2>&1
             rm -f "$file"
         fi
     done
@@ -259,7 +259,7 @@ EXTRACT_FIRMWARE() {
     for file in "$FIRM_DIR"/*.xz; do
         if [ -f "$file" ]; then
             echo -e "- Extracting xz: $(basename "$file")"
-            7z x -y -bd -o"$FIRM_DIR" "$file"
+            7z x -y -bd -o"$FIRM_DIR" "$file" >/dev/null 2>&1
             rm -f "$file"
         fi
     done
@@ -275,7 +275,7 @@ EXTRACT_FIRMWARE() {
     for file in "$FIRM_DIR"/*.tar; do
         if [ -f "$file" ]; then
             echo -e "- Extracting tar: $(basename "$file")"
-            tar -xvf "$file" -C "$FIRM_DIR"
+            tar -xvf "$file" -C "$FIRM_DIR" >/dev/null 2>&1
             rm -f "$file"
         fi
     done
@@ -287,7 +287,7 @@ EXTRACT_FIRMWARE() {
     for file in "$FIRM_DIR"/*.lz4; do
         if [ -f "$file" ]; then
             echo -e "Extracting lz4: $(basename "$file")"
-            lz4 -d "$file" "${file%.lz4}"
+            lz4 -d "$file" "${file%.lz4}" >/dev/null 2>&1
             rm -f "$file"
         fi
     done
@@ -371,6 +371,11 @@ EXTRACT_FIRMWARE_IMG() {
 
     local FIRM_DIR="$1"
     local MODE="$2"
+
+    if ! ls "$FIRM_DIR"/*.img >/dev/null 2>&1; then
+        echo -e "No .img files found in: $FIRM_DIR"
+        return 1
+    fi
 
     echo -e "${YELLOW}Extracting images from:${NC} $FIRM_DIR"
 
