@@ -15,14 +15,13 @@ QT_DIR="$(pwd)"
 export lpmake="$QT_DIR/bin/lp/lpmake"
 export lpunpack="$QT_DIR/bin/lp/lpunpack"
 export make_ext4fs="$QT_DIR/bin/ext4/make_ext4fs"
-export e2fsdroid="$QT_DIR/bin/e2fsdroid/e2fsdroid"
+export omc_decoder="$QT_DIR/bin/java/omc-decoder.jar"
 export mkfs_erofs="$QT_DIR/bin/erofs-utils/mkfs.erofs"
 export extract_erofs="$QT_DIR/bin/erofs-utils/extract.erofs"
 export imgextractor_py="$QT_DIR/bin/py_scripts/imgextractor.py"
 
 chmod +x "$lpmake"
 chmod +x "$lpunpack"
-chmod +x "$e2fsdroid"
 chmod +x "$mkfs_erofs"
 chmod +x "$make_ext4fs"
 chmod +x "$extract_erofs"
@@ -89,8 +88,7 @@ GET_PROP() {
         return 1
     fi
 
-    local VALUE
-    VALUE=$(grep -m1 "^${PROP}=" "$FILE" | cut -d'=' -f2-)
+    local VALUE=$(grep -m1 "^${PROP}=" "$FILE" | cut -d'=' -f2-)
 
     if [ -z "$VALUE" ]; then
         return 1
@@ -107,6 +105,49 @@ GET_FF_VALUE() {
     awk -F'[<>]' -v key="$KEY" '
         $2 == key { print $3; exit }
     ' "$FILE"
+}
+
+
+DETECT_FILESYSTEM() {
+    local imgfile="$1"
+
+    [ ! -f "$imgfile" ] && {
+        echo "unknown"
+        return 1
+    }
+
+    local fstype=$(blkid -o value -s TYPE "$imgfile" 2>/dev/null)
+    [ -z "$fstype" ] && fstype=$(file -b "$imgfile" 2>/dev/null)
+
+    case "$fstype" in
+        *"Android sparse image"*)
+            echo "sparse"
+            ;;
+        *"ext2"*)
+            echo "ext2"
+            ;;
+        *"ext3"*)
+            echo "ext3"
+            ;;
+        *"ext4"*)
+            echo "ext4"
+            ;;
+        *"f2fs"*|*"F2FS"*)
+            echo "f2fs"
+            ;;
+        *"erofs"*|*"EROFS"*)
+            echo "erofs"
+            ;;
+        *"squashfs"*|*"Squashfs"*)
+            echo "squashfs"
+            ;;
+        *"LZ4 compressed"*)
+            echo "lz4"
+            ;;
+        *)
+            echo "unknown"
+            ;;
+    esac
 }
 
 
@@ -178,7 +219,7 @@ DOWNLOAD_FIRMWARE() {
     fi
 
     # --- Show Firmware Info ---
-    file_size=$(du -m "${DOWN_DIR}/${MODEL}.zip" | cut -f1)
+    local file_size=$(du -m "${DOWN_DIR}/${MODEL}.zip" | cut -f1)
 
     echo " "
     echo -e "- ✅ Firmware decrypted successfully! Firmware Size: ${file_size} MB"
@@ -212,7 +253,6 @@ EXTRACT_FIRMWARE() {
 
 	rm -rf "$FIRM_DIR"/BL_*.tar.md5
 	rm -f "$FIRM_DIR"/CP_*.tar.md5
-	rm -f "$FIRM_DIR"/CSC_*.tar.md5
     rm -f "$FIRM_DIR"/HOME_CSC_*.tar.md5
 
     # ---- XZ ----
@@ -240,39 +280,42 @@ EXTRACT_FIRMWARE() {
         fi
     done
 
+	rm -rf "$FIRM_DIR"/meta-data
+
     # ---- LZ4 ----
-	rm -rf $FIRM_DIR/{cache.img.lz4,dtbo.img.lz4,efuse.img.lz4,gz-verified.img.lz4,lk-verified.img.lz4,md1img.img.lz4,md_udc.img.lz4,misc.bin.lz4,omr.img.lz4,param.bin.lz4,preloader.img.lz4,recovery.img.lz4,scp-verified.img.lz4,spmfw-verified.img.lz4,sspm-verified.img.lz4,tee-verified.img.lz4,tzar.img.lz4,up_param.bin.lz4,userdata.img.lz4,vbmeta.img.lz4,vbmeta_system.img.lz4,audio_dsp-verified.img.lz4,cam_vpu1-verified.img.lz4,cam_vpu2-verified.img.lz4,cam_vpu3-verified.img.lz4,dpm-verified.img.lz4,init_boot.img.lz4,mcupm-verified.img.lz4,pi_img-verified.img.lz4,uh.bin.lz4,vendor_boot.img.lz4}
+    rm -rf $FIRM_DIR/{cache.img.lz4,dtbo.img.lz4,efuse.img.lz4,gz-verified.img.lz4,lk-verified.img.lz4,md1img.img.lz4,md_udc.img.lz4,misc.bin.lz4,omr.img.lz4,param.bin.lz4,preloader.img.lz4,recovery.img.lz4,scp-verified.img.lz4,spmfw-verified.img.lz4,sspm-verified.img.lz4,tee-verified.img.lz4,tzar.img.lz4,up_param.bin.lz4,userdata.img.lz4,vbmeta.img.lz4,vbmeta_system.img.lz4,audio_dsp-verified.img.lz4,cam_vpu1-verified.img.lz4,cam_vpu2-verified.img.lz4,cam_vpu3-verified.img.lz4,dpm-verified.img.lz4,init_boot.img.lz4,mcupm-verified.img.lz4,pi_img-verified.img.lz4,uh.bin.lz4,vendor_boot.img.lz4,ssu.img.lz4}
     for file in "$FIRM_DIR"/*.lz4; do
         if [ -f "$file" ]; then
-            echo -e "- Extracting lz4: $(basename "$file")"
+            echo -e "Extracting lz4: $(basename "$file")"
             lz4 -d "$file" "${file%.lz4}" >/dev/null 2>&1
             rm -f "$file"
         fi
     done
 
     # ---- REMOVE UNWANTED FILES ----
-    rm -rf \
-        "$FIRM_DIR"/*.txt \
-        "$FIRM_DIR"/*.pit \
-        "$FIRM_DIR"/*.bin \
-        "$FIRM_DIR"/meta-data
+    rm -rf "$FIRM_DIR"/*.txt "$FIRM_DIR"/*.pit "$FIRM_DIR"/*.bin
 
     # ---- SUPER.IMG ----
     if [ -f "$FIRM_DIR/super.img" ]; then
-        echo -e "- Extracting super.img"
-        simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
+        echo -e "Extracting super.img"
+        if [ "$(DETECT_FILESYSTEM "$FIRM_DIR/super.img")" = "sparse" ]; then
+		    echo -e "Converting to raw super.img"
+            simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
+            rm -f "$FIRM_DIR/super.img"
+            mv -f "$FIRM_DIR/super_raw.img" "$FIRM_DIR/super.img"
+        fi
+
+        "$lpunpack" "$FIRM_DIR/super.img" "$FIRM_DIR" || return 1
         rm -f "$FIRM_DIR/super.img"
 
-        "$lpunpack" "$FIRM_DIR/super_raw.img" "$FIRM_DIR"
-        rm -f "$FIRM_DIR/super_raw.img"
-        echo -e "- Extraction complete"
+        echo -e "Extraction complete"
     fi
 }
 
 
 PREPARE_PARTITIONS() {
 	if [ -z "$STOCK_DEVICE" ] || [ "$STOCK_DEVICE" = "None" ]; then
-        export BUILD_PARTITIONS="odm,odm_dlkm,product,system,system_ext,system_dlkm,vendor,vendor_dlkm,odm_a,odm_dlkm_a,product_a,system_a,system_ext_a,system_dlkm_a,vendor_a,vendor_dlkm_a"
+        export BUILD_PARTITIONS="odm,odm_dlkm,product,system,system_ext,system_dlkm,vendor,vendor_dlkm,odm_a,odm_dlkm_a,product_a,system_a,system_ext_a,system_dlkm_a,vendor_a,vendor_dlkm_a,optics,optics_a"
     fi
 
     if [ "$#" -ne 1 ]; then
@@ -349,23 +392,23 @@ EXTRACT_FIRMWARE_IMG() {
         fi
 
         local partition="$(basename "${imgfile%.img}")"
-
         local ORG_IMG_SIZE=$(stat -c%s -- "$imgfile")
 
         rm -rf "$FIRM_DIR/$partition"
 
-        if file -b "$imgfile" | grep -qi "Android sparse"; then
-            echo -e "- $partition.img is SPARSE. Converting to raw..."
+        local fstype=$(DETECT_FILESYSTEM "$imgfile")
+        if [ "$fstype" = "sparse" ]; then
+            echo -e "${YELLOW}$partition.img is SPARSE. Converting to raw img.${NC}"
 
             local tmp_raw="${imgfile}.raw"
 
             if ! simg2img "$imgfile" "$tmp_raw" >/dev/null 2>&1; then
-                echo -e "- Failed to convert sparse image: $img_name"
+                echo -e "${RED}Failed to convert sparse image:${NC} $img_name"
                 return
             fi
 
             if [ ! -f "$tmp_raw" ]; then
-                echo -e "- Sparse conversion output missing: $tmp_raw"
+                echo -e "${RED}- Sparse conversion output missing:${NC} $tmp_raw"
                 return
             fi
 
@@ -373,28 +416,29 @@ EXTRACT_FIRMWARE_IMG() {
             mv "$tmp_raw" "$imgfile"
         fi
 
-        local fstype=$(blkid -o value -s TYPE "$imgfile" 2>/dev/null)
-
-        [ -z "$fstype" ] && fstype=$(file -b "$imgfile")
+        local fstype=$(DETECT_FILESYSTEM "$imgfile")
 
         case "$fstype" in
             ext4)
-                echo -e "- $partition.img Detected ext4. Size: $ORG_IMG_SIZE bytes. Extracting..."
+                echo " "
+                echo -e "${YELLOW}$partition.img Detected ext4.${NC} Size: $ORG_IMG_SIZE bytes. Extracting..."
                 python3 "$imgextractor_py" "$imgfile" "$FIRM_DIR"
                 ;;
 
             erofs)
-                echo -e "- $partition.img Detected erofs. Size: $ORG_IMG_SIZE bytes. Extracting..."
+                echo " "
+                echo -e "${YELLOW}$partition.img Detected erofs.${NC} Size: $ORG_IMG_SIZE bytes. Extracting..."
                 "$extract_erofs" -i "$imgfile" -x -f -o "$FIRM_DIR"
                 ;;
 
             #f2fs)
-                #echo -e "- $partition.img Detected f2fs. Size: $ORG_IMG_SIZE bytes. Extracting..."
+                #echo " "
+                #echo -e "${YELLOW}$partition.img Detected f2fs.${NC} Size: $ORG_IMG_SIZE bytes. Extracting..."
                 #bash "$QT_DIR/scripts/extract_img.sh" "$imgfile" "$FIRM_DIR"
                 #;;
 
             *)
-                echo -e "- $img_name unsupported filesystem type ($fstype), skipping"
+                echo -e "${RED}- $img_name unsupported filesystem type:${NC} ($fstype), skipping"
                 ;;
         esac
     }
@@ -406,13 +450,13 @@ EXTRACT_FIRMWARE_IMG() {
             extract_img "$imgfile"
         done
 
-	rm -rf "$FIRM_DIR"/*.img
+	    rm -rf "$FIRM_DIR"/*.img
 
     else
         local TARGET_IMG="$FIRM_DIR/$MODE"
 
         if [ ! -f "$TARGET_IMG" ]; then
-            echo -e "- Image not found: $TARGET_IMG"
+            echo -e "${RED}- Image not found:${NC} $TARGET_IMG"
             return 1
         fi
 
@@ -441,8 +485,7 @@ DISABLE_FBE() {
         return 1
     fi
 
-    local fstab_files
-    fstab_files=$(grep -lr 'fileencryption' "$EXTRACTED_FIRM_DIR/vendor/etc" 2>/dev/null)
+    local fstab_files=$(grep -lr 'fileencryption' "$EXTRACTED_FIRM_DIR/vendor/etc" 2>/dev/null)
 
     for i in $fstab_files; do
         if [ -f "$i" ]; then
@@ -466,8 +509,7 @@ DISABLE_FDE() {
         return 1
     fi
 
-    local fstab_files
-    fstab_files=$(grep -lr 'forceencrypt' "$EXTRACTED_FIRM_DIR/vendor/etc" 2>/dev/null)
+    local fstab_files=$(grep -lr 'forceencrypt' "$EXTRACTED_FIRM_DIR/vendor/etc" 2>/dev/null)
 
     for i in $fstab_files; do
         if [ -f "$i" ]; then
@@ -497,7 +539,7 @@ INSTALL_FRAMEWORK() {
         return 1
     fi
 
-    echo -e "${YELLOW}Installing $framework_apk ${NC}"
+    echo -e "${YELLOW}Installing:${NC} $framework_apk"
     java -jar "$APKTOOL" install-framework "$framework_apk"
 }
 
@@ -526,6 +568,12 @@ DECOMPILE() {
     local OUT="$DECOMPILE_DIR/$BASENAME"
 
     echo -e "${YELLOW}Decompiling:${NC} $FILE"
+
+	if [ ! -f "$FILE" ]; then
+        echo -e "-${RED} File not found:${NC} $FILE"
+        return 1
+    fi
+
 	rm -rf "$OUT"
     java -jar "$APKTOOL" d --force --frame-path "$FRAMEWORK_DIR" --match-original "$FILE" -o "$OUT"
 }
@@ -553,16 +601,17 @@ RECOMPILE() {
     local name="${org_file_name%.*}"
     local ext="${org_file_name##*.}"
     local built_file="$RECOMPILE_DIR/${name}.$ext"
-	
+
+    echo -e "${YELLOW}Recompiling:${NC} $DECOMPILED_DIR"
+
 	if [ ! -d "$DECOMPILED_DIR" ]; then
-        echo -e "- ${RED} Directory not found:${NC} $DECOMPILED_DIR"
+        echo -e "-${RED} Directory not found:${NC} $DECOMPILED_DIR"
         return 1
     fi
 
-    echo -e "${YELLOW}Recompiling:${NC} $DECOMPILED_DIR"
     java -jar "$APKTOOL" b "$DECOMPILED_DIR" --copy-original --frame-path "$FRAMEWORK_DIR" -o "$built_file"
     rm -rf "$DECOMPILED_DIR"
-    
+
 	# Zipalign
 	# echo " "
 	# if [[ "$ext" == "apk" ]]; then
@@ -876,7 +925,7 @@ PATCH_SSRM() {
     local SSRM_DIR="$1"
     local FILE="$SSRM_DIR/smali/com/android/server/ssrm/Feature.smali"
 
-    echo -e "${YELLOW}Patching ssrm${NC}"
+    echo -e "${YELLOW}Patching SSRM.${NC}"
     echo -e "- Patching: $FILE"
 
     if [ ! -f "$FILE" ]; then
@@ -918,13 +967,17 @@ PATCH_BT_LIB() {
 
     echo -e "${YELLOW}Patching Bluetooth library.${NC}"
     # Get libbluetooth_jni.so
-	if ! ls "$EXTRACTED_FIRM_DIR"/system/system/apex/com.android.bt*.apex >/dev/null 2>&1; then
+    if ! ls "$EXTRACTED_FIRM_DIR"/system/system/apex/com.android.bt*.apex >/dev/null 2>&1; then
         echo -e "- ${RED} No bluetooth apex file found.${NC}"
         return 1
     fi
 
-    7z e "$EXTRACTED_FIRM_DIR/system/system/apex/"com.android.bt*.apex "apex_payload.img" -o"$WORK_DIR" -y
-	debugfs -R "dump /lib64/libbluetooth_jni.so $WORK_DIR/libbluetooth_jni.so" "$WORK_DIR/apex_payload.img
+    7z e "$EXTRACTED_FIRM_DIR/system/system/apex/com.android.bt"*.apex \
+        "apex_payload.img" \
+        -o"$WORK_DIR" -y >/dev/null
+
+	debugfs -R "dump /lib64/libbluetooth_jni.so $WORK_DIR/libbluetooth_jni.so" \
+        "$WORK_DIR/apex_payload.img" >/dev/null
 
 	rm -rf "$WORK_DIR/apex_payload.img"
 
@@ -971,8 +1024,7 @@ PATCH_BT_LIB() {
         [ -z "$to" ] && continue
 
         # convert wildcard .... → regex
-        local from_regex
-        from_regex="$(echo "$from" | sed -E 's/\.\./[0-9a-f]{2}/g')"
+        local from_regex="$(echo "$from" | sed -E 's/\.\./[0-9a-f]{2}/g')"
         if perl -e '
             $/ = undef;
             open(F, shift) or exit 1;
@@ -1163,11 +1215,13 @@ ADJUST_SYSTEM_EXT() {
         fi
     fi
 
-    echo "- TARGET_ROM_SYSTEM_EXT_DIR set to: $TARGET_ROM_SYSTEM_EXT_DIR"
+    echo "  - TARGET_ROM_SYSTEM_EXT_DIR set to: $TARGET_ROM_SYSTEM_EXT_DIR"
 }
 
 
 PATCH_SELINUX() {
+    echo " "
+
     if [ "$#" -ne 1 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
@@ -1175,7 +1229,7 @@ PATCH_SELINUX() {
 
 	local EXTRACTED_FIRM_DIR="$1"
 
-    echo -e "- Patching selinux"
+    echo -e "${YELLOW}Patching selinux.${NC}"
 
 	UNSUPPORTED_SELINUX=("audiomirroring" "fabriccrypto" "hal_dsms_default" "qb_id_prop" "hal_dsms_service" "proc_compaction_proactiveness" "sbauth" "ker_app" "kpp_app" "kpp_data" "attiqi_app" "kpoc_charger" "sec_diag")
 
@@ -1238,17 +1292,14 @@ UPDATE_FLOATING_FEATURE() {
     fi
 
     if grep -q "<${key}>.*</${key}>" "$FLOATING_FEATURE_FILE_DIRECTORY"; then
-        local current_line
-        current_line=$(grep "<${key}>.*</${key}>" "$FLOATING_FEATURE_FILE_DIRECTORY")
-        local current_value
-        current_value=$(echo -e "$current_line" | sed -E "s/.*<${key}>(.*)<\/${key}>.*/\1/")
+        local current_line=$(grep "<${key}>.*</${key}>" "$FLOATING_FEATURE_FILE_DIRECTORY")
+        local current_value=$(echo -e "$current_line" | sed -E "s/.*<${key}>(.*)<\/${key}>.*/\1/")
 
         if [[ "$current_value" == "$value" ]]; then
             return
         fi
 
-        local indent
-        indent=$(echo -e "$current_line" | sed -E "s/(<${key}>.*<\/${key}>).*//")
+        local indent=$(echo -e "$current_line" | sed -E "s/(<${key}>.*<\/${key}>).*//")
         local line="${indent}<${key}>${value}</${key}>"
         sed -i "s|${indent}<${key}>.*</${key}>|$line|" "$FLOATING_FEATURE_FILE_DIRECTORY"
         # echo -e "- Updated $key with ▶️ $value"
@@ -1671,13 +1722,15 @@ APPLY_JDM_SPECIAL() {
 }
 
 
-APPLY_CUSTOM_FEATURES() {
+ADD_FLAGSHIP_APPS() {
     echo " "
 
     if [ "$#" -ne 1 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
     fi
+
+	echo -e "${YELLOW}Adding samsung full ONEUI apps.${NC}"
 
 	local EXTRACTED_FIRM_DIR="$1"
 	local FLOATING_FEATURE_FILE_DIRECTORY="$EXTRACTED_FIRM_DIR/system/system/etc/floating_feature.xml"
@@ -1686,26 +1739,8 @@ APPLY_CUSTOM_FEATURES() {
 		echo "No extracted firmware found."
         return 1
     fi
-    echo -e "${YELLOW}Applying usefull features.${NC}"
-	DISABLE_SECURITY "$EXTRACTED_FIRM_DIR"
 
-	echo -e "- Adding build prop tweak."
-	BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.product.locale" "en-US"
-    BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "fw.max_users" "5"
-    BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "fw.show_multiuserui" "1"
-    BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "wifi.interface=" "wlan0"
-    BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "wlan.wfd.hdcp" "disabled"
-    BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "debug.hwui.renderer" "skiavk"
-	BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.telephony.sim_slots.count" "2"
-	BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.surface_flinger.protected_contents" "true"
-	BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.config.dmverity" "false"
-	BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.config.iccc_version" "iccc_disabled"
-
-	BUILD_PROP "$EXTRACTED_FIRM_DIR" "product" "ro.product.locale" "en-US"
-	BUILD_PROP "$EXTRACTED_FIRM_DIR" "product" "ro.config.dmverity" "false"
-	BUILD_PROP "$EXTRACTED_FIRM_DIR" "product" "ro.config.iccc_version" "iccc_disabled"
-
-	echo -e "- Adding China smart manager."
+    echo -e "- Adding China smart manager."
 	rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/AppLock"
     rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/Firewall"
     rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/SmartManager_v5"
@@ -1726,7 +1761,7 @@ APPLY_CUSTOM_FEATURES() {
         cp -rfa "$(pwd)/QuantumROM/Mods/Apps/SecCalculator_R/"* "$EXTRACTED_FIRM_DIR/"
     fi
 
-    # Photo editor full
+    # Photo editor ai full
 	if [ ! -d "$EXTRACTED_FIRM_DIR/system/system/priv-app/PhotoEditor_AIFull" ]; then
 	    rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/ailasso"
 		rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/ailassomatting"
@@ -1739,6 +1774,46 @@ APPLY_CUSTOM_FEATURES() {
         cp -rfa "$(pwd)/QuantumROM/Mods/Apps/PhotoEditor_AIFull/"* "$EXTRACTED_FIRM_DIR"
     fi
 
+	chown -R "$REAL_USER:$REAL_USER" "$EXTRACTED_FIRM_DIR"
+    chmod -R u+rwX "$EXTRACTED_FIRM_DIR"
+}
+
+
+APPLY_CUSTOM_FEATURES() {
+    echo " "
+
+    if [ "$#" -ne 1 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        return 1
+    fi
+
+	local EXTRACTED_FIRM_DIR="$1"
+	local FLOATING_FEATURE_FILE_DIRECTORY="$EXTRACTED_FIRM_DIR/system/system/etc/floating_feature.xml"
+
+	if [ ! -d "$EXTRACTED_FIRM_DIR/system" ]; then
+		echo "No extracted firmware found."
+        return 1
+    fi
+
+    echo -e "${YELLOW}Applying usefull features.${NC}"
+	DISABLE_SECURITY "$EXTRACTED_FIRM_DIR"
+
+	echo -e "- Adding build prop tweak."
+	BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.product.locale" "en-US"
+    BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "fw.max_users" "5"
+    BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "fw.show_multiuserui" "1"
+    BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "wifi.interface=" "wlan0"
+    BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "wlan.wfd.hdcp" "disabled"
+    BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "debug.hwui.renderer" "skiavk"
+	BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.telephony.sim_slots.count" "2"
+	BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.surface_flinger.protected_contents" "true"
+	BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.config.dmverity" "false"
+	BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.config.iccc_version" "iccc_disabled"
+
+	BUILD_PROP "$EXTRACTED_FIRM_DIR" "product" "ro.product.locale" "en-US"
+	BUILD_PROP "$EXTRACTED_FIRM_DIR" "product" "ro.config.dmverity" "false"
+	BUILD_PROP "$EXTRACTED_FIRM_DIR" "product" "ro.config.iccc_version" "iccc_disabled"
+
     # Text recognition: The full OCR app cannot be included in this repository due to GitHub’s file size limitations.
 	if [ ! -d "$EXTRACTED_FIRM_DIR/system/system/saiv/textrecognition" ]; then
 	    cp -rfa "$(pwd)/QuantumROM/Mods/Apps/OCR/." "$EXTRACTED_FIRM_DIR/"
@@ -1747,21 +1822,46 @@ APPLY_CUSTOM_FEATURES() {
     # Apply custom floating feature.
 	APPLY_CUSTOM_FLOATING_FEATURE "$FLOATING_FEATURE_FILE_DIRECTORY"
 
-	# Google photos unlimited backup.
-	# https://github.com/VehanRajintha/Free-Unlimited-Google-Cloud-Backup-Magisk-Module/releases/tag/Assets
-	cp -rfa "$(pwd)/QuantumROM/Mods/GPhotos/." "$EXTRACTED_FIRM_DIR/"
-
     # Fix Samsung AI Photo Editor Crash.
-	sed -i '0,/"ModelType": "MODEL_TYPE_INSTANCE_CAPTURE"/s//"ModelType": "MODEL_TYPE_OBJ_INSTANCE_CAPTURE"/' "$EXTRACTED_FIRM_DIR/system/system/cameradata/portrait_data/single_bokeh_feature.json"
+    if [ -f "$EXTRACTED_FIRM_DIR/system/system/cameradata/portrait_data/single_bokeh_feature.json" ]; then
+        sed -i '0,/"ModelType": "MODEL_TYPE_INSTANCE_CAPTURE"/s//"ModelType": "MODEL_TYPE_OBJ_INSTANCE_CAPTURE"/' \
+        "$EXTRACTED_FIRM_DIR/system/system/cameradata/portrait_data/single_bokeh_feature.json"
+    fi
 
-	# Remove power and data usage permissions for certain apps when Power Saver and Data Saver are always enabled.
-	# sed -i '/^[[:space:]]*<allow-in-power-save/d; /^[[:space:]]*<allow-in-data-usage-save/d' "$EXTRACTED_FIRM_DIR/product/etc/sysconfig/"*.xml "$EXTRACTED_FIRM_DIR/system/system/etc/sysconfig/"*.xml
 	chown -R "$REAL_USER:$REAL_USER" "$EXTRACTED_FIRM_DIR"
     chmod -R u+rwX "$EXTRACTED_FIRM_DIR"
 	
 	if [ -d "$(pwd)/QuantumROM/usefull_things" ]; then
         cp -a "$(pwd)/QuantumROM/usefull_things/." "$(pwd)/OUT"
     fi
+}
+
+
+DECODE_OMC() {
+    echo " "
+
+    if [ "$#" -ne 1 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        return 1
+    fi
+
+    echo -e "${YELLOW}Decoding CSC [optics].${NC}"
+
+    if ! command -v java >/dev/null 2>&1; then
+        echo -e "${RED}- Java is not installed.${NC}"
+        return 1
+    fi
+
+    local EXTRACTED_FIRM_DIR="$1"
+    local CSC_DIR="${EXTRACTED_FIRM_DIR}/optics"
+
+    if [ ! -d "$CSC_DIR" ]; then
+        echo -e "${RED}- Directory not found:${NC} $CSC_DIR"
+        return 1
+    fi
+
+    rm -rf "${WORK_DIR}/optics_decoded"
+    java -jar "$omc_decoder" -i "$CSC_DIR" -o "${WORK_DIR}/optics_decoded"
 }
 
 
@@ -1870,8 +1970,7 @@ GEN_FILE_CONTEXTS() {
         declare -A EXISTING=()
         while IFS= read -r line || [[ -n "$line" ]]; do
             [ -z "$line" ] && continue
-            local PATH_ONLY
-            PATH_ONLY=$(echo -e "$line" | awk '{print $1}')
+            local PATH_ONLY=$(echo -e "$line" | awk '{print $1}')
             EXISTING["$PATH_ONLY"]=1
         done < "$FILE_CONTEXTS"
 
@@ -1879,14 +1978,12 @@ GEN_FILE_CONTEXTS() {
             local REL_PATH="${item#$ROOT}"
             local PATH_ENTRY="/$PARTITION$REL_PATH"
 
-            local ESCAPED_PATH
-            ESCAPED_PATH="/$(escape_path "${PATH_ENTRY#/}")"
+            local ESCAPED_PATH="/$(escape_path "${PATH_ENTRY#/}")"
 
             [[ -n "${EXISTING[$ESCAPED_PATH]-}" ]] && continue
 
             local CONTEXT="u:object_r:system_file:s0"
-            local BASENAME
-            BASENAME=$(basename "$item")
+            local BASENAME=$(basename "$item")
             if [[ "$BASENAME" == "linker" || "$BASENAME" == "linker64" ]]; then
                 CONTEXT="u:object_r:system_linker_exec:s0"
             fi
@@ -1923,17 +2020,17 @@ BUILD_IMG() {
 
     for PART in "$EXTRACTED_FIRM_DIR"/*; do
         [[ -d "$PART" ]] || continue    
-        PARTITION="$(basename "$PART")"
+        local PARTITION="$(basename "$PART")"
         [[ "$PARTITION" == "config" ]] && continue 
 
         local SOURCE_DIR="$EXTRACTED_FIRM_DIR/$PARTITION"
         local OUT_IMG="$OUT_DIR/${PARTITION}.img"
         local FS_CONFIG="$EXTRACTED_FIRM_DIR/config/${PARTITION}_fs_config"
         local FILE_CONTEXTS="$EXTRACTED_FIRM_DIR/config/${PARTITION}_file_contexts"
-        local SIZE=$(du -sb --apparent-size "$SOURCE_DIR" | awk '{printf "%.0f", $1 * 1.2}')
+        local EXTRACTED_SIZE=$(du -sb --apparent-size "$SOURCE_DIR" | cut -f1)
 		local MOUNT_POINT="/$PARTITION"
 
-        rm -rf "$OUT_IMG"
+		rm -rf "$OUT_IMG"
 
         [[ -f "$FS_CONFIG" ]] || { echo -e "Warning: $FS_CONFIG missing, skipping $PARTITION"; continue; }
         [[ -f "$FILE_CONTEXTS" ]] || { echo -e "Warning: $FILE_CONTEXTS missing, skipping $PARTITION"; continue; }
@@ -1942,14 +2039,53 @@ BUILD_IMG() {
         sort -u "$FS_CONFIG" -o "$FS_CONFIG"
 
         if [[ "$FILE_SYSTEM" == "erofs" ]]; then
-            echo -e "${YELLOW}Building EROFS image:${NC} $OUT_IMG"
-            $mkfs_erofs --mount-point="$MOUNT_POINT" --fs-config-file="$FS_CONFIG" --file-contexts="$FILE_CONTEXTS" -z lz4hc -b 4096 -T 1199145600 "$OUT_IMG" "$SOURCE_DIR" >/dev/null 2>&1
+            echo " "
+            echo -e "${YELLOW}Building $FILE_SYSTEM image:${NC} $OUT_IMG"
+            $mkfs_erofs --mount-point="$MOUNT_POINT" --fs-config-file="$FS_CONFIG" --file-contexts="$FILE_CONTEXTS" -z lz4hc -b 4096 -T 1199145600 "$OUT_IMG" "$SOURCE_DIR"
 
         elif [[ "$FILE_SYSTEM" == "ext4" ]]; then
-            echo -e "${YELLOW}Building ext4 image:${NC} $OUT_IMG"
-            $make_ext4fs -l "$(awk "BEGIN {printf \"%.0f\", $SIZE * 1.1}")" -J -b 4096 -S "$FILE_CONTEXTS" -C "$FS_CONFIG"  -a "$MOUNT_POINT" -L "$PARTITION" "$OUT_IMG" "$SOURCE_DIR"
+            echo " "
+            echo -e "${YELLOW}Building $FILE_SYSTEM image:${NC} $OUT_IMG"
+            SIZE=$(((EXTRACTED_SIZE + 4095) / 4096 * 4096))
+            EXTENDED_SIZE=$((SIZE + SIZE / 5))
+            if [ "$EXTENDED_SIZE" -lt "4349952" ]; then
+                EXTENDED_SIZE="4349952"
+            fi
+
+            $make_ext4fs -l "$EXTENDED_SIZE" -J -b 4096 -S "$FILE_CONTEXTS" -C "$FS_CONFIG"  -a "$MOUNT_POINT" -L "$PARTITION" "$OUT_IMG" "$SOURCE_DIR"
 			# Resize img to reduce size.
 			resize2fs -M "$OUT_IMG"
+
+		#elif [[ "$FILE_SYSTEM" == "f2fs" ]]; then
+		    #echo " "
+		    #echo -e "${YELLOW}Building $FILE_SYSTEM image:${NC} $OUT_IMG"
+            #SIZE=$(((EXTRACTED_SIZE + 511) / 512 * 512))
+            #EXTENDED_SIZE=$((SIZE + SIZE / 4))
+
+            #dd if=/dev/zero of=$OUT_IMG bs=512 count=$((EXTENDED_SIZE / 512))
+
+            #make_f2fs \
+                #-f -q \
+                #-g android \
+                #-O extra_attr,inode_checksum,sb_checksum,compression \
+                #-l "$MOUNT_POINT" \
+                #"$OUT_IMG"
+
+            #sload_f2fs \
+                #-f "$SOURCE_DIR" \
+                #-C "$FS_CONFIG" \
+                #-s "$FILE_CONTEXTS" \
+                #-t "$MOUNT_POINT" \
+                #-P \
+                #-c \
+                #-L 2 \
+                #-a lz4 \
+                #"$OUT_IMG"
+
+            #img2simg "$OUT_IMG" "${OUT_IMG}.sparse"
+            #rm -rf "$OUT_IMG"
+            #mv "${OUT_IMG}.sparse" "$OUT_IMG"
+
         else
             echo "Unknown filesystem: $FILE_SYSTEM, skipping $PARTITION"
             continue
@@ -1965,7 +2101,7 @@ BUILD_SUPER_IMG() {
     OUTPUT_DIR="$2"
     OUTPUT_IMG="$OUTPUT_DIR/super.img"
     
-    echo "Building super.img..."
+    echo -e "${YELLOW}Building:${NC} super.img"
 
     if [ ! -d "$IMG_DIR" ]; then
         echo "- Input folder not found: $IMG_DIR"
@@ -1993,7 +2129,7 @@ BUILD_SUPER_IMG() {
         part_name="${name%.img}"
         size=$(stat -c%s "$img")
 
-        echo "- Adding $part_name ($size bytes)"
+        echo "${YELLOW}Adding:${NC} $part_name ($size bytes)"
 
         PARTITIONS="$PARTITIONS --partition ${part_name}:readonly:${size}:main"
         IMAGES="$IMAGES --image ${part_name}=$img"
@@ -2003,7 +2139,7 @@ BUILD_SUPER_IMG() {
 
     TOTAL_SIZE=$((TOTAL_SIZE + 67108864))
 
-    echo "- Total super size: $TOTAL_SIZE bytes"
+    echo "Total super size: $TOTAL_SIZE bytes"
 
     $lpmake \
         --metadata-size 65536 \
@@ -2016,9 +2152,9 @@ BUILD_SUPER_IMG() {
         --output "$OUTPUT_IMG"
 
     if [ $? -eq 0 ]; then
-        echo "- Done: $OUTPUT_IMG"
+        echo -e "${YELLOW}Build completed:${NC} $OUTPUT_IMG"
     else
-        echo "- Failed to build super.img"
+        echo -e "${RED}Failed to build super.img${NC}"
         return 1
     fi
 }

@@ -16,11 +16,11 @@ export OUTPUT_FILESYSTEM="$6"
 VERSION="1"
 
 # Directories
+export FIRM_DIR="$(pwd)/FW"
 export OUT_DIR="$(pwd)/OUT"
 export WORK_DIR="$(pwd)/WORK"
-export FIRM_DIR="$(pwd)/FIRMWARE"
+export APKTOOL="$(pwd)/bin/java/apktool.jar"
 export DEVICES_DIR="$(pwd)/QuantumROM/Devices"
-export APKTOOL="$(pwd)/bin/apktool/apktool.jar"
 export VNDKS_COLLECTION="$(pwd)/QuantumROM/vndks"
 export SMART_MANAGER_CN="$(pwd)/QuantumROM/Mods/SMART_MANAGER_CN"
 
@@ -33,10 +33,12 @@ source "$(pwd)/scripts/QuantumRom.sh"
 EXTRACT_FIRMWARE "$FIRM_DIR/$TARGET_DEVICE"
 EXTRACT_FIRMWARE_IMG "$FIRM_DIR/$TARGET_DEVICE" "all"
 
+DECODE_OMC "$FIRM_DIR/$TARGET_DEVICE"
 APPLY_STOCK_CONFIG "$FIRM_DIR/$TARGET_DEVICE"
 
 DEBLOAT "$FIRM_DIR/$TARGET_DEVICE"
 PATCH_SELINUX "$FIRM_DIR/$TARGET_DEVICE"
+ADD_FLAGSHIP_APPS "$FIRM_DIR/$TARGET_DEVICE"
 APPLY_CUSTOM_FEATURES "$FIRM_DIR/$TARGET_DEVICE"
 
 INSTALL_FRAMEWORK "$APKTOOL" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework/framework-res.apk"
