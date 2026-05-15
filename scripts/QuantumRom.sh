@@ -431,11 +431,11 @@ EXTRACT_FIRMWARE_IMG() {
                 "$extract_erofs" -i "$imgfile" -x -f -o "$FIRM_DIR"
                 ;;
 
-            #f2fs)
-                #echo " "
-                #echo -e "${YELLOW}$partition.img Detected f2fs.${NC} Size: $ORG_IMG_SIZE bytes. Extracting..."
-                #bash "$QT_DIR/scripts/extract_img.sh" "$imgfile" "$FIRM_DIR"
-                #;;
+            f2fs)
+                echo " "
+                echo -e "${YELLOW}$partition.img Detected f2fs.${NC} Size: $ORG_IMG_SIZE bytes. Extracting..."
+                bash "$QT_DIR/scripts/extract_img.sh" "$imgfile" "$FIRM_DIR"
+                ;;
 
             *)
                 echo -e "${RED}- $img_name unsupported filesystem type:${NC} ($fstype), skipping"
