@@ -1683,6 +1683,8 @@ REMOVE_TLC_ICC() {
 
 
 DISABLE_SECURITY() {
+    echo " "
+
     if [ "$#" -ne 1 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
@@ -1690,16 +1692,20 @@ DISABLE_SECURITY() {
 
 	local EXTRACTED_FIRM_DIR="$1"
 
-    echo -e "- Disabling security related things..."
+    echo -e "${YELLOW}Disabling security related things.${NC}"
+
     if [ -f "$EXTRACTED_FIRM_DIR/product/etc/build.prop" ]; then
+        echo "- Disabling factory reset protection from product."
         BUILD_PROP "$EXTRACTED_FIRM_DIR" "product" "ro.frp.pst" ""
     fi
 
 	if [ -f "$EXTRACTED_FIRM_DIR/vendor/build.prop" ]; then
+        echo "Disabling factory reset protection from vendor."
 		BUILD_PROP "$EXTRACTED_FIRM_DIR" "vendor" "ro.frp.pst" ""
     fi
 
     if [ -f "$EXTRACTED_FIRM_DIR/vendor/recovery-from-boot.p" ]; then
+        echo "Disabling stock recovery restoration."
         rm -rf "$EXTRACTED_FIRM_DIR/vendor/recovery-from-boot.p"
     fi
 
@@ -1795,7 +1801,6 @@ APPLY_CUSTOM_FEATURES() {
     fi
 
     echo -e "${YELLOW}Applying usefull features.${NC}"
-	DISABLE_SECURITY "$EXTRACTED_FIRM_DIR"
 
 	echo -e "- Adding build prop tweak."
 	BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.product.locale" "en-US"
