@@ -12,6 +12,8 @@ REAL_USER=${SUDO_USER:-$USER}
 QT_DIR="$(pwd)"
 
 # Binary
+export make_f2fs="make.f2fs"
+export sload_f2fs="sload.f2fs"
 export lpmake="$QT_DIR/bin/lp/lpmake"
 export lpunpack="$QT_DIR/bin/lp/lpunpack"
 export make_ext4fs="$QT_DIR/bin/ext4/make_ext4fs"
