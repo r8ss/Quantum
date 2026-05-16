@@ -2073,7 +2073,7 @@ BUILD_IMG() {
             $make_f2fs \
                 -f -q \
                 -g android \
-                -O extra_attr,inode_checksum,sb_checksum,compression \
+                -O extra_attr,inode_checksum,sb_checksum \
                 -l "$MOUNT_POINT" \
                 "$OUT_IMG"
 
@@ -2083,8 +2083,6 @@ BUILD_IMG() {
                 -s "$FILE_CONTEXTS" \
                 -t "$MOUNT_POINT" \
                 -P \
-                -c \
-                -a lz4 \
                 "$OUT_IMG"
 
             img2simg "$OUT_IMG" "${OUT_IMG}.sparse"
