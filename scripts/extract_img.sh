@@ -35,7 +35,7 @@ mkdir -p "$SRC_MOUNT"
 
 
 # Mount img
-mount -o loop,ro "$IMG_NAME" "$SRC_MOUNT"
+mount -o ro "$IMG_NAME" "$SRC_MOUNT"
 
 FC_SOURCE=$(find "$SRC_MOUNT" -type f \( \
 -name "file_contexts" -o \
