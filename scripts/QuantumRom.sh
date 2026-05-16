@@ -2060,35 +2060,35 @@ BUILD_IMG() {
 			# Resize img to reduce size.
 			resize2fs -M "$OUT_IMG"
 
-		#elif [[ "$FILE_SYSTEM" == "f2fs" ]]; then
-		    #echo " "
-		    #echo -e "${YELLOW}Building $FILE_SYSTEM image:${NC} $OUT_IMG"
-            #SIZE=$(((EXTRACTED_SIZE + 511) / 512 * 512))
-            #EXTENDED_SIZE=$((SIZE + SIZE / 4))
+		elif [[ "$FILE_SYSTEM" == "f2fs" ]]; then
+		    echo " "
+		    echo -e "${YELLOW}Building $FILE_SYSTEM image:${NC} $OUT_IMG"
+            SIZE=$(((EXTRACTED_SIZE + 511) / 512 * 512))
+            EXTENDED_SIZE=$((SIZE + SIZE / 4))
 
-            #dd if=/dev/zero of=$OUT_IMG bs=512 count=$((EXTENDED_SIZE / 512))
+            dd if=/dev/zero of=$OUT_IMG bs=512 count=$((EXTENDED_SIZE / 512))
 
-            #make_f2fs \
-                #-f -q \
-                #-g android \
-                #-O extra_attr,inode_checksum,sb_checksum,compression \
-                #-l "$MOUNT_POINT" \
-                #"$OUT_IMG"
+            make_f2fs \
+                -f -q \
+                -g android \
+                -O extra_attr,inode_checksum,sb_checksum,compression \
+                -l "$MOUNT_POINT" \
+                "$OUT_IMG"
 
-            #sload_f2fs \
-                #-f "$SOURCE_DIR" \
-                #-C "$FS_CONFIG" \
-                #-s "$FILE_CONTEXTS" \
-                #-t "$MOUNT_POINT" \
-                #-P \
-                #-c \
-                #-L 2 \
-                #-a lz4 \
-                #"$OUT_IMG"
+            sload_f2fs \
+                -f "$SOURCE_DIR" \
+                -C "$FS_CONFIG" \
+                -s "$FILE_CONTEXTS" \
+                -t "$MOUNT_POINT" \
+                -P \
+                -c \
+                -L 2 \
+                -a lz4 \
+                "$OUT_IMG"
 
-            #img2simg "$OUT_IMG" "${OUT_IMG}.sparse"
-            #rm -rf "$OUT_IMG"
-            #mv "${OUT_IMG}.sparse" "$OUT_IMG"
+            img2simg "$OUT_IMG" "${OUT_IMG}.sparse"
+            rm -rf "$OUT_IMG"
+            mv "${OUT_IMG}.sparse" "$OUT_IMG"
 
         else
             echo "Unknown filesystem: $FILE_SYSTEM, skipping $PARTITION"
