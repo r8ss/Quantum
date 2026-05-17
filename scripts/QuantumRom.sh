@@ -2087,7 +2087,6 @@ BUILD_IMG() {
                 -P \
                 -c \
                 -L 2 \
-                -a lz4 \
                 "$OUT_IMG"
 
             img2simg "$OUT_IMG" "${OUT_IMG}.sparse"
