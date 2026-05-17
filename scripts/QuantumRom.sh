@@ -249,7 +249,7 @@ EXTRACT_FIRMWARE() {
     # ---- ZIP ----
     for file in "$FIRM_DIR"/*.zip; do
         if [ -f "$file" ]; then
-            echo -e "- Extracting zip: $(basename "$file")"
+            echo -e "Extracting zip: $(basename "$file")"
             7z x -y -bd -o"$FIRM_DIR" "$file" >/dev/null 2>&1
             rm -f "$file"
         fi
@@ -262,7 +262,7 @@ EXTRACT_FIRMWARE() {
     # ---- XZ ----
     for file in "$FIRM_DIR"/*.xz; do
         if [ -f "$file" ]; then
-            echo -e "- Extracting xz: $(basename "$file")"
+            echo -e "Extracting xz: $(basename "$file")"
             7z x -y -bd -o"$FIRM_DIR" "$file" >/dev/null 2>&1
             rm -f "$file"
         fi
@@ -278,7 +278,7 @@ EXTRACT_FIRMWARE() {
     # ---- TAR ----
     for file in "$FIRM_DIR"/*.tar; do
         if [ -f "$file" ]; then
-            echo -e "- Extracting tar: $(basename "$file")"
+            echo -e "Extracting tar: $(basename "$file")"
             tar -xvf "$file" -C "$FIRM_DIR" >/dev/null 2>&1
             rm -f "$file"
         fi
