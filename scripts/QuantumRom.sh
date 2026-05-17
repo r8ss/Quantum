@@ -12,11 +12,11 @@ REAL_USER=${SUDO_USER:-$USER}
 QT_DIR="$(pwd)"
 
 # Binary
-export make_f2fs="mkfs.f2fs"
-export sload_f2fs="sload.f2fs"
 export lpmake="$QT_DIR/bin/lp/lpmake"
 export lpunpack="$QT_DIR/bin/lp/lpunpack"
 export make_ext4fs="$QT_DIR/bin/ext4/make_ext4fs"
+export make_f2fs="$QT_DIR/bin/f2fs-tools/mkfs.f2fs"
+export sload_f2fs="$QT_DIR/bin/f2fs-tools/sload.f2fs"
 export omc_decoder="$QT_DIR/bin/java/omc-decoder.jar"
 export mkfs_erofs="$QT_DIR/bin/erofs-utils/mkfs.erofs"
 export extract_erofs="$QT_DIR/bin/erofs-utils/extract.erofs"
@@ -24,6 +24,8 @@ export imgextractor_py="$QT_DIR/bin/py_scripts/imgextractor.py"
 
 chmod +x "$lpmake"
 chmod +x "$lpunpack"
+chmod +x "$make_f2fs"
+chmod +x "$sload_f2fs"
 chmod +x "$mkfs_erofs"
 chmod +x "$make_ext4fs"
 chmod +x "$extract_erofs"
