@@ -1,4 +1,4 @@
-#!/bin/bash
+⁸#!/bin/bash
 
 ###################################################################################################
 
@@ -432,7 +432,7 @@ EXTRACT_FIRMWARE_IMG() {
             erofs)
                 echo " "
                 echo -e "${YELLOW}$partition.img Detected erofs.${NC} Size: $ORG_IMG_SIZE bytes. Extracting..."
-                "$extract_erofs" -i "$imgfile" -x -f -o "$FIRM_DIR"
+                "$extract_erofs" -i "$imgfile" -x -f -o "$FIRM_DIR" >/dev/null 2>&1
                 ;;
 
             f2fs)
@@ -2075,7 +2075,7 @@ BUILD_IMG() {
             $make_f2fs \
                 -f -q \
                 -g android \
-                -O extra_attr,inode_checksum,sb_checksum,compression \
+                -O extra_attr,inode_checksum,sb_checksum \
                 -l "$MOUNT_POINT" \
                 "$OUT_IMG"
 
@@ -2085,8 +2085,6 @@ BUILD_IMG() {
                 -s "$FILE_CONTEXTS" \
                 -t "$MOUNT_POINT" \
                 -P \
-                -c \
-                -L 2 \
                 "$OUT_IMG"
 
             img2simg "$OUT_IMG" "${OUT_IMG}.sparse"
