@@ -45,7 +45,6 @@ FC_SOURCE=$(find "$SRC_MOUNT" -type f \( \
 
 
 escape_regex() {
-
     echo "$1" | sed \
         -e 's/\./\\./g' \
         -e 's/\+/\\+/g' \
@@ -60,14 +59,10 @@ escape_regex() {
 
 
 append_context() {
-
     local path="$1"
     local ctx="$2"
     local isdir="$3"
-
-    local esc
-    esc=$(escape_regex "$path")
-
+    local esc=$(escape_regex "$path")
     local line="/${esc} ${ctx}"
 
     grep -qxF "$line" "$FILE_CONTEXTS" 2>/dev/null || \
