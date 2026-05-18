@@ -127,7 +127,7 @@ GENERATE_FS_CONFIG() {
 
         uid=$(stat -c %u "$f")
         gid=$(stat -c %g "$f")
-        mode=$(stat -c %a "$f")
+        mode="0$(stat -c %a "$f")"
 
         echo "$path $uid $gid $mode" >> "$FS_CONFIG"
 
