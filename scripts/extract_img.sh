@@ -16,7 +16,6 @@ if [ ! -f "$IMG_NAME" ]; then
 fi
 
 IMG_NAME_BASE=$(basename "$IMG_NAME" .img)
-
 SRC_MOUNT="${FIRM_DIR}/${IMG_NAME_BASE}_mount"
 
 FILE_CONTEXTS="${FIRM_DIR}/config/${IMG_NAME_BASE}_file_contexts"
@@ -85,9 +84,7 @@ append_context() {
 
 
 find_context() {
-
     local full="$1"
-
     local ctx="u:object_r:system_file:s0"
 
     if [ -f "$FC_SOURCE" ]; then
@@ -110,8 +107,8 @@ find_context() {
     echo "$ctx"
 }
 
-GENERATE_FS_CONFIG() {
 
+GENERATE_FS_CONFIG() {
     echo "- Generating fs_config"
 
     > "$FS_CONFIG"
@@ -138,7 +135,6 @@ GENERATE_FS_CONFIG() {
 
 
 GENERATE_FILE_CONTEXTS() {
-
     echo "- Generating file_contexts"
 
     > "$FILE_CONTEXTS"
