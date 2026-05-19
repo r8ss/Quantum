@@ -101,6 +101,7 @@ GENERATE_FS_CONFIG() {
     > "$FS_CONFIG"
 
     echo "/ 0 0 0755" >> "$FS_CONFIG"
+    echo "${IMG_NAME_BASE}/ 0 0 0755" >> "$FS_CONFIG"
 
     find "$SRC_MOUNT" -mindepth 1 -print0 | while IFS= read -r -d '' f; do
 
