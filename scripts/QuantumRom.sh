@@ -2122,7 +2122,7 @@ BUILD_IMG() {
 
     build_img() {
         local PARTITION="$1"
-        
+
         mkdir -p "${EXTRACTED_FIRM_DIR}/${PARTITION}/lost+found"
 
         GEN_FS_CONFIG "$EXTRACTED_FIRM_DIR" "$PARTITION"
