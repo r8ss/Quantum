@@ -348,7 +348,7 @@ EXTRACT_FIRMWARE() {
         \( -name "*.txt" -o -name "*.pit" -o -name "*.bin" \) \
         -delete
 
-    echo -e "${GREEN}Firmware Extraction complete${NC}"
+    echo -e "Firmware Extraction complete."
 }
 
 
