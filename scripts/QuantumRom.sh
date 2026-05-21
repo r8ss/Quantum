@@ -248,60 +248,122 @@ EXTRACT_FIRMWARE() {
 
     # ---- ZIP ----
     for file in "$FIRM_DIR"/*.zip; do
-        if [ -f "$file" ]; then
-            echo -e "Extracting zip: $(basename "$file")"
-            7z x -y -bd -o"$FIRM_DIR" "$file" >/dev/null 2>&1
-            rm -f "$file"
-        fi
+        [ -e "$file" ] || continue
+
+        echo -e "Extracting zip: $(basename "$file")"
+        7z x -y -bd -bsp1 -o"$FIRM_DIR" "$file"
+
+        rm -f "$file"
     done
 
-	rm -rf "$FIRM_DIR"/BL_*.tar.md5
-	rm -f "$FIRM_DIR"/CP_*.tar.md5
+    # remove unwanted archives before extraction
+    rm -f "$FIRM_DIR"/BL_*.tar.md5
+    rm -f "$FIRM_DIR"/CP_*.tar.md5
     rm -f "$FIRM_DIR"/HOME_CSC_*.tar.md5
 
     # ---- XZ ----
     for file in "$FIRM_DIR"/*.xz; do
-        if [ -f "$file" ]; then
-            echo -e "Extracting xz: $(basename "$file")"
-            7z x -y -bd -o"$FIRM_DIR" "$file" >/dev/null 2>&1
-            rm -f "$file"
-        fi
+        [ -e "$file" ] || continue
+
+        echo -e "Extracting xz: $(basename "$file")"
+        7z x -y -bd -bsp1 -o"$FIRM_DIR" "$file"
+
+        rm -f "$file"
     done
 
-    # ---- MD5 rename ----
+    # ---- RENAME .MD5 -> .TAR ----
     for file in "$FIRM_DIR"/*.md5; do
-        if [ -f "$file" ]; then
-            mv -- "$file" "${file%.md5}"
-        fi
+        [ -e "$file" ] || continue
+
+        mv -- "$file" "${file%.md5}"
     done
 
     # ---- TAR ----
     for file in "$FIRM_DIR"/*.tar; do
-        if [ -f "$file" ]; then
-            echo -e "Extracting tar: $(basename "$file")"
-            tar -xvf "$file" -C "$FIRM_DIR" >/dev/null 2>&1
-            rm -f "$file"
-        fi
+        [ -e "$file" ] || continue
+
+        echo -e "Extracting tar: $(basename "$file")"
+
+        tar -xf "$file" -C "$FIRM_DIR"
+
+        # remove only samsung firmware tar archives
+        case "$(basename "$file")" in
+            AP_*|BL_*|CP_*|CSC_*|HOME_CSC_*)
+                rm -f "$file"
+                ;;
+        esac
     done
 
-	rm -rf "$FIRM_DIR"/meta-data
+    # ---- REMOVE META-DATA ----
+    rm -rf "$FIRM_DIR/meta-data"
+
+    # ---- REMOVE UNWANTED LZ4 FILES ----
+    rm -f \
+        "$FIRM_DIR"/cache.img.lz4 \
+        "$FIRM_DIR"/dtbo.img.lz4 \
+        "$FIRM_DIR"/efuse.img.lz4 \
+        "$FIRM_DIR"/gz-verified.img.lz4 \
+        "$FIRM_DIR"/lk-verified.img.lz4 \
+        "$FIRM_DIR"/md1img.img.lz4 \
+        "$FIRM_DIR"/md_udc.img.lz4 \
+        "$FIRM_DIR"/misc.bin.lz4 \
+        "$FIRM_DIR"/omr.img.lz4 \
+        "$FIRM_DIR"/param.bin.lz4 \
+        "$FIRM_DIR"/preloader.img.lz4 \
+        "$FIRM_DIR"/recovery.img.lz4 \
+        "$FIRM_DIR"/scp-verified.img.lz4 \
+        "$FIRM_DIR"/spmfw-verified.img.lz4 \
+        "$FIRM_DIR"/sspm-verified.img.lz4 \
+        "$FIRM_DIR"/tee-verified.img.lz4 \
+        "$FIRM_DIR"/tzar.img.lz4 \
+        "$FIRM_DIR"/up_param.bin.lz4 \
+        "$FIRM_DIR"/userdata.img.lz4 \
+        "$FIRM_DIR"/vbmeta.img.lz4 \
+        "$FIRM_DIR"/vbmeta_system.img.lz4 \
+        "$FIRM_DIR"/audio_dsp-verified.img.lz4 \
+        "$FIRM_DIR"/cam_vpu1-verified.img.lz4 \
+        "$FIRM_DIR"/cam_vpu2-verified.img.lz4 \
+        "$FIRM_DIR"/cam_vpu3-verified.img.lz4 \
+        "$FIRM_DIR"/dpm-verified.img.lz4 \
+        "$FIRM_DIR"/init_boot.img.lz4 \
+        "$FIRM_DIR"/mcupm-verified.img.lz4 \
+        "$FIRM_DIR"/pi_img-verified.img.lz4 \
+        "$FIRM_DIR"/uh.bin.lz4 \
+        "$FIRM_DIR"/vendor_boot.img.lz4 \
+        "$FIRM_DIR"/ssu.img.lz4
 
     # ---- LZ4 ----
-    rm -rf $FIRM_DIR/{cache.img.lz4,dtbo.img.lz4,efuse.img.lz4,gz-verified.img.lz4,lk-verified.img.lz4,md1img.img.lz4,md_udc.img.lz4,misc.bin.lz4,omr.img.lz4,param.bin.lz4,preloader.img.lz4,recovery.img.lz4,scp-verified.img.lz4,spmfw-verified.img.lz4,sspm-verified.img.lz4,tee-verified.img.lz4,tzar.img.lz4,up_param.bin.lz4,userdata.img.lz4,vbmeta.img.lz4,vbmeta_system.img.lz4,audio_dsp-verified.img.lz4,cam_vpu1-verified.img.lz4,cam_vpu2-verified.img.lz4,cam_vpu3-verified.img.lz4,dpm-verified.img.lz4,init_boot.img.lz4,mcupm-verified.img.lz4,pi_img-verified.img.lz4,uh.bin.lz4,vendor_boot.img.lz4,ssu.img.lz4}
     for file in "$FIRM_DIR"/*.lz4; do
-        if [ -f "$file" ]; then
-            echo -e "Extracting lz4: $(basename "$file")"
-            lz4 -d "$file" "${file%.lz4}" >/dev/null 2>&1
-            rm -f "$file"
-        fi
+        [ -e "$file" ] || continue
+
+        echo -e "Extracting lz4: $(basename "$file")"
+
+        lz4 -d "$file" "${file%.lz4}"
+
+        rm -f "$file"
     done
 
     # ---- REMOVE UNWANTED FILES ----
-    rm -rf "$FIRM_DIR"/*.txt "$FIRM_DIR"/*.pit "$FIRM_DIR"/*.bin
+    find "$FIRM_DIR" -maxdepth 1 -type f \
+        \( -name "*.txt" -o -name "*.pit" -o -name "*.bin" \) \
+        -delete
 
-    # ---- SUPER.IMG ----
+    echo -e "${GREEN}Firmware Extraction complete${NC}"
+}
+
+
+EXTRACT_SUPER_IMG() {
+    echo " "
+
+    if [ "$#" -ne 1 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <FIRMWARE_DIRECTORY>"
+        return 1
+    fi
+
+    local FIRM_DIR="$1"
+
     if [ -f "$FIRM_DIR/super.img" ]; then
-        echo -e "Extracting super.img"
+        echo -e "${YELLOW}Extracting super.img${NC}"
         if [ "$(DETECT_FILESYSTEM "$FIRM_DIR/super.img")" = "sparse" ]; then
 		    echo -e "Converting to raw super.img"
             simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
@@ -312,7 +374,10 @@ EXTRACT_FIRMWARE() {
         "$lpunpack" "$FIRM_DIR/super.img" "$FIRM_DIR" || return 1
         rm -f "$FIRM_DIR/super.img"
 
-        echo -e "Extraction complete"
+        echo -e "super.img extraction complete"
+
+    else
+        echo -e "${RED}No super.img found.${NC}"
     fi
 }
 
@@ -1112,7 +1177,6 @@ ADD_SYSTEM_EXT_IN_SYSTEM_ROOT() {
     # Clean system_ext config
     grep -v '^/ 0 0 0755$' "$SYSTEM_EXT_CONFIG_FILE" \
     | grep -v '^system_ext/ 0 0 0755$' \
-    | grep -v '^system_ext/lost+found 0 0 0755$' \
     > "$SYSTEM_EXT_TEMP_CONFIG" && mv "$SYSTEM_EXT_TEMP_CONFIG" "$SYSTEM_EXT_CONFIG_FILE"
 
     # Fix system_ext config
@@ -1853,105 +1917,125 @@ DECODE_OMC() {
         return 1
     fi
 
-    echo -e "${YELLOW}Decoding CSC [optics].${NC}"
+    echo -e "${YELLOW}Decoding CSC - odm,optics.${NC}"
 
     if ! command -v java >/dev/null 2>&1; then
         echo -e "${RED}- Java is not installed.${NC}"
         return 1
     fi
 
-    local EXTRACTED_FIRM_DIR="$1"
-    local CSC_DIR="${EXTRACTED_FIRM_DIR}/optics"
+    local FW_DIR="$1"
 
-    if [ ! -d "$CSC_DIR" ]; then
-        echo -e "${RED}- Directory not found:${NC} $CSC_DIR"
-        return 1
+    if [ -d "${FW_DIR}/optics" ]; then
+        rm -rf "${WORK_DIR}/optics_decoded"
+
+        echo "Decoding optics."
+
+        java -jar "$omc_decoder" \
+            -i "${FW_DIR}/optics" \
+            -o "${WORK_DIR}/optics_decoded" \
+            >/dev/null 2>&1 || {
+                echo -e "${RED}Failed decoding optics.${NC}"
+            }
     fi
 
-    rm -rf "${WORK_DIR}/optics_decoded"
-    java -jar "$omc_decoder" -i "$CSC_DIR" -o "${WORK_DIR}/optics_decoded"
+    if [ -d "${FW_DIR}/odm/etc/omc" ]; then
+        rm -rf "${WORK_DIR}/odm_decoded"
+
+        echo "Decoding odm/etc/omc."
+
+        java -jar "$omc_decoder" \
+            -i "${FW_DIR}/odm/etc/omc" \
+            -o "${WORK_DIR}/odm_decoded" \
+            >/dev/null 2>&1 || {
+                echo -e "${RED}Failed decoding odm/etc/omc.${NC}"
+            }
+    fi
 }
 
 
 GEN_FS_CONFIG() {
-    if [ "$#" -ne 1 ]; then
-        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+    echo " "
+
+    if [ "$#" -ne 2 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR> <PARTITION_FOLDER_NAME>"
         return 1
     fi
 
     local EXTRACTED_FIRM_DIR="$1"
+    local PARTITION="$2"
 
-    [ ! -d "$EXTRACTED_FIRM_DIR" ] && {
-        echo -e "- $EXTRACTED_FIRM_DIR not found."
+    [ ! -d "$EXTRACTED_FIRM_DIR/$PARTITION" ] && {
+        echo -e "- Partition not found: $PARTITION"
         return 1
     }
 
-    [ ! -d "$EXTRACTED_FIRM_DIR/config" ] && {
-        echo -e "[ERROR] config directory missing"
-        return 1
-    }
+    [ "$PARTITION" = "config" ] && return
 
-    for ROOT in "$EXTRACTED_FIRM_DIR"/*; do
-        [ ! -d "$ROOT" ] && continue
+    local FS_CONFIG="$EXTRACTED_FIRM_DIR/config/${PARTITION}_fs_config"
+    local TMP_EXISTING="$(mktemp)"
 
-        local PARTITION="$(basename "$ROOT")"
-        [ "$PARTITION" = "config" ] && continue
+    touch "$FS_CONFIG"
 
-        local FS_CONFIG="$EXTRACTED_FIRM_DIR/config/${PARTITION}_fs_config"
-        local TMP_EXISTING="$(mktemp)"
+    echo -e "${YELLOW}Generating fs_config for partition:${NC} $PARTITION"
 
-        touch "$FS_CONFIG"
+    awk '{print $1}' "$FS_CONFIG" | sort -u > "$TMP_EXISTING"
 
-        echo " "
-        echo -e "${YELLOW}Generating fs_config for partition:${NC} $PARTITION"
+    find "$EXTRACTED_FIRM_DIR/$PARTITION" -mindepth 1 \( -type f -o -type d -o -type l \) | while IFS= read -r item; do
 
-        awk '{print $1}' "$FS_CONFIG" | sort -u > "$TMP_EXISTING"
+        REL_PATH="${item#$EXTRACTED_FIRM_DIR/$PARTITION/}"
+        PATH_ENTRY="$PARTITION/$REL_PATH"
 
-        find "$ROOT" -mindepth 1 \( -type f -o -type d -o -type l \) | while IFS= read -r item; do
+        grep -qxF "$PATH_ENTRY" "$TMP_EXISTING" && continue
 
-            REL_PATH="${item#$ROOT/}"
-            PATH_ENTRY="$PARTITION/$REL_PATH"
+        if [ -d "$item" ]; then
+            echo -e "- Adding: $PATH_ENTRY 0 0 0755"
+            printf "%s 0 0 0755\n" "$PATH_ENTRY" >> "$FS_CONFIG"
 
-            grep -qxF "$PATH_ENTRY" "$TMP_EXISTING" && continue
-
-            if [ -d "$item" ]; then
-                echo -e "- Adding: $PATH_ENTRY 0 0 0755"
-                printf "%s 0 0 0755\n" "$PATH_ENTRY" >> "$FS_CONFIG"
-
+        else
+            if [[ "$REL_PATH" == */bin/* ]]; then
+                echo -e "- Adding: $PATH_ENTRY 0 2000 0755"
+                printf "%s 0 2000 0755\n" "$PATH_ENTRY" >> "$FS_CONFIG"
             else
-                if [[ "$REL_PATH" == */bin/* ]]; then
-                    echo -e "- Adding: $PATH_ENTRY 0 2000 0755"
-                    printf "%s 0 2000 0755\n" "$PATH_ENTRY" >> "$FS_CONFIG"
-                else
-                    echo -e "- Adding: $PATH_ENTRY 0 0 0644"
-                    printf "%s 0 0 0644\n" "$PATH_ENTRY" >> "$FS_CONFIG"
-                fi
+                echo -e "- Adding: $PATH_ENTRY 0 0 0644"
+                printf "%s 0 0 0644\n" "$PATH_ENTRY" >> "$FS_CONFIG"
             fi
+        fi
 
-        done
-
-        rm -f "$TMP_EXISTING"
-        echo -e "- $PARTITION fs_config generated"
     done
+
+    rm -f "$TMP_EXISTING"
+
+    echo -e "- $PARTITION fs_config generated"
 }
 
 
 GEN_FILE_CONTEXTS() {
-    if [ "$#" -ne 1 ]; then
-        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+    echo " "
+
+    if [ "$#" -ne 2 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR> <PARTITION_FOLDER_NAME>"
         return 1
     fi
 
     local EXTRACTED_FIRM_DIR="$1"
-    [ ! -d "$EXTRACTED_FIRM_DIR" ] && { echo -e "- $EXTRACTED_FIRM_DIR not found."; return 1; }
-    [ ! -d "$EXTRACTED_FIRM_DIR/config" ] && { echo -e "[ERROR] config directory missing"; return 1; }
+    local PARTITION="$2"
+
+    [ ! -d "$EXTRACTED_FIRM_DIR/$PARTITION" ] && {
+        echo -e "- Partition not found: $PARTITION"
+        return 1
+    }
+
+    [ "$PARTITION" = "config" ] && return
 
     escape_path() {
         local path="$1"
         local result=""
         local c
+
         for ((i=0; i<${#path}; i++)); do
             c="${path:i:1}"
+
             case "$c" in
                 '.'|'+'|'['|']'|'*'|'?'|'^'|'$'|'\\')
                     result+="\\$c"
@@ -1961,121 +2045,163 @@ GEN_FILE_CONTEXTS() {
                     ;;
             esac
         done
+
         printf '%s' "$result"
     }
 
-    for ROOT in "$EXTRACTED_FIRM_DIR"/*; do
-        [ ! -d "$ROOT" ] && continue
-        local PARTITION="$(basename "$ROOT")"
-        [ "$PARTITION" = "config" ] && continue
+    local FILE_CONTEXTS="$EXTRACTED_FIRM_DIR/config/${PARTITION}_file_contexts"
 
-        local FILE_CONTEXTS="$EXTRACTED_FIRM_DIR/config/${PARTITION}_file_contexts"
-        touch "$FILE_CONTEXTS"
+    touch "$FILE_CONTEXTS"
 
-        echo " "
-        echo -e "${YELLOW}Generating file_contexts for partition:${NC} $PARTITION"
+    echo -e "${YELLOW}Generating file_contexts for partition:${NC} $PARTITION"
 
-        declare -A EXISTING=()
-        while IFS= read -r line || [[ -n "$line" ]]; do
-            [ -z "$line" ] && continue
-            local PATH_ONLY=$(echo -e "$line" | awk '{print $1}')
-            EXISTING["$PATH_ONLY"]=1
-        done < "$FILE_CONTEXTS"
+    declare -A EXISTING=()
 
-        find "$ROOT" -mindepth 1 \( -type f -o -type d -o -type l \) | while IFS= read -r item; do
-            local REL_PATH="${item#$ROOT}"
-            local PATH_ENTRY="/$PARTITION$REL_PATH"
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        [ -z "$line" ] && continue
 
-            local ESCAPED_PATH="/$(escape_path "${PATH_ENTRY#/}")"
+        local PATH_ONLY=$(echo -e "$line" | awk '{print $1}')
 
-            [[ -n "${EXISTING[$ESCAPED_PATH]-}" ]] && continue
+        EXISTING["$PATH_ONLY"]=1
 
-            local CONTEXT="u:object_r:system_file:s0"
-            local BASENAME=$(basename "$item")
-            if [[ "$BASENAME" == "linker" || "$BASENAME" == "linker64" ]]; then
-                CONTEXT="u:object_r:system_linker_exec:s0"
-            fi
-            if [[ "$BASENAME" == "[" ]]; then
-                CONTEXT="u:object_r:system_file:s0"
-            fi
+    done < "$FILE_CONTEXTS"
 
-            printf "%s %s\n" "$ESCAPED_PATH" "$CONTEXT" >> "$FILE_CONTEXTS"
-            echo -e "- Added: $ESCAPED_PATH"
+    find "$EXTRACTED_FIRM_DIR/$PARTITION" -mindepth 1 \( -type f -o -type d -o -type l \) | while IFS= read -r item; do
 
-            EXISTING["$ESCAPED_PATH"]=1
-        done
+        local REL_PATH="${item#$EXTRACTED_FIRM_DIR/$PARTITION}"
+        local PATH_ENTRY="/$PARTITION$REL_PATH"
 
-        echo -e "- $PARTITION file_contexts generated"
-        unset EXISTING
+        local ESCAPED_PATH="/$(escape_path "${PATH_ENTRY#/}")"
+
+        [[ -n "${EXISTING[$ESCAPED_PATH]-}" ]] && continue
+
+        local CONTEXT="u:object_r:system_file:s0"
+        
+        if [[ "$PARTITION" == odm* || "$PARTITION" == vendor* ]]; then
+            CONTEXT="u:object_r:vendor_file:s0"
+        fi
+
+        local BASENAME=$(basename "$item")
+
+        if [[ "$BASENAME" == "linker" || "$BASENAME" == "linker64" ]]; then
+            CONTEXT="u:object_r:system_linker_exec:s0"
+        fi
+
+        if [[ "$BASENAME" == "[" ]]; then
+            CONTEXT="u:object_r:system_file:s0"
+        fi
+
+        printf "%s %s\n" "$ESCAPED_PATH" "$CONTEXT" >> "$FILE_CONTEXTS"
+
+        echo -e "- Added: $ESCAPED_PATH"
+
+        EXISTING["$ESCAPED_PATH"]=1
+
     done
+
+    echo -e "- $PARTITION file_contexts generated"
+
+    unset EXISTING
 }
 
 
 BUILD_IMG() {
     echo " "
 
-    if [ "$#" -ne 3 ]; then
-        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR> <FILE_SYSTEM> <OUT_DIR>"
+    if [ "$#" -ne 4 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR> all|img_name <FILE_SYSTEM> <OUT_DIR>"
         return 1
     fi
 
     local EXTRACTED_FIRM_DIR="$1"
-    local FILE_SYSTEM="$2"
-	local OUT_DIR="$3"
+    local MODE="$2"
+    local FILE_SYSTEM="$3"
+    local OUT_DIR="$4"
 
-    GEN_FS_CONFIG "$EXTRACTED_FIRM_DIR"
-	GEN_FILE_CONTEXTS "$EXTRACTED_FIRM_DIR"
+    mkdir -p "$OUT_DIR"
 
-    for PART in "$EXTRACTED_FIRM_DIR"/*; do
-        [[ -d "$PART" ]] || continue    
-        local PARTITION="$(basename "$PART")"
-        [[ "$PARTITION" == "config" ]] && continue 
+    build_img() {
+        local PARTITION="$1"
+        
+        mkdir -p "${EXTRACTED_FIRM_DIR}/${PARTITION}/lost+found"
+
+        GEN_FS_CONFIG "$EXTRACTED_FIRM_DIR" "$PARTITION"
+        GEN_FILE_CONTEXTS "$EXTRACTED_FIRM_DIR" "$PARTITION"
 
         local SOURCE_DIR="$EXTRACTED_FIRM_DIR/$PARTITION"
         local OUT_IMG="$OUT_DIR/${PARTITION}.img"
         local FS_CONFIG="$EXTRACTED_FIRM_DIR/config/${PARTITION}_fs_config"
         local FILE_CONTEXTS="$EXTRACTED_FIRM_DIR/config/${PARTITION}_file_contexts"
+
+        [[ -d "$SOURCE_DIR" ]] || return
+
         local EXTRACTED_SIZE=$(du -sb --apparent-size "$SOURCE_DIR" | cut -f1)
-		local MOUNT_POINT="/$PARTITION"
+        local MOUNT_POINT="/$PARTITION"
 
-		rm -rf "$OUT_IMG"
+        rm -rf "$OUT_IMG"
 
-        [[ -f "$FS_CONFIG" ]] || { echo -e "Warning: $FS_CONFIG missing, skipping $PARTITION"; continue; }
-        [[ -f "$FILE_CONTEXTS" ]] || { echo -e "Warning: $FILE_CONTEXTS missing, skipping $PARTITION"; continue; }
+        [[ -f "$FS_CONFIG" ]] || {
+            echo -e "Warning: $FS_CONFIG missing, skipping $PARTITION"
+            return
+        }
+
+        [[ -f "$FILE_CONTEXTS" ]] || {
+            echo -e "Warning: $FILE_CONTEXTS missing, skipping $PARTITION"
+            return
+        }
 
         sort -u "$FILE_CONTEXTS" -o "$FILE_CONTEXTS"
         sort -u "$FS_CONFIG" -o "$FS_CONFIG"
 
         if [[ "$FILE_SYSTEM" == "erofs" ]]; then
             echo " "
-            echo -e "${YELLOW}Building $FILE_SYSTEM image:${NC} $OUT_IMG"
-            $mkfs_erofs --mount-point="$MOUNT_POINT" --fs-config-file="$FS_CONFIG" --file-contexts="$FILE_CONTEXTS" -z lz4hc -b 4096 -T 1199145600 "$OUT_IMG" "$SOURCE_DIR"
+            echo -e "${YELLOW}Building erofs image:${NC} $OUT_IMG"
+
+            $mkfs_erofs \
+                --mount-point="$MOUNT_POINT" \
+                --fs-config-file="$FS_CONFIG" \
+                --file-contexts="$FILE_CONTEXTS" \
+                -z lz4hc \
+                -b 4096 \
+                -T 1199145600 \
+                "$OUT_IMG" "$SOURCE_DIR" >/dev/null 2>&1
 
         elif [[ "$FILE_SYSTEM" == "ext4" ]]; then
             echo " "
-            echo -e "${YELLOW}Building $FILE_SYSTEM image:${NC} $OUT_IMG"
+            echo -e "${YELLOW}Building ext4 image:${NC} $OUT_IMG"
+
             SIZE=$(((EXTRACTED_SIZE + 4095) / 4096 * 4096))
             EXTENDED_SIZE=$((SIZE + SIZE / 5))
+
             if [ "$EXTENDED_SIZE" -lt "4349952" ]; then
                 EXTENDED_SIZE="4349952"
             fi
 
-            $make_ext4fs -l "$EXTENDED_SIZE" -J -b 4096 -S "$FILE_CONTEXTS" -C "$FS_CONFIG"  -a "$MOUNT_POINT" -L "$PARTITION" "$OUT_IMG" "$SOURCE_DIR"
-			# Resize img to reduce size.
-			resize2fs -M "$OUT_IMG"
+            $make_ext4fs \
+                -l "$EXTENDED_SIZE" \
+                -J \
+                -b 4096 \
+                -S "$FILE_CONTEXTS" \
+                -C "$FS_CONFIG" \
+                -a "$MOUNT_POINT" \
+                -L "$PARTITION" \
+                "$OUT_IMG" "$SOURCE_DIR"
 
-		elif [[ "$FILE_SYSTEM" == "f2fs" ]]; then
-		    echo " "
-		    echo -e "${YELLOW}Building $FILE_SYSTEM image:${NC} $OUT_IMG"
+            resize2fs -M "$OUT_IMG"
+
+        elif [[ "$FILE_SYSTEM" == "f2fs" ]]; then
+            echo " "
+            echo -e "${YELLOW}Building f2fs image:${NC} $OUT_IMG"
+
             SIZE=$(((EXTRACTED_SIZE + 511) / 512 * 512))
             EXTENDED_SIZE=$((SIZE + SIZE / 4))
 
-            dd if=/dev/zero of=$OUT_IMG bs=512 count=$((EXTENDED_SIZE / 512))
+            dd if=/dev/zero of="$OUT_IMG" bs=512 count=$((EXTENDED_SIZE / 512))
 
             $make_f2fs \
                 -f -q \
                 -g android \
-                -O extra_attr,inode_checksum,sb_checksum \
+                -O extra_attr,inode_checksum,sb_checksum,compression \
                 -l "$MOUNT_POINT" \
                 "$OUT_IMG"
 
@@ -2085,17 +2211,40 @@ BUILD_IMG() {
                 -s "$FILE_CONTEXTS" \
                 -t "$MOUNT_POINT" \
                 -P \
+                -c \
+                -L 2 \
+                -a lz4 \
                 "$OUT_IMG"
 
             img2simg "$OUT_IMG" "${OUT_IMG}.sparse"
+
             rm -rf "$OUT_IMG"
             mv "${OUT_IMG}.sparse" "$OUT_IMG"
 
         else
-            echo "Unknown filesystem: $FILE_SYSTEM, skipping $PARTITION"
-            continue
+            echo -e "${RED}Unsupported filesystem:${NC} $FILE_SYSTEM"
+            return
         fi
-    done
+    }
+
+    if [ "$MODE" = "all" ]; then
+
+        for PART in "$EXTRACTED_FIRM_DIR"/*; do
+            [[ -d "$PART" ]] || continue
+
+            local PARTITION="$(basename "$PART")"
+
+            [[ "$PARTITION" == "config" ]] && continue
+
+            build_img "$PARTITION"
+        done
+
+    else
+        build_img "$MODE"
+    fi
+
+    chown -R "$REAL_USER:$REAL_USER" "$OUT_DIR"
+    chmod -R u+rwX "$OUT_DIR"
 }
 
 

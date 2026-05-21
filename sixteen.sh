@@ -31,6 +31,7 @@ source "$(pwd)/scripts/debloat.sh"
 source "$(pwd)/scripts/QuantumRom.sh"
 
 EXTRACT_FIRMWARE "$FIRM_DIR/$TARGET_DEVICE"
+EXTRACT_SUPER_IMG "$FIRM_DIR/$TARGET_DEVICE"
 EXTRACT_FIRMWARE_IMG "$FIRM_DIR/$TARGET_DEVICE" "all"
 
 DECODE_OMC "$FIRM_DIR/$TARGET_DEVICE"
@@ -65,4 +66,4 @@ D_ID="$(grep -m1 '^ro.build.display.id=' "$FIRM_DIR/$TARGET_DEVICE/system/system
 BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system" "ro.build.display.id" "${D_ID} V-${VERSION}: Build with Quantum Tools"
 BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "product" "ro.build.display.id" "${D_ID} V-${VERSION}: Build with Quantum Tools"
 
-BUILD_IMG "$FIRM_DIR/$TARGET_DEVICE" "$OUTPUT_FILESYSTEM" "$OUT_DIR"
+BUILD_IMG "$FIRM_DIR/$TARGET_DEVICE" "all" "$OUTPUT_FILESYSTEM" "$OUT_DIR"
