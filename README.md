@@ -79,7 +79,7 @@ ption to True if your kernel BPF version is 5.4 (lower than 5.10).
 - Required to download the target device firmware from the Samsung server.
 - Change the IMEI if you want to change the target device.
 
-#### 6. OUTPUT_FILESYSTEM (erofs / ext4).
+#### 6. OUTPUT_FILESYSTEM (erofs / ext4 / f2fs).
 My tool can build images in two formats:
 - erofs
   - Recommended if your device partition size is small.
@@ -88,6 +88,10 @@ My tool can build images in two formats:
 - ext4
   - Use this if your kernel does not support EROFS.
   - The generated image will be larger in size.
+- f2fs
+  - Recommended if your device partition size is small. (Not better than EROFS)
+  - Saves storage space.
+  - Your kernel must support F2FS.
 
 #### 7. Compress IMG to XZ (True / False).
 If set to True:
