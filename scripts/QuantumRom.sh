@@ -209,7 +209,7 @@ DOWNLOAD_FIRMWARE() {
 
     echo " "
     echo -e "- ✅ Firmware decrypted successfully! Firmware Size: ${file_size} MB"
-    echo -e "- Saved to: ${DOWN_DIR}/${MODEL}.zip"
+    echo -e "- Saved to: ${DOWN_DIR}/${MODEL}_*_fac.zip"
 
     # --- Cleanup ---
     rm -f "$enc_file"
