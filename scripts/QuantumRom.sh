@@ -179,15 +179,15 @@ DOWNLOAD_FIRMWARE() {
 
     # --- Step 1: Determine Version ---
     if [ -n "$VERSION" ]; then
-        echo -e "- ✅ Downloading provided version: $VERSION"
+        echo -e "✅ Downloading provided version: $VERSION"
     else
-        echo -e "- Fetching latest firmware..."
+        echo -e "Fetching latest firmware..."
 
         VERSION=$(python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" checkupdate 2>&1)
 
         if [ $? -ne 0 ] || [ -z "$VERSION" ]; then
-            echo -e "- ⛔️ MODEL/CSC/IMEI not valid or no update found."
-            echo -e "- Error: $VERSION"
+            echo -e "⛔️ MODEL/CSC/IMEI not valid or no update found."
+            echo -e "Error: $VERSION"
             return 1
         fi
 
@@ -200,16 +200,13 @@ DOWNLOAD_FIRMWARE() {
     # --- Step 2: Download Firmware ---
     python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" download -v "$VERSION" -O "$DOWN_DIR"
     if [ $? -ne 0 ]; then
-        echo -e "- ⛔️ Download failed. Check IMEI/MODEL/CSC."
+        echo -e "⛔️ Download failed. Check IMEI/MODEL/CSC."
         exit 1
     fi
 
     # --- Show Firmware Info ---
-    local file_size=$(du -m "${DOWN_DIR}/${MODEL}.zip" | cut -f1)
-
-    echo " "
-    echo -e "- ✅ Firmware decrypted successfully! Firmware Size: ${file_size} MB"
-    echo -e "- Saved to: ${DOWN_DIR}/${MODEL}_*_fac.zip"
+    local file_size=$(du -m "${DOWN_DIR}/${MODEL}_*_fac.zip" | cut -f1)
+    echo -e "Firmware Size: ${file_size} MB"
 
     # --- Cleanup ---
     rm -f "$enc_file"
@@ -512,11 +509,6 @@ EXTRACT_FIRMWARE_IMG() {
         fi
 
         extract_img "$TARGET_IMG"
-    fi
-
-    if ! ls "$FIRM_DIR"/system* >/dev/null 2>&1; then
-        echo -e "❌ Firmware may be corrupt or unsupported."
-        exit 1
     fi
 
     chown -R "$REAL_USER:$REAL_USER" "$FIRM_DIR"
