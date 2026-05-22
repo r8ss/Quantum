@@ -93,32 +93,33 @@ jobs:
         run: |
           source scripts/QuantumRom.sh
           EXTRACT_SUPER_IMG "$FIRM_DIR/$TARGET_DEVICE"
+          ls -a "$FIRM_DIR/$TARGET_DEVICE"
 
       - name: Extract partition images
         run: |
           source scripts/QuantumRom.sh
-          EXTRACT_FIRMWARE_IMG "$FIRM_DIR/$TARGET_DEVICE" "all"
+          ls -a "$FIRM_DIR/$TARGET_DEVICE"
+          sudo EXTRACT_FIRMWARE_IMG "$FIRM_DIR/$TARGET_DEVICE" "all"
 
       - name: Decode OMC
         run: |
           source scripts/QuantumRom.sh
-          DECODE_OMC "$FIRM_DIR/$TARGET_DEVICE"
+          sudo DECODE_OMC "$FIRM_DIR/$TARGET_DEVICE"
 
       - name: Debloat ROM
         run: |
           source scripts/debloat.sh
-          source scripts/QuantumRom.sh
-          DEBLOAT "$FIRM_DIR/$TARGET_DEVICE"
+          sudo DEBLOAT "$FIRM_DIR/$TARGET_DEVICE"
 
       - name: Apply stock config
         run: |
           source scripts/QuantumRom.sh
-          APPLY_STOCK_CONFIG "$FIRM_DIR/$TARGET_DEVICE"
+          sudo APPLY_STOCK_CONFIG "$FIRM_DIR/$TARGET_DEVICE"
 
       - name: Patch SELinux
         run: |
           source scripts/QuantumRom.sh
-          PATCH_SELINUX "$FIRM_DIR/$TARGET_DEVICE"
+          sudo PATCH_SELINUX "$FIRM_DIR/$TARGET_DEVICE"
 
       - name: Disable security
         run: |
@@ -128,46 +129,46 @@ jobs:
       - name: Add flagship apps
         run: |
           source scripts/QuantumRom.sh
-          ADD_FLAGSHIP_APPS "$FIRM_DIR/$TARGET_DEVICE"
+          sudo ADD_FLAGSHIP_APPS "$FIRM_DIR/$TARGET_DEVICE"
 
       - name: Apply custom features
         run: |
           source scripts/QuantumRom.sh
-          APPLY_CUSTOM_FEATURES "$FIRM_DIR/$TARGET_DEVICE"
+          sudo APPLY_CUSTOM_FEATURES "$FIRM_DIR/$TARGET_DEVICE"
 
       - name: Decompile framework jars
         run: |
           source scripts/QuantumRom.sh
 
-          INSTALL_FRAMEWORK "$APKTOOL" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework/framework-res.apk"
-          DECOMPILE "$APKTOOL" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework/ssrm.jar" "$WORK_DIR"
-          DECOMPILE "$APKTOOL" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework/services.jar" "$WORK_DIR"
-          DECOMPILE "$APKTOOL" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework/samsungkeystoreutils.jar" "$WORK_DIR"
+          sudo INSTALL_FRAMEWORK "$APKTOOL" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework/framework-res.apk"
+          sudo DECOMPILE "$APKTOOL" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework/ssrm.jar" "$WORK_DIR"
+          sudo DECOMPILE "$APKTOOL" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework/services.jar" "$WORK_DIR"
+          sudo DECOMPILE "$APKTOOL" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework/samsungkeystoreutils.jar" "$WORK_DIR"
 
       - name: Patch framework jars
         run: |
           source scripts/QuantumRom.sh
 
-          PATCH_SSRM "$WORK_DIR/ssrm"
-          # PATCH_KNOX_GUARD "$WORK_DIR/services"
-          PATCH_FLAG_SECURE "$WORK_DIR/services"
-          PATCH_SECURE_FOLDER "$WORK_DIR/services"
-          PATCH_PRIVATE_SHARE "$WORK_DIR/samsungkeystoreutils"
+          sudo PATCH_SSRM "$WORK_DIR/ssrm"
+          #sudo  PATCH_KNOX_GUARD "$WORK_DIR/services"
+          sudo PATCH_FLAG_SECURE "$WORK_DIR/services"
+          sudo PATCH_SECURE_FOLDER "$WORK_DIR/services"
+          sudo PATCH_PRIVATE_SHARE "$WORK_DIR/samsungkeystoreutils"
 
       - name: Recompile framework jars
         run: |
           source scripts/QuantumRom.sh
 
-          DECOMPILE_DIR="$FIRM_DIR/$TARGET_DEVICE/system/system/framework"
-          RECOMPILE "$APKTOOL" "$DECOMPILE_DIR" "$WORK_DIR/ssrm" "$WORK_DIR"
-          RECOMPILE "$APKTOOL" "$DECOMPILE_DIR" "$WORK_DIR/services" "$WORK_DIR"
-          RECOMPILE "$APKTOOL" "$DECOMPILE_DIR" "$WORK_DIR/samsungkeystoreutils" "$WORK_DIR"
-          mv -f "$WORK_DIR"/*.jar "$DECOMPILE_DIR/" || true
+          sudo DECOMPILE_DIR="$FIRM_DIR/$TARGET_DEVICE/system/system/framework"
+          sudo RECOMPILE "$APKTOOL" "$DECOMPILE_DIR" "$WORK_DIR/ssrm" "$WORK_DIR"
+          sudo RECOMPILE "$APKTOOL" "$DECOMPILE_DIR" "$WORK_DIR/services" "$WORK_DIR"
+          sudo RECOMPILE "$APKTOOL" "$DECOMPILE_DIR" "$WORK_DIR/samsungkeystoreutils" "$WORK_DIR"
+          sudo mv -f "$WORK_DIR"/*.jar "$DECOMPILE_DIR/" || true
 
       - name: Patch Bluetooth library
         run: |
           source scripts/QuantumRom.sh
-          PATCH_BT_LIB "$FIRM_DIR/$TARGET_DEVICE" "$WORK_DIR"
+          sudo PATCH_BT_LIB "$FIRM_DIR/$TARGET_DEVICE" "$WORK_DIR"
 
       - name: Update build.prop
         run: |
@@ -175,12 +176,12 @@ jobs:
           VERSION="1"
           D_ID="$(grep -m1 '^ro.build.display.id=' "$FIRM_DIR/$TARGET_DEVICE/system/system/build.prop" | cut -d= -f2 | tr -d '\r')"
 
-          BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system" "ro.build.display.id" "${D_ID} V-${VERSION}: Build with Quantum Tools"
+          sudo BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system" "ro.build.display.id" "${D_ID} V-${VERSION}: Build with Quantum Tools"
 
       - name: Build partition images
         run: |
           source scripts/QuantumRom.sh
-          BUILD_IMG "$FIRM_DIR/$TARGET_DEVICE" "all" "$OUTPUT_FILESYSTEM" "$OUT_DIR"
+          sudo BUILD_IMG "$FIRM_DIR/$TARGET_DEVICE" "all" "$OUTPUT_FILESYSTEM" "$OUT_DIR"
 
       - name: Compress all .img & create zip
         run: |
