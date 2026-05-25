@@ -381,19 +381,12 @@ PREPARE_PARTITIONS() {
 	# Delete empty b slot images
     find "$EXTRACTED_FIRM_DIR" -type f -name '*_b.img' -size 0c -exec rm -rf {} +
 
-    # Rename _a slot images according to stock device
-    if [ "$STOCK_HAS_AB_SLOT" = "FALSE" ]; then
-        shopt -s nullglob
+    for img in "$EXTRACTED_FIRM_DIR"/*_a.img; do
+        [ -f "$img" ] || continue
 
-        for img in "$EXTRACTED_FIRM_DIR"/*_a.img; do
-            [ -f "$img" ] || continue
-
-            new="${img%_a.img}.img"
-            mv -f "$img" "$new"
-        done
-
-        shopt -u nullglob
-    fi
+        new="${img%_a.img}.img"
+        mv -f "$img" "$new"
+    done
 
     IFS=',' read -r -a KEEP <<< "$BUILD_PARTITIONS"
 
@@ -1595,11 +1588,7 @@ APPLY_STOCK_ROM_FLOATING_FEATURE() {
 
 
 APPLY_STOCK_CONFIG() {
-    echo -e ""
-	if [ -z "$STOCK_DEVICE" ] || [ "$STOCK_DEVICE" = "None" ]; then
-        echo -e "No target device is set. Just modifying ROM without any device config."
-        return 1
-    fi
+    echo " "
 
 	echo -e "${YELLOW}Applying $STOCK_DEVICE device config.${NC}"
     if [ "$#" -ne 1 ]; then
@@ -1609,9 +1598,19 @@ APPLY_STOCK_CONFIG() {
 
     local EXTRACTED_FIRM_DIR="$1"
 	local FLOATING_FEATURE_FILE_DIRECTORY="$EXTRACTED_FIRM_DIR/system/system/etc/floating_feature.xml"
+	
+	if [ -z "$STOCK_DEVICE" ] || [ "$STOCK_DEVICE" = "None" ]; then
+        echo -e "No target device is set. Just modifying ROM without any device config."
+        return 1
+    fi
 
     if [ ! -f "$DEVICES_DIR/$STOCK_DEVICE/config" ]; then
-        echo -e "- Config file for $STOCK_DEVICE not found in $DEVICES_DIR"
+        echo -e "Config file for $STOCK_DEVICE not found in $DEVICES_DIR"
+        return 1
+	fi
+
+    if [ ! -d "$EXTRACTED_FIRM_DIR/system/system" ]; then
+        echo -e "No usable extracted firmware found"
         return 1
 	fi
 
