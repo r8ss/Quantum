@@ -207,9 +207,6 @@ DOWNLOAD_FIRMWARE() {
     # --- Show Firmware Info ---
     local file_size=$(du -m "${DOWN_DIR}/${MODEL}_*_fac.zip" | cut -f1)
     echo -e "Firmware Size: ${file_size} MB"
-
-    # --- Cleanup ---
-    rm -f "$enc_file"
 }
 
 
@@ -273,9 +270,6 @@ EXTRACT_FIRMWARE() {
                 ;;
         esac
     done
-
-    # ---- REMOVE META-DATA ----
-    rm -rf "$FIRM_DIR/meta-data"
 
     # ---- REMOVE UNWANTED LZ4 FILES ----
     rm -rf \
@@ -367,22 +361,22 @@ PREPARE_PARTITIONS() {
         return 1
     fi
 
-	if [ -z "$STOCK_DEVICE" ] || [ "$STOCK_DEVICE" = "None" ]; then
+    local EXTRACTED_FIRM_DIR="$1"
+
+    echo -e "${YELLOW}Preparing partitinos.${NC} $STOCK_DEVICE"
+	
+	if [ ! -d "$EXTRACTED_FIRM_DIR" ]; then
+        echo -e "${RED} Directory not found:${NC} $EXTRACTED_FIRM_DIR"
+        return 1
+    fi
+
+    if [ -z "$STOCK_DEVICE" ] || [ "$STOCK_DEVICE" = "None" ]; then
         export BUILD_PARTITIONS="odm,odm_dlkm,product,system,system_ext,system_dlkm,vendor,vendor_dlkm,odm_a,odm_dlkm_a,product_a,system_a,system_ext_a,system_dlkm_a,vendor_a,vendor_dlkm_a,optics,optics_a"
     fi
 
-	if [ -n "$STOCK_DEVICE" ] && [ -f "$DEVICES_DIR/$STOCK_DEVICE/config" ]; then
+    if [ -n "$STOCK_DEVICE" ] && [ -f "$DEVICES_DIR/$STOCK_DEVICE/config" ]; then
         export STOCK_HAS_AB_SLOT="$(grep -m1 '^STOCK_HAS_AB_SLOT=' "$DEVICES_DIR/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
     fi
-
-    local EXTRACTED_FIRM_DIR="$1"
-	
-	echo -e "${YELLOW}Preparing partitinos.${NC} $STOCK_DEVICE"
-
-    [[ -z "$EXTRACTED_FIRM_DIR" || ! -d "$EXTRACTED_FIRM_DIR" ]] && {
-        echo -e "Invalid directory: $EXTRACTED_FIRM_DIR"
-        return 1
-    }
 
 	# Delete empty b slot images
     find "$EXTRACTED_FIRM_DIR" -type f -name '*_b.img' -size 0c -exec rm -rf {} +
@@ -406,8 +400,6 @@ PREPARE_PARTITIONS() {
     for i in "${!KEEP[@]}"; do
         KEEP[$i]=$(echo -e "${KEEP[$i]}" | xargs)
     done
-
-    find "$EXTRACTED_FIRM_DIR" -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} +
 
     shopt -s nullglob dotglob
 
@@ -1641,7 +1633,7 @@ APPLY_STOCK_CONFIG() {
 	if [ "$STOCK_DEVICE_CPU_ABILIST" != "$TARGET_ROM_CPU_ABILIST" ]; then
         echo "CPU ABI MISMATCH!"
         echo "STOCK DEVICE CPU ABI: $STOCK_DEVICE_CPU_ABILIST"
-        echo "TARGET ROM CPU ABU  : $TARGET_ROM_CPU_ABILIST"
+        echo "TARGET ROM CPU ABI  : $TARGET_ROM_CPU_ABILIST"
         exit 1
     fi
 
