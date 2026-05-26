@@ -23,10 +23,6 @@ on:
         description: "TARGET_DEVICE_IMEI."
         required: true
         default: "353435774197736"
-      TARGET_FW_VERSION:
-        description: "Any specific firmware release version."
-        required: false
-        default: ""
       OUTPUT_FILESYSTEM:
         description: "OUTPUT_FILESYSTEM. e.g erofs / ext4 / f2fs"
         required: true
