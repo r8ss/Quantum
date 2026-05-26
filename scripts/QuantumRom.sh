@@ -167,7 +167,6 @@ DOWNLOAD_FIRMWARE() {
     local CSC="$2"
     local IMEI="$3"
     local DOWN_DIR="${4}/$MODEL"
-    local VERSION="${5:-}"
 
     rm -rf "$DOWN_DIR"
     mkdir -p "$DOWN_DIR"
@@ -176,11 +175,6 @@ DOWNLOAD_FIRMWARE() {
     echo -e "${YELLOW}  Samsung FW Downloader   ${NC}"
     echo -e "======================================"
     echo -e "MODEL: $MODEL | CSC: $CSC"
-
-    # --- Step 1: Determine Version ---
-    if [ -n "$VERSION" ]; then
-        echo -e "✅ Downloading provided version: $VERSION"
-    fi
 
     VERSION=$(python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" checkupdate 2>&1)
 
