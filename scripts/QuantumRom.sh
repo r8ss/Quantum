@@ -1243,20 +1243,20 @@ ADJUST_SYSTEM_EXT() {
     if [ "$STOCK_HAS_SEPARATE_SYSTEM_EXT" = "FALSE" ]; then
         echo "- STOCK_HAS_SEPARATE_SYSTEM_EXT: $STOCK_HAS_SEPARATE_SYSTEM_EXT"
 
-        if [ -d "$EXTRACTED_FIRM_DIR/system/system/system_ext/apex" ]; then
+        if [ -d "$EXTRACTED_FIRM_DIR/system/system/system_ext/etc" ]; then
             export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system/system_ext"
 
-        elif [ -d "$EXTRACTED_FIRM_DIR/system/system_ext/apex" ]; then
+        elif [ -d "$EXTRACTED_FIRM_DIR/system/system_ext/etc" ]; then
             export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system_ext"
 			
-		elif [ -d "$EXTRACTED_FIRM_DIR/system_ext/apex" ]; then
+		elif [ -d "$EXTRACTED_FIRM_DIR/system_ext/etc" ]; then
 		    ADD_SYSTEM_EXT_IN_SYSTEM_ROOT "$EXTRACTED_FIRM_DIR"
         fi
 
 	elif [ "$STOCK_HAS_SEPARATE_SYSTEM_EXT" = "TRUE" ]; then
         echo "STOCK_HAS_SEPARATE_SYSTEM_EXT: $STOCK_HAS_SEPARATE_SYSTEM_EXT"
 
-        if [ -d "$EXTRACTED_FIRM_DIR/system/system/system_ext/apex" ]; then
+        if [ -d "$EXTRACTED_FIRM_DIR/system/system/system_ext/etc" ]; then
             SEPARATE_SYSTEM_EXT "$EXTRACTED_FIRM_DIR"
         fi
     fi
