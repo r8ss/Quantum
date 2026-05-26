@@ -1111,7 +1111,7 @@ FIX_VNDK() {
         echo -e "  - VNDK matched. $TARGET_ROM_SYSTEM_EXT_DIR/apex/com.android.vndk.v${STOCK_VNDK_VERSION}.apex"
     else
         echo -e "  - VNDK mismatch. Adding SDK $SDK com.android.vndk.v${STOCK_VNDK_VERSION}.apex"
-        rm -rf "$TARGET_ROM_SYSTEM_EXT_DIR/apex/"*.apex
+        rm -rf "$TARGET_ROM_SYSTEM_EXT_DIR/apex"
         7z x "$VNDKS_COLLECTION/$SDK/${STOCK_VNDK_VERSION}.zip" -o"$TARGET_ROM_SYSTEM_EXT_DIR/" -y >/dev/null 2>&1
     fi
 }
