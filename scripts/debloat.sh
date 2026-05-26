@@ -35,7 +35,7 @@ CARRIER_APPS=(
 "SKTFindLostPhone" "SKTHiddenMenu" "SKTMemberShip"
 "SKTOneStore" "SKTFindLostPhoneApp"
 "TPhoneOnePackage" "TPhoneSetup" "TService"
-"UsimRegistrationKOR"
+"UsimRegistrationKOR" "HpsAgreement_new" "KTAuth_Stub"
 )
 
 
@@ -227,6 +227,7 @@ DEBLOAT() {
 	rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/mediasearch"
 	rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/MediaSearch"
 	rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app"/GameDriver-*
+	rm -rf "$EXTRACTED_FIRM_DIR/system/system/skt"
 	rm -rf "$EXTRACTED_FIRM_DIR/system/system/tts"
 	rm -rf "$EXTRACTED_FIRM_DIR/product/app/Gmail2/oat"
     rm -rf "$EXTRACTED_FIRM_DIR/product/app/Maps/oat"
