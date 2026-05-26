@@ -1279,11 +1279,11 @@ PATCH_SELINUX() {
 
 	UNSUPPORTED_SELINUX=("audiomirroring" "fabriccrypto" "hal_dsms_default" "qb_id_prop" "hal_dsms_service" "proc_compaction_proactiveness" "sbauth" "ker_app" "kpp_app" "kpp_data" "attiqi_app" "kpoc_charger" "sec_diag")
 
-	if [ -d "$EXTRACTED_FIRM_DIR/system_ext/apex" ]; then
+	if [ -d "$EXTRACTED_FIRM_DIR/system_ext/etc" ]; then
         export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system_ext"
-	elif [ -d "$EXTRACTED_FIRM_DIR/system/system_ext/apex" ]; then
+	elif [ -d "$EXTRACTED_FIRM_DIR/system/system_ext/etc" ]; then
         export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system_ext"
-    elif [ -d "$EXTRACTED_FIRM_DIR/system/system/system_ext/apex" ]; then
+    elif [ -d "$EXTRACTED_FIRM_DIR/system/system/system_ext/etc" ]; then
             export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system/system_ext"
     fi
 
