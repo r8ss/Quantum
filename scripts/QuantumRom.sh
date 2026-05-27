@@ -1659,11 +1659,12 @@ APPLY_STOCK_CONFIG() {
         cp -af "$DEVICES_DIR/$STOCK_DEVICE/extra/." "$(pwd)/OUT"
     fi
 
-	if [ -n "$GITHUB_ENV" ]; then
-        echo "ANDROID_VERSION=$(GET_PROP "$FIRM_DIR" "system" ro.system.build.version.release)" >> "$GITHUB_ENV"
-        echo "ONE_UI_VERSION=$(GET_PROP "$FIRM_DIR" "system" ro.build.version.oneui)" >> "$GITHUB_ENV"
-        echo "CPU_ABILIST=$(GET_PROP "$FIRM_DIR" "system" ro.system.product.cpu.abilist)" >> "$GITHUB_ENV"
-    fi
+    ANDROID_VERSION=$(GET_PROP "$FIRM_DIR" "system" ro.system.build.version.release)
+    ONE_UI_VERSION=$(GET_PROP "$FIRM_DIR" "system" ro.build.version.oneui)
+    CPU_ABILIST=$(GET_PROP "$FIRM_DIR" "system" ro.system.product.cpu.abilist)
+	echo "Android Version: $ANDROID_VERSION"
+	echo "One UI Version: $ONE_UI_VERSION"
+	echo "CPU ABILIST: $CPU_ABILIST"
 }
 
 
