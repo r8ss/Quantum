@@ -31,7 +31,7 @@ $GOFILE_LINK
 • Ported From: $TARGET_DEVICE
 • Build Version: $VERSION
 • Android Version: $ANDROID_VERSION
-• ONE_UI_VERSION: $ONE_UI_VERSION
+• One UI Version: $ONE_UI_VERSION
 • CPU ABILIST: $CPU_ABILIST
 
 #### ⚙️ Build Options:
