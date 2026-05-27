@@ -499,6 +499,12 @@ EXTRACT_FIRMWARE_IMG() {
 
 	    rm -rf "$FIRM_DIR"/*.img
 
+		if [[ -n "$GITHUB_ENV" ]]; then
+            echo "ANDROID_VERSION=$(GET_PROP "$EXTRACTED_FIRM_DIR" "system" ro.system.build.version.release)" >> "$GITHUB_ENV"
+            echo "ONE_UI_VERSION=$(GET_PROP "$EXTRACTED_FIRM_DIR" "system" ro.build.version.oneui)" >> "$GITHUB_ENV"
+            echo "CPU_ABILIST=$(GET_PROP "$EXTRACTED_FIRM_DIR" "system" ro.system.product.cpu.abilist)" >> "$GITHUB_ENV"
+        fi
+
     else
         local TARGET_IMG="$FIRM_DIR/$MODE"
 
@@ -1658,13 +1664,6 @@ APPLY_STOCK_CONFIG() {
     if [ -d "$DEVICES_DIR/$STOCK_DEVICE/extra" ]; then
         cp -af "$DEVICES_DIR/$STOCK_DEVICE/extra/." "$(pwd)/OUT"
     fi
-
-    ANDROID_VERSION=$(GET_PROP "$FIRM_DIR" "system" ro.system.build.version.release)
-    ONE_UI_VERSION=$(GET_PROP "$FIRM_DIR" "system" ro.build.version.oneui)
-    CPU_ABILIST=$(GET_PROP "$FIRM_DIR" "system" ro.system.product.cpu.abilist)
-	echo "Android Version: $ANDROID_VERSION"
-	echo "One UI Version: $ONE_UI_VERSION"
-	echo "CPU ABILIST: $CPU_ABILIST"
 }
 
 
