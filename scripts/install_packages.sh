@@ -22,7 +22,8 @@ install_packages() {
     # Fedora
     elif [ "$OS" = "fedora" ]; then
         echo "Installing for Fedora..."
-        sudo dnf upgrade -y && sudo dnf install -y p7zip p7zip-plugins lz4 lz4-devel zstd zstd-devel gcc gcc-c++ make android-tools f2fs-tools fuse fuse-libs e2fsprogs python3 python3-pip zip unzip java-17-openjdk-devel jq perl vim-common kmod erofs-utils
+        sudo dnf upgrade -y
+		sudo dnf install -y p7zip p7zip-plugins lz4 lz4-devel zstd zstd-devel gcc gcc-c++ make android-tools f2fs-tools fuse fuse-libs e2fsprogs python3 python3-pip zip unzip java-17-openjdk-devel jq perl vim-common kmod erofs-utils
     else
         echo "Unsupported OS: $OS"
         return 1

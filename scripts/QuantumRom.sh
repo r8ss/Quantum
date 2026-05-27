@@ -1759,12 +1759,12 @@ DISABLE_SECURITY() {
     fi
 
 	if [ -f "$EXTRACTED_FIRM_DIR/vendor/build.prop" ]; then
-        echo "Disabling factory reset protection from vendor."
+        echo "- Disabling factory reset protection from vendor."
 		BUILD_PROP "$EXTRACTED_FIRM_DIR" "vendor" "ro.frp.pst" ""
     fi
 
     if [ -f "$EXTRACTED_FIRM_DIR/vendor/recovery-from-boot.p" ]; then
-        echo "Disabling stock recovery restoration."
+        echo "- Disabling stock recovery restoration."
         rm -rf "$EXTRACTED_FIRM_DIR/vendor/recovery-from-boot.p"
     fi
 
@@ -2246,64 +2246,66 @@ BUILD_IMG() {
 BUILD_SUPER_IMG() {
     echo " "
 
-    IMG_DIR="$1"
-    OUTPUT_DIR="$2"
-    OUTPUT_IMG="$OUTPUT_DIR/super.img"
-    
-    echo -e "Building: super.img"
+    local IMG_DIR="$1"
+    local OUTPUT_DIR="$2"
+    local OUTPUT_IMG="$OUTPUT_DIR/super.img"
 
-    if [ ! -d "$IMG_DIR" ]; then
+    echo "Building: super.img"
+
+    [ ! -d "$IMG_DIR" ] && {
         echo "- Input folder not found: $IMG_DIR"
         return 1
-    fi
+    }
 
-    PARTITIONS=""
-    IMAGES=""
-    TOTAL_SIZE=0
+    local PARTITIONS=""
+    local IMAGES=""
+    local TOTAL_SIZE=0
+    local VALID_IMAGES=0
 
-    rm -f "$OUTPUT_DIR/super.img"
+    rm -f "$OUTPUT_IMG"
 
     for img in "$IMG_DIR"/*.img; do
         [ -e "$img" ] || continue
 
-        name=$(basename "$img")
+        local name="$(basename "$img")"
 
         case "$name" in
-            boot.img|recovery.img|vbmeta.img|dtbo.img|userdata.img|cache.img|vendor_boot.img|super.img)
-                echo "- Skipping $name (not logical partition)"
+            boot.img|init_boot.img|recovery.img|vbmeta.img|vbmeta_system.img|vbmeta_vendor.img|dtbo.img|userdata.img|cache.img|metadata.img|vendor_boot.img|super.img)
+                echo "- Skipping $name"
                 continue
                 ;;
         esac
 
-        part_name="${name%.img}"
-        size=$(stat -c%s "$img")
+        local part_name="${name%.img}"
+        local size=$(stat -c%s "$img")
 
-        echo -e "Adding: $part_name ($size bytes)"
+        [ "$size" -le 0 ] && {
+            echo "- Skipping empty image: $name"
+            continue
+        }
 
-        PARTITIONS="$PARTITIONS --partition ${part_name}:readonly:${size}:main"
-        IMAGES="$IMAGES --image ${part_name}=$img"
+        echo "Adding: $part_name ($size bytes)"
 
+        PARTITIONS+=" --partition ${part_name}:readonly:${size}:main"
+        IMAGES+=" --image ${part_name}=$img"
         TOTAL_SIZE=$((TOTAL_SIZE + size))
+        VALID_IMAGES=1
     done
 
-    TOTAL_SIZE=$((TOTAL_SIZE + 67108864))
+    [ "$VALID_IMAGES" -eq 0 ] && {
+        echo "- No valid logical partition images found"
+        return 1
+    }
 
-    echo "Total super size: $TOTAL_SIZE bytes"
+    TOTAL_SIZE=$((TOTAL_SIZE + 4194304))
 
     $lpmake \
+	    --device super:$TOTAL_SIZE \
         --metadata-size 65536 \
         --metadata-slots 2 \
-        --super-name super \
-        --device super:$TOTAL_SIZE \
-        --group main:$TOTAL_SIZE \
+		--group main:$TOTAL_SIZE \
+		--block-size 4096 \
         $PARTITIONS \
         $IMAGES \
         --output "$OUTPUT_IMG"
-
-    if [ $? -eq 0 ]; then
-        echo -e "Build completed: $OUTPUT_IMG"
-    else
-        echo -e "${RED}Failed to build super.img"
-        return 1
-    fi
 }
