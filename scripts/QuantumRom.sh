@@ -490,14 +490,97 @@ EXTRACT_FIRMWARE_IMG() {
         esac
     }
 
+
+EXTRACT_FIRMWARE_IMG() {
+    echo " "
+
+    if [ "$#" -ne 2 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <FIRMWARE_DIRECTORY> all|img_name"
+        return 1
+    fi
+
+    local EXTRACTED_FIRM_DIR="$1"
+    local MODE="$2"
+
+    if ! ls "$EXTRACTED_FIRM_DIR"/*.img >/dev/null 2>&1; then
+        echo -e "No .img files found in: $EXTRACTED_FIRM_DIR"
+        return 1
+    fi
+
+    echo -e "${YELLOW}Extracting images from:${NC} $EXTRACTED_FIRM_DIR"
+
+    extract_img() {
+        local imgfile="$1"
+
+        [ -e "$imgfile" ] || return
+
+        local img_name="$(basename "$imgfile")"
+
+        if [[ "$img_name" == "boot.img" || "$img_name" == "recovery.img" ]]; then
+            echo -e "- Skipping $img_name"
+            return
+        fi
+
+        local partition="$(basename "${imgfile%.img}")"
+        local ORG_IMG_SIZE=$(stat -c%s -- "$imgfile")
+
+        rm -rf "$EXTRACTED_FIRM_DIR/$partition"
+
+        local fstype=$(DETECT_FILESYSTEM "$imgfile")
+        if [ "$fstype" = "sparse" ]; then
+            echo -e "${YELLOW}$partition.img is SPARSE. Converting to raw img.${NC}"
+
+            local tmp_raw="${imgfile}.raw"
+
+            if ! simg2img "$imgfile" "$tmp_raw" >/dev/null 2>&1; then
+                echo -e "${RED}Failed to convert sparse image:${NC} $img_name"
+                return
+            fi
+
+            if [ ! -f "$tmp_raw" ]; then
+                echo -e "${RED}- Sparse conversion output missing:${NC} $tmp_raw"
+                return
+            fi
+
+            rm -f "$imgfile"
+            mv "$tmp_raw" "$imgfile"
+        fi
+
+        local fstype=$(DETECT_FILESYSTEM "$imgfile")
+
+        case "$fstype" in
+            ext4)
+                echo " "
+                echo -e "${YELLOW}$partition.img Detected ext4.${NC} Size: $ORG_IMG_SIZE bytes. Extracting..."
+                python3 "$imgextractor_py" "$imgfile" "$EXTRACTED_FIRM_DIR"
+                ;;
+
+            erofs)
+                echo " "
+                echo -e "${YELLOW}$partition.img Detected erofs.${NC} Size: $ORG_IMG_SIZE bytes. Extracting..."
+                "$extract_erofs" -i "$imgfile" -x -f -o "$EXTRACTED_FIRM_DIR" >/dev/null 2>&1
+                ;;
+
+            f2fs)
+                echo " "
+                echo -e "${YELLOW}$partition.img Detected f2fs.${NC} Size: $ORG_IMG_SIZE bytes. Extracting..."
+                bash "$QT_DIR/scripts/extract_img.sh" "$imgfile" "$EXTRACTED_FIRM_DIR"
+                ;;
+
+            *)
+                echo -e "${RED}- $img_name unsupported filesystem type:${NC} ($fstype), skipping"
+                ;;
+        esac
+    }
+
     if [ "$MODE" = "all" ]; then
-	    PREPARE_PARTITIONS "$FIRM_DIR"
-        for imgfile in "$FIRM_DIR"/*.img; do
+	    PREPARE_PARTITIONS "$EXTRACTED_FIRM_DIR"
+        for imgfile in "$EXTRACTED_FIRM_DIR"/*.img; do
             [ -e "$imgfile" ] || continue
             extract_img "$imgfile"
         done
 
-	    rm -rf "$FIRM_DIR"/*.img
+	    rm -rf "$EXTRACTED_FIRM_DIR"/*.img
 
 		if [[ -n "$GITHUB_ENV" ]]; then
             echo "ANDROID_VERSION=$(GET_PROP "$EXTRACTED_FIRM_DIR" "system" ro.system.build.version.release)" >> "$GITHUB_ENV"
@@ -506,7 +589,7 @@ EXTRACT_FIRMWARE_IMG() {
         fi
 
     else
-        local TARGET_IMG="$FIRM_DIR/$MODE"
+        local TARGET_IMG="$EXTRACTED_FIRM_DIR/$MODE"
 
         if [ ! -f "$TARGET_IMG" ]; then
             echo -e "${RED}- Image not found:${NC} $TARGET_IMG"
@@ -516,8 +599,8 @@ EXTRACT_FIRMWARE_IMG() {
         extract_img "$TARGET_IMG"
     fi
 
-    chown -R "$REAL_USER:$REAL_USER" "$FIRM_DIR"
-    chmod -R u+rwX "$FIRM_DIR"
+    chown -R "$REAL_USER:$REAL_USER" "$EXTRACTED_FIRM_DIR"
+    chmod -R u+rwX "$EXTRACTED_FIRM_DIR"
 }
 
 
