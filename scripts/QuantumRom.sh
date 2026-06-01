@@ -495,13 +495,6 @@ EXTRACT_FIRMWARE_IMG() {
 
 	    rm -rf "$EXTRACTED_FIRM_DIR"/*.img
 
-		if [ -n "$GITHUB_ENV" ]; then
-            echo "ANDROID_VERSION=$(GET_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.system.build.version.release")" >> "$GITHUB_ENV"
-            echo "ONE_UI_VERSION=$(GET_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.build.version.oneui")" >> "$GITHUB_ENV"
-            echo "CPU_ABILIST=$(GET_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.system.product.cpu.abilist")" >> "$GITHUB_ENV"
-	        echo "BRAND=$(GET_PROP "$EXTRACTED_FIRM_DIR" "system" "Build.BRAND")" >> "$GITHUB_ENV"
-        fi
-
     else
         local TARGET_IMG="$EXTRACTED_FIRM_DIR/$MODE"
 
@@ -1787,7 +1780,7 @@ APPLY_JDM_SPECIAL() {
 }
 
 
-ADD_FLAGSHIP_APPS() {
+ADD_SAMSUNG_FLAGSHIP_APPS() {
     echo " "
 
     if [ "$#" -ne 1 ]; then
@@ -1795,51 +1788,131 @@ ADD_FLAGSHIP_APPS() {
         return 1
     fi
 
-	echo -e "Adding samsung full ONEUI apps."
+    echo -e "Adding samsung full ONEUI apps."
 
-	local EXTRACTED_FIRM_DIR="$1"
-	local FLOATING_FEATURE_FILE_DIRECTORY="$EXTRACTED_FIRM_DIR/system/system/etc/floating_feature.xml"
+    local EXTRACTED_FIRM_DIR="$1"
+    local FLOATING_FEATURE_FILE_DIRECTORY="$EXTRACTED_FIRM_DIR/system/system/etc/floating_feature.xml"
 
-	if [ ! -d "$EXTRACTED_FIRM_DIR/system" ]; then
-		echo "No extracted firmware found."
+    if [ ! -d "$EXTRACTED_FIRM_DIR/system" ]; then
+        echo "No extracted firmware found."
         return 1
     fi
 
-    echo -e "- Adding China smart manager."
-	rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/AppLock"
-    rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/Firewall"
-    rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/SmartManager_v5"
-    rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/SmartManagerCN"
-	cp -rfa "$(pwd)/QuantumROM/Mods/SMART_MANAGER_CN/." "$EXTRACTED_FIRM_DIR/"
-	UPDATE_FLOATING_FEATURE "$FLOATING_FEATURE_FILE_DIRECTORY" "SEC_FLOATING_FEATURE_SMARTMANAGER_CONFIG_PACKAGE_NAME" "com.samsung.android.sm_cn"
-
-	echo -e "- Adding full OneUI and important apps."
-	if [ ! -d "$EXTRACTED_FIRM_DIR/product/priv-app/AiWallpaper" ]; then
-        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/AiWallpaper/"* "$EXTRACTED_FIRM_DIR/"
+    export PRODUCT_BRAND=$(GET_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.product.system.brand")
+    export ANDROID_VERSION=$(GET_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.system.build.version.release")
+	
+    if [ "$PRODUCT_BRAND" != "samsung" ]; then
+        return 1
     fi
 
-    if [ ! -d "$EXTRACTED_FIRM_DIR/system/system/app/ClockPackage" ]; then
-        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/ClockPackage/"* "$EXTRACTED_FIRM_DIR/"
+    # ================= SMART MANAGER =================
+    echo "- Adding China smart manager."
+
+    if [ ! -s "$(pwd)/QuantumROM/Mods/Apps/Samsung_SmartManagerCN_Android_${ANDROID_VERSION}.zip" ]; then
+        if ping -c 1 8.8.8.8 >/dev/null 2>&1; then
+            wget --no-check-certificate \
+                "https://github.com/SN-Abdullah-Al-Noman/Samsung_Special/releases/download/Android_${ANDROID_VERSION}/Samsung_SmartManagerCN_Android_${ANDROID_VERSION}.zip" \
+                -O "$(pwd)/QuantumROM/Mods/Apps/Samsung_SmartManagerCN_Android_${ANDROID_VERSION}.zip"
+        else
+            echo "No internet connection available."
+            return 1
+        fi
     fi
 
-    if [ ! -d "$EXTRACTED_FIRM_DIR/system/system/app/SecCalculator_R" ]; then
-        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/SecCalculator_R/"* "$EXTRACTED_FIRM_DIR/"
+    if [ -s "$(pwd)/QuantumROM/Mods/Apps/Samsung_SmartManagerCN_Android_${ANDROID_VERSION}.zip" ]; then
+        rm -rf "$(pwd)/QuantumROM/Mods/Apps/Samsung_SmartManagerCN_Android_${ANDROID_VERSION}"
+        unzip -o "$(pwd)/QuantumROM/Mods/Apps/Samsung_SmartManagerCN_Android_${ANDROID_VERSION}.zip" \
+            -d "$(pwd)/QuantumROM/Mods/Apps/Samsung_SmartManagerCN_Android_${ANDROID_VERSION}" >/dev/null 2>&1
+
+        rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/AppLock"
+        rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/Firewall"
+        rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/SmartManager_v5"
+        rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/SmartManagerCN"
+
+        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/Samsung_SmartManagerCN_Android_${ANDROID_VERSION}/." "$EXTRACTED_FIRM_DIR/"
+
+        UPDATE_FLOATING_FEATURE "$FLOATING_FEATURE_FILE_DIRECTORY" \
+            "SEC_FLOATING_FEATURE_SMARTMANAGER_CONFIG_PACKAGE_NAME" \
+            "com.samsung.android.sm_cn"
     fi
 
-    # Photo editor ai full
-	if [ ! -d "$EXTRACTED_FIRM_DIR/system/system/priv-app/PhotoEditor_AIFull" ]; then
-	    rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/ailasso"
-		rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/ailassomatting"
-		rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/inpainting"
-		rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/objectremoval"
-		rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/reflectionremoval"
-		rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/shadowremoval"
-		rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/style_transfer"
-	    rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app"/PhotoEditor_*
-        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/PhotoEditor_AIFull/"* "$EXTRACTED_FIRM_DIR"
+    # ================= PHOTO EDITOR =================
+    echo "- Adding Photo editor ai full."
+
+    if [ ! -s "$(pwd)/QuantumROM/Mods/Apps/Samsung_PhotoEditor_AIFull_Android_${ANDROID_VERSION}.zip" ]; then
+        if ping -c 1 8.8.8.8 >/dev/null 2>&1; then
+            wget --no-check-certificate \
+                "https://github.com/SN-Abdullah-Al-Noman/Samsung_Special/releases/download/Android_${ANDROID_VERSION}/Samsung_PhotoEditor_AIFull_Android_${ANDROID_VERSION}.zip" \
+                -O "$(pwd)/QuantumROM/Mods/Apps/Samsung_PhotoEditor_AIFull_Android_${ANDROID_VERSION}.zip"
+        else
+            echo "No internet connection available."
+            return 1
+        fi
     fi
 
-	chown -R "$REAL_USER:$REAL_USER" "$EXTRACTED_FIRM_DIR"
+    if [ -s "$(pwd)/QuantumROM/Mods/Apps/Samsung_PhotoEditor_AIFull_Android_${ANDROID_VERSION}.zip" ]; then
+        rm -rf "$(pwd)/QuantumROM/Mods/Apps/Samsung_PhotoEditor_AIFull_Android_${ANDROID_VERSION}"
+
+        unzip -o "$(pwd)/QuantumROM/Mods/Apps/Samsung_PhotoEditor_AIFull_Android_${ANDROID_VERSION}.zip" \
+            -d "$(pwd)/QuantumROM/Mods/Apps/Samsung_PhotoEditor_AIFull_Android_${ANDROID_VERSION}" >/dev/null 2>&1
+
+        rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/ailasso"
+        rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/ailassomatting"
+        rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/inpainting"
+        rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/objectremoval"
+        rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/reflectionremoval"
+        rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/shadowremoval"
+        rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/style_transfer"
+        rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app"/PhotoEditor_*
+
+        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/Samsung_PhotoEditor_AIFull_Android_${ANDROID_VERSION}/." "$EXTRACTED_FIRM_DIR/"
+    fi
+
+    # ================= OCR DATA PROVIDER =================
+    echo "- Adding Samsung OCR Data Provider."
+
+    if [ ! -s "$(pwd)/QuantumROM/Mods/Apps/Samsung_OCRDataProvider_Android_16.zip" ]; then
+        if ping -c 1 8.8.8.8 >/dev/null 2>&1; then
+            wget --no-check-certificate \
+                "https://github.com/SN-Abdullah-Al-Noman/Samsung_Special/releases/download/Android_16/Samsung_OCRDataProvider_Android_16.zip" \
+                -O "$(pwd)/QuantumROM/Mods/Apps/Samsung_OCRDataProvider_Android_16.zip"
+        else
+            echo "No internet connection available."
+            return 1
+        fi
+    fi
+
+    if [ -s "$(pwd)/QuantumROM/Mods/Apps/Samsung_OCRDataProvider_Android_16.zip" ]; then
+        rm -rf "$(pwd)/QuantumROM/Mods/Apps/Samsung_OCRDataProvider_Android_16"
+        unzip -o "$(pwd)/QuantumROM/Mods/Apps/Samsung_OCRDataProvider_Android_16.zip" \
+            -d "$(pwd)/QuantumROM/Mods/Apps/Samsung_OCRDataProvider_Android_16" >/dev/null 2>&1
+
+        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/Samsung_OCRDataProvider_Android_16/." "$EXTRACTED_FIRM_DIR/"
+    fi
+
+    # ================= IMPORTANT APPS =================
+	echo "- Adding Samsung Important Apps."
+
+    if [ ! -s "$(pwd)/QuantumROM/Mods/Apps/Samsung_Important_Apps_Android_16.zip" ]; then
+        if ping -c 1 8.8.8.8 >/dev/null 2>&1; then
+            wget --no-check-certificate \
+                "https://github.com/SN-Abdullah-Al-Noman/Samsung_Special/releases/download/Android_16/Samsung_Important_Apps_Android_16.zip" \
+               -O "$(pwd)/QuantumROM/Mods/Apps/Samsung_Important_Apps_Android_16.zip"
+        else
+            echo "No internet connection available."
+            return 1
+        fi
+    fi
+
+    if [ -s "$(pwd)/QuantumROM/Mods/Apps/Samsung_Important_Apps_Android_16.zip" ]; then
+        rm -rf "$(pwd)/QuantumROM/Mods/Apps/Samsung_Important_Apps_Android_16"
+        unzip -o "$(pwd)/QuantumROM/Mods/Apps/Samsung_Important_Apps_Android_16.zip" \
+            -d "$(pwd)/QuantumROM/Mods/Apps/Samsung_Important_Apps_Android_16" >/dev/null 2>&1
+
+        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/Samsung_Important_Apps_Android_16/." "$EXTRACTED_FIRM_DIR/"
+    fi
+
+    chown -R "$REAL_USER:$REAL_USER" "$EXTRACTED_FIRM_DIR"
     chmod -R u+rwX "$EXTRACTED_FIRM_DIR"
 }
 
