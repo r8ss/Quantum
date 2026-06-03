@@ -63,19 +63,19 @@ GET_PROP() {
 
     case "$PARTITION" in
         system)
-            FILE="$EXTRACTED_FIRM_DIR/system/system/build.prop"
+            FILE="${EXTRACTED_FIRM_DIR}/system/system/build.prop"
             ;;
         vendor)
-            FILE="$EXTRACTED_FIRM_DIR/vendor/build.prop"
+            FILE="${EXTRACTED_FIRM_DIR}/vendor/build.prop"
             ;;
         product)
-            FILE="$EXTRACTED_FIRM_DIR/product/etc/build.prop"
+            FILE="${EXTRACTED_FIRM_DIR}/product/etc/build.prop"
             ;;
         system_ext)
-            FILE="$EXTRACTED_FIRM_DIR/system_ext/etc/build.prop"
+            FILE="${EXTRACTED_FIRM_DIR}/system_ext/etc/build.prop"
             ;;
         odm)
-            FILE="$EXTRACTED_FIRM_DIR/odm/etc/build.prop"
+            FILE="${EXTRACTED_FIRM_DIR}/odm/etc/build.prop"
             ;;
         *)
             echo -e "Unknown partition: $PARTITION"
@@ -363,8 +363,8 @@ PREPARE_PARTITIONS() {
         export BUILD_PARTITIONS="odm,odm_dlkm,product,system,system_ext,system_dlkm,vendor,vendor_dlkm,odm_a,odm_dlkm_a,product_a,system_a,system_ext_a,system_dlkm_a,vendor_a,vendor_dlkm_a,optics,optics_a"
     fi
 
-    if [ -n "$STOCK_DEVICE" ] && [ -f "$DEVICES_DIR/$STOCK_DEVICE/config" ]; then
-        export STOCK_HAS_AB_SLOT="$(grep -m1 '^STOCK_HAS_AB_SLOT=' "$DEVICES_DIR/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
+    if [ -n "$STOCK_DEVICE" ] && [ -f "${DEVICES_DIR}/$STOCK_DEVICE/config" ]; then
+        export STOCK_HAS_AB_SLOT="$(grep -m1 '^STOCK_HAS_AB_SLOT=' "${DEVICES_DIR}/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
     fi
 
 	# Delete empty b slot images
@@ -437,7 +437,7 @@ EXTRACT_FIRMWARE_IMG() {
         local partition="$(basename "${imgfile%.img}")"
         local ORG_IMG_SIZE=$(stat -c%s -- "$imgfile")
 
-        rm -rf "$EXTRACTED_FIRM_DIR/$partition"
+        rm -rf "${EXTRACTED_FIRM_DIR}/$partition"
 
         local fstype=$(DETECT_FILESYSTEM "$imgfile")
         if [ "$fstype" = "sparse" ]; then
@@ -496,7 +496,7 @@ EXTRACT_FIRMWARE_IMG() {
 	    rm -rf "$EXTRACTED_FIRM_DIR"/*.img
 
     else
-        local TARGET_IMG="$EXTRACTED_FIRM_DIR/$MODE"
+        local TARGET_IMG="${EXTRACTED_FIRM_DIR}/$MODE"
 
         if [ ! -f "$TARGET_IMG" ]; then
             echo -e "${RED}- Image not found: $TARGET_IMG"
@@ -519,11 +519,11 @@ DISABLE_FBE() {
         return 1
     fi
 
-    if [ ! -d "$EXTRACTED_FIRM_DIR/vendor/etc" ]; then
+    if [ ! -d "${EXTRACTED_FIRM_DIR}/vendor/etc" ]; then
         return 1
     fi
 
-    local fstab_files=$(grep -lr 'fileencryption' "$EXTRACTED_FIRM_DIR/vendor/etc" 2>/dev/null)
+    local fstab_files=$(grep -lr 'fileencryption' "${EXTRACTED_FIRM_DIR}/vendor/etc" 2>/dev/null)
 
     for i in $fstab_files; do
         if [ -f "$i" ]; then
@@ -543,11 +543,11 @@ DISABLE_FDE() {
         return 1
     fi
 
-    if [ ! -d "$EXTRACTED_FIRM_DIR/vendor/etc" ]; then
+    if [ ! -d "${EXTRACTED_FIRM_DIR}/vendor/etc" ]; then
         return 1
     fi
 
-    local fstab_files=$(grep -lr 'forceencrypt' "$EXTRACTED_FIRM_DIR/vendor/etc" 2>/dev/null)
+    local fstab_files=$(grep -lr 'forceencrypt' "${EXTRACTED_FIRM_DIR}/vendor/etc" 2>/dev/null)
 
     for i in $fstab_files; do
         if [ -f "$i" ]; then
@@ -1001,7 +1001,7 @@ PATCH_BT_LIB() {
         return 1
     fi
 
-    7z e "$EXTRACTED_FIRM_DIR/system/system/apex/com.android.bt"*.apex \
+    7z e "${EXTRACTED_FIRM_DIR}/system/system/apex/com.android.bt"*.apex \
         "apex_payload.img" \
         -o"$WORK_DIR" -y >/dev/null
 
@@ -1067,7 +1067,7 @@ PATCH_BT_LIB() {
             HEX_PATCH "$BT_LIB_FILE" "$from" "$to" || return 1
 
             PATCHED=1
-            mv -f "$BT_LIB_FILE" "$EXTRACTED_FIRM_DIR/system/system/lib64/"
+            mv -f "$BT_LIB_FILE" "${EXTRACTED_FIRM_DIR}/system/system/lib64/"
             break
         fi
     done
@@ -1114,16 +1114,16 @@ ADD_SYSTEM_EXT_IN_SYSTEM_ROOT() {
     local EXTRACTED_FIRM_DIR="$1"
 
     echo -e "- Copying system_ext content into system root"
-    rm -rf "$EXTRACTED_FIRM_DIR/system/system_ext"
-    mv "$EXTRACTED_FIRM_DIR/system_ext" "$EXTRACTED_FIRM_DIR/system"
+    rm -rf "${EXTRACTED_FIRM_DIR}/system/system_ext"
+    mv "${EXTRACTED_FIRM_DIR}/system_ext" "${EXTRACTED_FIRM_DIR}/system"
 
     echo -e "- Cleaning and merging system_ext file contexts and configs"
     # File paths
-    SYSTEM_EXT_CONFIG_FILE="$EXTRACTED_FIRM_DIR/config/system_ext_fs_config"
-    SYSTEM_EXT_CONTEXTS_FILE="$EXTRACTED_FIRM_DIR/config/system_ext_file_contexts"
+    SYSTEM_EXT_CONFIG_FILE="${EXTRACTED_FIRM_DIR}/config/system_ext_fs_config"
+    SYSTEM_EXT_CONTEXTS_FILE="${EXTRACTED_FIRM_DIR}/config/system_ext_file_contexts"
 
-    SYSTEM_CONFIG_FILE="$EXTRACTED_FIRM_DIR/config/system_fs_config"
-    SYSTEM_CONTEXTS_FILE="$EXTRACTED_FIRM_DIR/config/system_file_contexts"
+    SYSTEM_CONFIG_FILE="${EXTRACTED_FIRM_DIR}/config/system_fs_config"
+    SYSTEM_CONTEXTS_FILE="${EXTRACTED_FIRM_DIR}/config/system_file_contexts"
 
     SYSTEM_EXT_TEMP_CONFIG="${SYSTEM_EXT_CONFIG_FILE}.tmp"
     SYSTEM_EXT_TEMP_CONTEXTS="${SYSTEM_EXT_CONTEXTS_FILE}.tmp"
@@ -1155,7 +1155,7 @@ ADD_SYSTEM_EXT_IN_SYSTEM_ROOT() {
     cat "$SYSTEM_EXT_CONTEXTS_FILE" >> "$SYSTEM_CONTEXTS_FILE"
 
     rm -rf "$EXTRACTED_FIRM_DIR"/config/system_ext*
-    export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system_ext"
+    export TARGET_ROM_SYSTEM_EXT_DIR="${EXTRACTED_FIRM_DIR}/system/system_ext"
 }
 
 
@@ -1168,16 +1168,16 @@ SEPARATE_SYSTEM_EXT() {
     local EXTRACTED_FIRM_DIR="$1"
 
 	echo "- Separating system_ext"
-    mv "$EXTRACTED_FIRM_DIR/system/system/system_ext" "$EXTRACTED_FIRM_DIR/"
-	ln -s /system_ext $EXTRACTED_FIRM_DIR/system/system/system_ext
-	rm -rf "$EXTRACTED_FIRM_DIR/system/system_ext"
-	mkdir "$EXTRACTED_FIRM_DIR/system/system_ext"
+    mv "${EXTRACTED_FIRM_DIR}/system/system/system_ext" "${EXTRACTED_FIRM_DIR}/"
+	ln -s /system_ext ${EXTRACTED_FIRM_DIR}/system/system/system_ext
+	rm -rf "${EXTRACTED_FIRM_DIR}/system/system_ext"
+	mkdir "${EXTRACTED_FIRM_DIR}/system/system_ext"
 
-    SYSTEM_FS_CONFIG="$EXTRACTED_FIRM_DIR/config/system_fs_config"
-	SYSTEM_FILE_CONTEXTS="$EXTRACTED_FIRM_DIR/config/system_file_contexts"
+    SYSTEM_FS_CONFIG="${EXTRACTED_FIRM_DIR}/config/system_fs_config"
+	SYSTEM_FILE_CONTEXTS="${EXTRACTED_FIRM_DIR}/config/system_file_contexts"
     
-	SYSTEM_EXT_FS_CONFIG="$EXTRACTED_FIRM_DIR/config/system_ext_fs_config"
-	SYSTEM_EXT_FILE_CONTEXTS="$EXTRACTED_FIRM_DIR/config/system_ext_file_contexts"
+	SYSTEM_EXT_FS_CONFIG="${EXTRACTED_FIRM_DIR}/config/system_ext_fs_config"
+	SYSTEM_EXT_FILE_CONTEXTS="${EXTRACTED_FIRM_DIR}/config/system_ext_file_contexts"
 
     # Process system_ext_file_contexts
     if grep -q '^/system/system/system_ext' "$SYSTEM_FILE_CONTEXTS"; then
@@ -1210,7 +1210,7 @@ SEPARATE_SYSTEM_EXT() {
 		sort -u "$SYSTEM_EXT_FS_CONFIG" -o "$SYSTEM_EXT_FS_CONFIG"
     fi
 
-    export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system_ext"
+    export TARGET_ROM_SYSTEM_EXT_DIR="${EXTRACTED_FIRM_DIR}/system_ext"
 }
 
 
@@ -1225,20 +1225,20 @@ ADJUST_SYSTEM_EXT() {
     if [ "$STOCK_HAS_SEPARATE_SYSTEM_EXT" = "FALSE" ]; then
         echo "- STOCK_HAS_SEPARATE_SYSTEM_EXT: $STOCK_HAS_SEPARATE_SYSTEM_EXT"
 
-        if [ -d "$EXTRACTED_FIRM_DIR/system/system/system_ext/etc" ]; then
-            export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system/system_ext"
+        if [ -d "${EXTRACTED_FIRM_DIR}/system/system/system_ext/etc" ]; then
+            export TARGET_ROM_SYSTEM_EXT_DIR="${EXTRACTED_FIRM_DIR}/system/system/system_ext"
 
-        elif [ -d "$EXTRACTED_FIRM_DIR/system/system_ext/etc" ]; then
-            export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system_ext"
+        elif [ -d "${EXTRACTED_FIRM_DIR}/system/system_ext/etc" ]; then
+            export TARGET_ROM_SYSTEM_EXT_DIR="${EXTRACTED_FIRM_DIR}/system/system_ext"
 			
-		elif [ -d "$EXTRACTED_FIRM_DIR/system_ext/etc" ]; then
+		elif [ -d "${EXTRACTED_FIRM_DIR}/system_ext/etc" ]; then
 		    ADD_SYSTEM_EXT_IN_SYSTEM_ROOT "$EXTRACTED_FIRM_DIR"
         fi
 
 	elif [ "$STOCK_HAS_SEPARATE_SYSTEM_EXT" = "TRUE" ]; then
         echo "STOCK_HAS_SEPARATE_SYSTEM_EXT: $STOCK_HAS_SEPARATE_SYSTEM_EXT"
 
-        if [ -d "$EXTRACTED_FIRM_DIR/system/system/system_ext/etc" ]; then
+        if [ -d "${EXTRACTED_FIRM_DIR}/system/system/system_ext/etc" ]; then
             SEPARATE_SYSTEM_EXT "$EXTRACTED_FIRM_DIR"
         fi
     fi
@@ -1261,19 +1261,19 @@ PATCH_SELINUX() {
 
 	UNSUPPORTED_SELINUX=("audiomirroring" "fabriccrypto" "hal_dsms_default" "qb_id_prop" "hal_dsms_service" "proc_compaction_proactiveness" "sbauth" "ker_app" "kpp_app" "kpp_data" "attiqi_app" "kpoc_charger" "sec_diag")
 
-	if [ -d "$EXTRACTED_FIRM_DIR/system_ext/etc" ]; then
-        export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system_ext"
-	elif [ -d "$EXTRACTED_FIRM_DIR/system/system_ext/etc" ]; then
-        export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system_ext"
-    elif [ -d "$EXTRACTED_FIRM_DIR/system/system/system_ext/etc" ]; then
-            export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system/system_ext"
+	if [ -d "${EXTRACTED_FIRM_DIR}/system_ext/etc" ]; then
+        export TARGET_ROM_SYSTEM_EXT_DIR="${EXTRACTED_FIRM_DIR}/system_ext"
+	elif [ -d "${EXTRACTED_FIRM_DIR}/system/system_ext/etc" ]; then
+        export TARGET_ROM_SYSTEM_EXT_DIR="${EXTRACTED_FIRM_DIR}/system/system_ext"
+    elif [ -d "${EXTRACTED_FIRM_DIR}/system/system/system_ext/etc" ]; then
+            export TARGET_ROM_SYSTEM_EXT_DIR="${EXTRACTED_FIRM_DIR}/system/system/system_ext"
     fi
 
-    if [ -d "$EXTRACTED_FIRM_DIR/system" ]; then
+    if [ -d "${EXTRACTED_FIRM_DIR}/system" ]; then
 	    REMOVE_LINE '(genfscon sysfs "/bus/usb/devices" (u object_r sysfs_usb ((s0) (s0))))' \
-		    "$EXTRACTED_FIRM_DIR/system/system/etc/selinux/plat_sepolicy.cil" >/dev/null 2>&1
+		    "${EXTRACTED_FIRM_DIR}/system/system/etc/selinux/plat_sepolicy.cil" >/dev/null 2>&1
 		REMOVE_LINE '(genfscon proc "/sys/vm/compaction_proactiveness" (u object_r proc_compaction_proactiveness ((s0) (s0))))' \
-		    "$EXTRACTED_FIRM_DIR/system/system/etc/selinux/plat_sepolicy.cil" >/dev/null 2>&1
+		    "${EXTRACTED_FIRM_DIR}/system/system/etc/selinux/plat_sepolicy.cil" >/dev/null 2>&1
     else
         echo -e "- No system dir found."
         return 1
@@ -1589,12 +1589,12 @@ REMOVE_CAMERA_FILES() {
 
     local EXTRACTED_FIRM_DIR="$1"
     local LIB_DIRS=(
-        "$EXTRACTED_FIRM_DIR/system/system/lib"
-        "$EXTRACTED_FIRM_DIR/system/system/lib64"
+        "${EXTRACTED_FIRM_DIR}/system/system/lib"
+        "${EXTRACTED_FIRM_DIR}/system/system/lib64"
     )
 
-    local ARCSOFT_LIBS_LIST="$EXTRACTED_FIRM_DIR/system/system/etc/public.libraries-arcsoft.txt"
-    local CAMERA_LIBS_LIST="$EXTRACTED_FIRM_DIR/system/system/etc/public.libraries-camera.samsung.txt"
+    local ARCSOFT_LIBS_LIST="${EXTRACTED_FIRM_DIR}/system/system/etc/public.libraries-arcsoft.txt"
+    local CAMERA_LIBS_LIST="${EXTRACTED_FIRM_DIR}/system/system/etc/public.libraries-camera.samsung.txt"
 
     echo "- Removing camera files."
 
@@ -1620,14 +1620,33 @@ REMOVE_CAMERA_FILES() {
     rm -f "$ARCSOFT_LIBS_LIST"
     rm -f "$CAMERA_LIBS_LIST"
 
-    rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/SamsungCamera"
-    rm -rf "$EXTRACTED_FIRM_DIR/system/system/cameradata"
+    rm -rf "${EXTRACTED_FIRM_DIR}/system/system/priv-app/SamsungCamera"
+    rm -rf "${EXTRACTED_FIRM_DIR}/system/system/cameradata"
 
     export FIRST_CAM_LINE="$(
         grep -n '^    <SEC_FLOATING_FEATURE_CAMERA' \
-        "$EXTRACTED_FIRM_DIR/system/system/etc/floating_feature.xml" |
+        "${EXTRACTED_FIRM_DIR}/system/system/etc/floating_feature.xml" |
         head -n 1 | cut -d: -f1
     )"
+}
+
+
+FIX_BLUETOOTH() {
+    if [ "$#" -ne 1 ]; then
+        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        return 1
+    fi
+
+    local EXTRACTED_FIRM_DIR="$1"
+    local BUILD_BRAND=$(GET_PROP "$EXTRACTED_FIRM_DIR" "system" "Build.BRAND")
+	local SDK=$(GET_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.build.version.sdk_full")
+    local ANDROID_VERSION=$(GET_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.system.build.version.release")
+
+    if [ "$STOCK_DEVICE_CHIPSET" = "MediaTek" ] && [ "$BUILD_BRAND" != "MTK" ]; then
+        echo "- Adding mediatek bluetooth apex."
+        rm -f "${EXTRACTED_FIRM_DIR}"/system/system/apex/com.android.bt*.apex
+        cp -rfa "$(pwd)/QuantumROM/MTK_SPECIAL/${SDK}/BT_APEX/system/." "${EXTRACTED_FIRM_DIR}/system/system"
+    fi
 }
 
 
@@ -1666,12 +1685,12 @@ FIX_CAMERA() {
 
             sed -i \
                 "$((FIRST_CAM_LINE-1))r $(pwd)/QuantumROM/Mods/Apps/MTK_Camera_Files_Android_${ANDROID_VERSION}/system/etc/floating_feature.xml" \
-                "$EXTRACTED_FIRM_DIR/system/system/etc/floating_feature.xml"
+                "${EXTRACTED_FIRM_DIR}/system/system/etc/floating_feature.xml"
 
 			rm -rf "$(pwd)/QuantumROM/Mods/Apps/MTK_Camera_Files_Android_${ANDROID_VERSION}/system/etc/floating_feature.xml"
 
             echo "- Copying A34 mediatek camera related files."
-            cp -rfa "$(pwd)/QuantumROM/Mods/Apps/MTK_Camera_Files_Android_${ANDROID_VERSION}/system/." "$EXTRACTED_FIRM_DIR/system/system"
+            cp -rfa "$(pwd)/QuantumROM/Mods/Apps/MTK_Camera_Files_Android_${ANDROID_VERSION}/system/." "${EXTRACTED_FIRM_DIR}/system/system"
         fi
     fi
 }
@@ -1687,7 +1706,7 @@ APPLY_STOCK_CONFIG() {
     fi
 
     local EXTRACTED_FIRM_DIR="$1"
-	local FLOATING_FEATURE_FILE_DIRECTORY="$EXTRACTED_FIRM_DIR/system/system/etc/floating_feature.xml"
+	local FLOATING_FEATURE_FILE_DIRECTORY="${EXTRACTED_FIRM_DIR}/system/system/etc/floating_feature.xml"
 	export TARGET_ROM_CPU_ABILIST="$(GET_PROP "$EXTRACTED_FIRM_DIR" "system" ro.system.product.cpu.abilist)"
 
 	if [ -z "$STOCK_DEVICE" ] || [ "$STOCK_DEVICE" = "None" ]; then
@@ -1695,28 +1714,28 @@ APPLY_STOCK_CONFIG() {
         return 1
     fi
 
-    if [ ! -f "$DEVICES_DIR/$STOCK_DEVICE/config" ]; then
+    if [ ! -f "${DEVICES_DIR}/$STOCK_DEVICE/config" ]; then
         echo -e "Config file for $STOCK_DEVICE not found in $DEVICES_DIR"
         return 1
 	fi
 
-    if [ ! -d "$EXTRACTED_FIRM_DIR/system/system" ]; then
+    if [ ! -d "${EXTRACTED_FIRM_DIR}/system/system" ]; then
         echo -e "No usable extracted firmware found"
         return 1
 	fi
 
-    if [ -f "$DEVICES_DIR/$STOCK_DEVICE/config" ]; then
+    if [ -f "${DEVICES_DIR}/$STOCK_DEVICE/config" ]; then
         echo -e "$STOCK_DEVICE config found."
-        export STOCK_VNDK_VERSION="$(grep -m1 '^STOCK_VNDK_VERSION=' "$DEVICES_DIR/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
-        export STOCK_HAS_SEPARATE_SYSTEM_EXT="$(grep -m1 '^STOCK_HAS_SEPARATE_SYSTEM_EXT=' "$DEVICES_DIR/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
-    	export STOCK_DVFS_FILENAME="$(grep -m1 '^STOCK_DVFS_FILENAME=' "$DEVICES_DIR/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
-		export STOCK_DEVICE_CPU_ABILIST="$(grep -m1 '^STOCK_DEVICE_CPU_ABILIST=' "$DEVICES_DIR/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
-		export STOCK_DEVICE_CHIPSET="$(grep -m1 '^STOCK_DEVICE_CHIPSET=' "$DEVICES_DIR/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
-		export USE_ALT_SDHMS_APP="$(grep -m1 '^USE_ALT_SDHMS_APP=' "$DEVICES_DIR/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
+        export STOCK_VNDK_VERSION="$(grep -m1 '^STOCK_VNDK_VERSION=' "${DEVICES_DIR}/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
+        export STOCK_HAS_SEPARATE_SYSTEM_EXT="$(grep -m1 '^STOCK_HAS_SEPARATE_SYSTEM_EXT=' "${DEVICES_DIR}/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
+    	export STOCK_DVFS_FILENAME="$(grep -m1 '^STOCK_DVFS_FILENAME=' "${DEVICES_DIR}/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
+		export STOCK_DEVICE_CPU_ABILIST="$(grep -m1 '^STOCK_DEVICE_CPU_ABILIST=' "${DEVICES_DIR}/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
+		export STOCK_DEVICE_CHIPSET="$(grep -m1 '^STOCK_DEVICE_CHIPSET=' "${DEVICES_DIR}/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
+		export USE_ALT_SDHMS_APP="$(grep -m1 '^USE_ALT_SDHMS_APP=' "${DEVICES_DIR}/$STOCK_DEVICE/config" | cut -d= -f2 | tr -d '\r')"
     fi
 
 	echo "Stock device vndk version: $STOCK_VNDK_VERSION"
-    export STOCK_ROM_FLOATING_FEATURE="$DEVICES_DIR/$STOCK_DEVICE/floating_feature.xml"
+    export STOCK_ROM_FLOATING_FEATURE="${DEVICES_DIR}/$STOCK_DEVICE/floating_feature.xml"
 	export STOCK_SIOP_POLICY_FILENAME="$(awk -F'[<>]' '$2 == "SEC_FLOATING_FEATURE_SYSTEM_CONFIG_SIOP_POLICY_FILENAME" {print $3}' "$STOCK_ROM_FLOATING_FEATURE" | tr -d '\r' | xargs)"
 	export STOCK_DEVICE_TYPE="$(awk -F'[<>]' '$2 == "SEC_FLOATING_FEATURE_COMMON_CONFIG_DEVICE_MANUFACTURING_TYPE" {print $3}' "$STOCK_ROM_FLOATING_FEATURE")"
 
@@ -1741,23 +1760,23 @@ APPLY_STOCK_CONFIG() {
 
     # Fix unsupported BPF error for kernels lower than 5.10.
     if [ "$USE_UI_8_TETHERING_APEX" = "True" ]; then
-        cp -rfa "$(pwd)/QuantumROM/Mods/Tethering_Apex/UI-8/." "$EXTRACTED_FIRM_DIR/"
+        cp -rfa "$(pwd)/QuantumROM/Mods/Tethering_Apex/UI-8/." "${EXTRACTED_FIRM_DIR}/"
     fi
 
     if [ "$STOCK_DEVICE_TYPE" = "jdm" ]; then
 	    echo -e "Applying jdm device feature."
 	    APPLY_JDM_SPECIAL "$EXTRACTED_FIRM_DIR"
     else
-	    rm -rf "$EXTRACTED_FIRM_DIR/system/system/cameradata/portrait_data"
+	    rm -rf "${EXTRACTED_FIRM_DIR}/system/system/cameradata/portrait_data"
 	fi
 
-	rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/init"/rscmgr*.rc
-	find "$EXTRACTED_FIRM_DIR/system/system/media" -maxdepth 1 -type f \( -iname "*.spi" -o -iname "*.qmg" -o -iname "*.txt" \) -delete
+	rm -rf "${EXTRACTED_FIRM_DIR}/system/system/etc/init"/rscmgr*.rc
+	find "${EXTRACTED_FIRM_DIR}/system/system/media" -maxdepth 1 -type f \( -iname "*.spi" -o -iname "*.qmg" -o -iname "*.txt" \) -delete
 	rm -rf "$EXTRACTED_FIRM_DIR"/product/overlay/framework-res*auto_generated_rro_product.apk
-	rm -rf $EXTRACTED_FIRM_DIR/product/overlay/SystemUI*auto_generated_rro_product.apk
-	cp -a "$DEVICES_DIR/$STOCK_DEVICE/Stock/." "$EXTRACTED_FIRM_DIR/"
-    if [ -d "$DEVICES_DIR/$STOCK_DEVICE/extra" ]; then
-        cp -af "$DEVICES_DIR/$STOCK_DEVICE/extra/." "$(pwd)/OUT"
+	rm -rf ${EXTRACTED_FIRM_DIR}/product/overlay/SystemUI*auto_generated_rro_product.apk
+	cp -a "${DEVICES_DIR}/$STOCK_DEVICE/Stock/." "${EXTRACTED_FIRM_DIR}/"
+    if [ -d "${DEVICES_DIR}/$STOCK_DEVICE/extra" ]; then
+        cp -af "${DEVICES_DIR}/$STOCK_DEVICE/extra/." "$(pwd)/OUT"
     fi
 }
 
@@ -1777,19 +1796,19 @@ BUILD_PROP() {
 
     case "$PARTITION" in
         system)
-            local FILE="$EXTRACTED_FIRM_DIR/system/system/build.prop"
+            local FILE="${EXTRACTED_FIRM_DIR}/system/system/build.prop"
             ;;
         vendor)
-            local FILE="$EXTRACTED_FIRM_DIR/vendor/build.prop"
+            local FILE="${EXTRACTED_FIRM_DIR}/vendor/build.prop"
             ;;
         product)
-            local FILE="$EXTRACTED_FIRM_DIR/product/etc/build.prop"
+            local FILE="${EXTRACTED_FIRM_DIR}/product/etc/build.prop"
             ;;
         system_ext)
-            local FILE="$EXTRACTED_FIRM_DIR/system_ext/etc/build.prop"
+            local FILE="${EXTRACTED_FIRM_DIR}/system_ext/etc/build.prop"
             ;;
         odm)
-            local FILE="$EXTRACTED_FIRM_DIR/odm/etc/build.prop"
+            local FILE="${EXTRACTED_FIRM_DIR}/odm/etc/build.prop"
             ;;
         *)
             echo -e "Unknown partition: $PARTITION"
@@ -1829,13 +1848,13 @@ REMOVE_TLC_ICC() {
 
     local EXTRACTED_FIRM_DIR="$1"
 
-    if [ -d "$EXTRACTED_FIRM_DIR/vendor" ]; then
+    if [ -d "${EXTRACTED_FIRM_DIR}/vendor" ]; then
         rm -f \
-        "$EXTRACTED_FIRM_DIR/vendor/bin/hw/vendor.samsung.hardware.tlc.iccc@1.0-service" \
-        "$EXTRACTED_FIRM_DIR/vendor/etc/init/vendor.samsung.hardware.tlc.iccc@1.0-service.rc" \
-        "$EXTRACTED_FIRM_DIR/vendor/etc/vintf/manifest/vendor.samsung.hardware.tlc.iccc@1.0-manifest.xml" \
-        "$EXTRACTED_FIRM_DIR/vendor/lib64/vendor.samsung.hardware.tlc.iccc@1.0-impl.so" \
-        "$EXTRACTED_FIRM_DIR/vendor/lib64/vendor.samsung.hardware.tlc.iccc@1.0.so"
+        "${EXTRACTED_FIRM_DIR}/vendor/bin/hw/vendor.samsung.hardware.tlc.iccc@1.0-service" \
+        "${EXTRACTED_FIRM_DIR}/vendor/etc/init/vendor.samsung.hardware.tlc.iccc@1.0-service.rc" \
+        "${EXTRACTED_FIRM_DIR}/vendor/etc/vintf/manifest/vendor.samsung.hardware.tlc.iccc@1.0-manifest.xml" \
+        "${EXTRACTED_FIRM_DIR}/vendor/lib64/vendor.samsung.hardware.tlc.iccc@1.0-impl.so" \
+        "${EXTRACTED_FIRM_DIR}/vendor/lib64/vendor.samsung.hardware.tlc.iccc@1.0.so"
     fi
 }
 
@@ -1852,19 +1871,19 @@ DISABLE_SECURITY() {
 
     echo -e "Disabling security related things."
 
-    if [ -f "$EXTRACTED_FIRM_DIR/product/etc/build.prop" ]; then
+    if [ -f "${EXTRACTED_FIRM_DIR}/product/etc/build.prop" ]; then
         echo "- Disabling factory reset protection from product."
         BUILD_PROP "$EXTRACTED_FIRM_DIR" "product" "ro.frp.pst" ""
     fi
 
-	if [ -f "$EXTRACTED_FIRM_DIR/vendor/build.prop" ]; then
+	if [ -f "${EXTRACTED_FIRM_DIR}/vendor/build.prop" ]; then
         echo "- Disabling factory reset protection from vendor."
 		BUILD_PROP "$EXTRACTED_FIRM_DIR" "vendor" "ro.frp.pst" ""
     fi
 
-    if [ -f "$EXTRACTED_FIRM_DIR/vendor/recovery-from-boot.p" ]; then
+    if [ -f "${EXTRACTED_FIRM_DIR}/vendor/recovery-from-boot.p" ]; then
         echo "- Disabling stock recovery restoration."
-        rm -rf "$EXTRACTED_FIRM_DIR/vendor/recovery-from-boot.p"
+        rm -rf "${EXTRACTED_FIRM_DIR}/vendor/recovery-from-boot.p"
     fi
 
 	DISABLE_FBE "$EXTRACTED_FIRM_DIR"
@@ -1880,8 +1899,8 @@ APPLY_JDM_SPECIAL() {
     fi
 
 	local EXTRACTED_FIRM_DIR="$1"
-	rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/SamSungCamera"
-    cp -rfa "$(pwd)/QuantumROM/Mods/Apps/JDM_Special/SamSungCamera/." "$EXTRACTED_FIRM_DIR/"
+	rm -rf "${EXTRACTED_FIRM_DIR}/system/system/priv-app/SamSungCamera"
+    cp -rfa "$(pwd)/QuantumROM/Mods/Apps/JDM_Special/SamSungCamera/." "${EXTRACTED_FIRM_DIR}/"
 }
 
 
@@ -1896,9 +1915,9 @@ ADD_SAMSUNG_FLAGSHIP_APPS() {
     echo -e "Adding samsung full ONEUI apps."
 
     local EXTRACTED_FIRM_DIR="$1"
-    local FLOATING_FEATURE_FILE_DIRECTORY="$EXTRACTED_FIRM_DIR/system/system/etc/floating_feature.xml"
+    local FLOATING_FEATURE_FILE_DIRECTORY="${EXTRACTED_FIRM_DIR}/system/system/etc/floating_feature.xml"
 
-    if [ ! -d "$EXTRACTED_FIRM_DIR/system" ]; then
+    if [ ! -d "${EXTRACTED_FIRM_DIR}/system" ]; then
         echo "No extracted firmware found."
         return 1
     fi
@@ -1929,12 +1948,12 @@ ADD_SAMSUNG_FLAGSHIP_APPS() {
         unzip -o "$(pwd)/QuantumROM/Mods/Apps/Samsung_SmartManagerCN_Android_${ANDROID_VERSION}.zip" \
             -d "$(pwd)/QuantumROM/Mods/Apps/Samsung_SmartManagerCN_Android_${ANDROID_VERSION}" >/dev/null 2>&1
 
-        rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/AppLock"
-        rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/Firewall"
-        rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/SmartManager_v5"
-        rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/SmartManagerCN"
+        rm -rf "${EXTRACTED_FIRM_DIR}/system/system/priv-app/AppLock"
+        rm -rf "${EXTRACTED_FIRM_DIR}/system/system/priv-app/Firewall"
+        rm -rf "${EXTRACTED_FIRM_DIR}/system/system/priv-app/SmartManager_v5"
+        rm -rf "${EXTRACTED_FIRM_DIR}/system/system/priv-app/SmartManagerCN"
 
-        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/Samsung_SmartManagerCN_Android_${ANDROID_VERSION}/." "$EXTRACTED_FIRM_DIR/"
+        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/Samsung_SmartManagerCN_Android_${ANDROID_VERSION}/." "${EXTRACTED_FIRM_DIR}/"
 
         UPDATE_FLOATING_FEATURE "$FLOATING_FEATURE_FILE_DIRECTORY" \
             "SEC_FLOATING_FEATURE_SMARTMANAGER_CONFIG_PACKAGE_NAME" \
@@ -1961,22 +1980,22 @@ ADD_SAMSUNG_FLAGSHIP_APPS() {
         unzip -o "$(pwd)/QuantumROM/Mods/Apps/Samsung_PhotoEditor_AIFull_Android_${ANDROID_VERSION}.zip" \
             -d "$(pwd)/QuantumROM/Mods/Apps/Samsung_PhotoEditor_AIFull_Android_${ANDROID_VERSION}" >/dev/null 2>&1
 
-        rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/ailasso"
-        rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/ailassomatting"
-        rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/inpainting"
-        rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/objectremoval"
-        rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/reflectionremoval"
-        rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/shadowremoval"
-        rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/style_transfer"
-        rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app"/PhotoEditor_*
+        rm -rf "${EXTRACTED_FIRM_DIR}/system/system/etc/ailasso"
+        rm -rf "${EXTRACTED_FIRM_DIR}/system/system/etc/ailassomatting"
+        rm -rf "${EXTRACTED_FIRM_DIR}/system/system/etc/inpainting"
+        rm -rf "${EXTRACTED_FIRM_DIR}/system/system/etc/objectremoval"
+        rm -rf "${EXTRACTED_FIRM_DIR}/system/system/etc/reflectionremoval"
+        rm -rf "${EXTRACTED_FIRM_DIR}/system/system/etc/shadowremoval"
+        rm -rf "${EXTRACTED_FIRM_DIR}/system/system/etc/style_transfer"
+        rm -rf "${EXTRACTED_FIRM_DIR}/system/system/priv-app"/PhotoEditor_*
 
-        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/Samsung_PhotoEditor_AIFull_Android_${ANDROID_VERSION}/." "$EXTRACTED_FIRM_DIR/"
+        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/Samsung_PhotoEditor_AIFull_Android_${ANDROID_VERSION}/." "${EXTRACTED_FIRM_DIR}/"
     fi
 
     # Fix Samsung AI Photo Editor app Crash.
-    if [ -f "$EXTRACTED_FIRM_DIR/system/system/cameradata/portrait_data/single_bokeh_feature.json" ]; then
+    if [ -f "${EXTRACTED_FIRM_DIR}/system/system/cameradata/portrait_data/single_bokeh_feature.json" ]; then
         sed -i '0,/"ModelType": "MODEL_TYPE_INSTANCE_CAPTURE"/s//"ModelType": "MODEL_TYPE_OBJ_INSTANCE_CAPTURE"/' \
-        "$EXTRACTED_FIRM_DIR/system/system/cameradata/portrait_data/single_bokeh_feature.json"
+        "${EXTRACTED_FIRM_DIR}/system/system/cameradata/portrait_data/single_bokeh_feature.json"
     fi
 
     # ================= OCR DATA PROVIDER =================
@@ -1998,10 +2017,10 @@ ADD_SAMSUNG_FLAGSHIP_APPS() {
         unzip -o "$(pwd)/QuantumROM/Mods/Apps/Samsung_OCRDataProvider_Android_${ANDROID_VERSION}.zip" \
             -d "$(pwd)/QuantumROM/Mods/Apps/Samsung_OCRDataProvider_Android_${ANDROID_VERSION}" >/dev/null 2>&1
 
-        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/Samsung_OCRDataProvider_Android_${ANDROID_VERSION}/." "$EXTRACTED_FIRM_DIR/"
+        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/Samsung_OCRDataProvider_Android_${ANDROID_VERSION}/." "${EXTRACTED_FIRM_DIR}/"
 
-		if [ ! -d "$EXTRACTED_FIRM_DIR/system/system/saiv/textrecognition" ]; then
-	        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/OCR/." "$EXTRACTED_FIRM_DIR/"
+		if [ ! -d "${EXTRACTED_FIRM_DIR}/system/system/saiv/textrecognition" ]; then
+	        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/OCR/." "${EXTRACTED_FIRM_DIR}/"
         fi
     fi
 
@@ -2024,7 +2043,7 @@ ADD_SAMSUNG_FLAGSHIP_APPS() {
         unzip -o "$(pwd)/QuantumROM/Mods/Apps/Samsung_Important_Apps_Android_${ANDROID_VERSION}.zip" \
             -d "$(pwd)/QuantumROM/Mods/Apps/Samsung_Important_Apps_Android_${ANDROID_VERSION}" >/dev/null 2>&1
 
-        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/Samsung_Important_Apps_Android_${ANDROID_VERSION}/." "$EXTRACTED_FIRM_DIR/"
+        cp -rfa "$(pwd)/QuantumROM/Mods/Apps/Samsung_Important_Apps_Android_${ANDROID_VERSION}/." "${EXTRACTED_FIRM_DIR}/"
     fi
 
     chown -R "$REAL_USER:$REAL_USER" "$EXTRACTED_FIRM_DIR"
@@ -2041,9 +2060,9 @@ APPLY_CUSTOM_FEATURES() {
     fi
 
 	local EXTRACTED_FIRM_DIR="$1"
-	local FLOATING_FEATURE_FILE_DIRECTORY="$EXTRACTED_FIRM_DIR/system/system/etc/floating_feature.xml"
+	local FLOATING_FEATURE_FILE_DIRECTORY="${EXTRACTED_FIRM_DIR}/system/system/etc/floating_feature.xml"
 
-	if [ ! -d "$EXTRACTED_FIRM_DIR/system" ]; then
+	if [ ! -d "${EXTRACTED_FIRM_DIR}/system" ]; then
 		echo "No extracted firmware found."
         return 1
     fi
@@ -2141,14 +2160,14 @@ GEN_FS_CONFIG() {
     local EXTRACTED_FIRM_DIR="$1"
     local PARTITION="$2"
 
-    [ ! -d "$EXTRACTED_FIRM_DIR/$PARTITION" ] && {
+    [ ! -d "${EXTRACTED_FIRM_DIR}/$PARTITION" ] && {
         echo -e "- Partition not found: $PARTITION"
         return 1
     }
 
     [ "$PARTITION" = "config" ] && return
 
-    local FS_CONFIG="$EXTRACTED_FIRM_DIR/config/${PARTITION}_fs_config"
+    local FS_CONFIG="${EXTRACTED_FIRM_DIR}/config/${PARTITION}_fs_config"
     local TMP_EXISTING="$(mktemp)"
 
     touch "$FS_CONFIG"
@@ -2157,9 +2176,9 @@ GEN_FS_CONFIG() {
 
     awk '{print $1}' "$FS_CONFIG" | sort -u > "$TMP_EXISTING"
 
-    find "$EXTRACTED_FIRM_DIR/$PARTITION" -mindepth 1 \( -type f -o -type d -o -type l \) | while IFS= read -r item; do
+    find "${EXTRACTED_FIRM_DIR}/$PARTITION" -mindepth 1 \( -type f -o -type d -o -type l \) | while IFS= read -r item; do
 
-        REL_PATH="${item#$EXTRACTED_FIRM_DIR/$PARTITION/}"
+        REL_PATH="${item#${EXTRACTED_FIRM_DIR}/$PARTITION/}"
         PATH_ENTRY="$PARTITION/$REL_PATH"
 
         grep -qxF "$PATH_ENTRY" "$TMP_EXISTING" && continue
@@ -2197,7 +2216,7 @@ GEN_FILE_CONTEXTS() {
     local EXTRACTED_FIRM_DIR="$1"
     local PARTITION="$2"
 
-    [ ! -d "$EXTRACTED_FIRM_DIR/$PARTITION" ] && {
+    [ ! -d "${EXTRACTED_FIRM_DIR}/$PARTITION" ] && {
         echo -e "- Partition not found: $PARTITION"
         return 1
     }
@@ -2225,7 +2244,7 @@ GEN_FILE_CONTEXTS() {
         printf '%s' "$result"
     }
 
-    local FILE_CONTEXTS="$EXTRACTED_FIRM_DIR/config/${PARTITION}_file_contexts"
+    local FILE_CONTEXTS="${EXTRACTED_FIRM_DIR}/config/${PARTITION}_file_contexts"
 
     touch "$FILE_CONTEXTS"
 
@@ -2242,9 +2261,9 @@ GEN_FILE_CONTEXTS() {
 
     done < "$FILE_CONTEXTS"
 
-    find "$EXTRACTED_FIRM_DIR/$PARTITION" -mindepth 1 \( -type f -o -type d -o -type l \) | while IFS= read -r item; do
+    find "${EXTRACTED_FIRM_DIR}/$PARTITION" -mindepth 1 \( -type f -o -type d -o -type l \) | while IFS= read -r item; do
 
-        local REL_PATH="${item#$EXTRACTED_FIRM_DIR/$PARTITION}"
+        local REL_PATH="${item#${EXTRACTED_FIRM_DIR}/$PARTITION}"
         local PATH_ENTRY="/$PARTITION$REL_PATH"
 
         local ESCAPED_PATH="/$(escape_path "${PATH_ENTRY#/}")"
@@ -2304,10 +2323,10 @@ BUILD_IMG() {
         GEN_FS_CONFIG "$EXTRACTED_FIRM_DIR" "$PARTITION"
         GEN_FILE_CONTEXTS "$EXTRACTED_FIRM_DIR" "$PARTITION"
 
-        local SOURCE_DIR="$EXTRACTED_FIRM_DIR/$PARTITION"
+        local SOURCE_DIR="${EXTRACTED_FIRM_DIR}/$PARTITION"
         local OUT_IMG="$OUT_DIR/${PARTITION}.img"
-        local FS_CONFIG="$EXTRACTED_FIRM_DIR/config/${PARTITION}_fs_config"
-        local FILE_CONTEXTS="$EXTRACTED_FIRM_DIR/config/${PARTITION}_file_contexts"
+        local FS_CONFIG="${EXTRACTED_FIRM_DIR}/config/${PARTITION}_fs_config"
+        local FILE_CONTEXTS="${EXTRACTED_FIRM_DIR}/config/${PARTITION}_file_contexts"
 
         [[ -d "$SOURCE_DIR" ]] || return
 
