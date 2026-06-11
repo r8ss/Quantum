@@ -15,6 +15,7 @@ DEBLOAT_APPS=(
 "UnifiedWFC" "UniversalMDMClient" "VideoEditorLite_Dream_N"
 "VisionIntelligence3.7" "VoiceAccess" "VTCameraSetting"
 "WebManual" "WifiGuider" "AutomationTest_FB" "FactoryTestProvider"
+"StickerCenter" "CIDManager" "FacAtFunction" "serviceModeApp_FB"
 )
 
 
