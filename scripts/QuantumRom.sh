@@ -1417,6 +1417,7 @@ APPLY_CUSTOM_FLOATING_FEATURE() {
 
     #========== LAUNCHER ==========#
     UPDATE_FLOATING_FEATURE "$FLOATING_FEATURE_FILE_DIRECTORY" "SEC_FLOATING_FEATURE_LAUNCHER_SUPPORT_CLOCK_LIVE_ICON" "TRUE"
+    UPDATE_FLOATING_FEATURE "$FLOATING_FEATURE_FILE_DIRECTORY" "SEC_FLOATING_FEATURE_LAUNCHER_CONFIG_ANIMATION_TYPE" "HighEnd"
 
     #========== AOD ==========#
 	if [ -d "$FIRM_DIR/$TARGET_DEVICE/system/system/priv-app"/AODService_* ]; then
@@ -2116,6 +2117,7 @@ APPLY_CUSTOM_FEATURES() {
 	BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.surface_flinger.protected_contents" "true"
 	BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.config.dmverity" "false"
 	BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.config.iccc_version" "iccc_disabled"
+    BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.product.system.model" "$STOCK_DEVICE"
 
 	BUILD_PROP "$EXTRACTED_FIRM_DIR" "product" "ro.product.locale" "en-US"
 	BUILD_PROP "$EXTRACTED_FIRM_DIR" "product" "ro.config.dmverity" "false"
