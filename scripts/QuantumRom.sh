@@ -352,7 +352,7 @@ PREPARE_PARTITIONS() {
 
     local EXTRACTED_FIRM_DIR="$1"
 
-    echo -e "Preparing partitinos. $STOCK_DEVICE"
+    echo -e "Preparing partitions. $STOCK_DEVICE"
 	
 	if [ ! -d "$EXTRACTED_FIRM_DIR" ]; then
         echo -e "${RED} Directory not found: $EXTRACTED_FIRM_DIR"
