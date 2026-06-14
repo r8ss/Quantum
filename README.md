@@ -20,7 +20,7 @@ This Custom ROM is built by combining and refining features from multiple projec
 - Built-in Screen Recorder.
 - More floating features enabled.
 - Edge features fully working.
-- Stock device conig always be added.
+- Stock device config always be added.
 - Extra brightness support.
 - Object, shadow and reflection remover support.
 - Multi user support.
