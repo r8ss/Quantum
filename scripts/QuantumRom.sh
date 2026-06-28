@@ -1278,6 +1278,58 @@ GET_SYSTEM_EXT_DIR() {
 }
 
 
+PATCH_SELINUX_MAPPING() {
+    echo " "
+    if [ "$#" -ne 1 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        return 1
+    fi
+
+    local EXTRACTED_FIRM_DIR="$1"
+    local STOCK_DIR="$EXTRACTED_FIRM_DIR/Stock"
+    local PORT_DIR="$EXTRACTED_FIRM_DIR/Port"
+
+    echo -e "Checking SELinux mapping availability..."
+
+    # Lista de subdiretórios a validar e aplicar
+    local PATHS_TO_CHECK=(
+        "system/system/etc/selinux/mapping"
+        "system/system/system_ext/etc/selinux/mapping"
+    )
+
+    local APPLIED_PATCH=false
+
+    for rel_path in "${PATHS_TO_CHECK[@]}"; do
+        local current_stock_path="$STOCK_DIR/$rel_path"
+        local current_port_path="$PORT_DIR/$rel_path"
+
+        # Verifica detalhadamente se a pasta existe e se há arquivos .cil dentro dela
+        if [ -d "$current_stock_path" ] && ls "$current_stock_path"/*.cil >/dev/null 2>&1; then
+            echo -e "- Found SELinux mapping files in Stock: $rel_path"
+            
+            # Cria a árvore correspondente de destino no Port caso falte
+            mkdir -p "$current_port_path"
+
+            # Copia de forma forçada substituindo o que estiver no Port
+            cp -f "$current_stock_path"/*.cil "$current_port_path/"
+            
+            if [ $? -eq 0 ]; then
+                echo -e "  [+] Successfully patched .cil files in Port."
+                APPLIED_PATCH=true
+            else
+                echo -e "  [!] Error copying .cil files for: $rel_path"
+            fi
+        fi
+    done
+
+    # Se ao final do loop nenhuma pasta válida com .cil foi processada, ignora silenciosamente
+    if [ "$APPLIED_PATCH" = false ]; then
+        echo -e "- SELinux mapping folder or content not found in Stock. Skipping patch."
+    fi
+    return 0
+}
+
+
 PATCH_SELINUX() {
     echo " "
 
