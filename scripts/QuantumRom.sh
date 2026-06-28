@@ -1278,58 +1278,6 @@ GET_SYSTEM_EXT_DIR() {
 }
 
 
-PATCH_SELINUX_MAPPING() {
-    echo " "
-    if [ "$#" -ne 1 ]; then
-        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
-        return 1
-    fi
-
-    local EXTRACTED_FIRM_DIR="$1"
-    local STOCK_DIR="$EXTRACTED_FIRM_DIR/Stock"
-    local PORT_DIR="$EXTRACTED_FIRM_DIR/Port"
-
-    echo -e "Checking SELinux mapping availability..."
-
-    # Lista de subdiretórios a validar e aplicar
-    local PATHS_TO_CHECK=(
-        "system/system/etc/selinux/mapping"
-        "system/system/system_ext/etc/selinux/mapping"
-    )
-
-    local APPLIED_PATCH=false
-
-    for rel_path in "${PATHS_TO_CHECK[@]}"; do
-        local current_stock_path="$STOCK_DIR/$rel_path"
-        local current_port_path="$PORT_DIR/$rel_path"
-
-        # Verifica detalhadamente se a pasta existe e se há arquivos .cil dentro dela
-        if [ -d "$current_stock_path" ] && ls "$current_stock_path"/*.cil >/dev/null 2>&1; then
-            echo -e "- Found SELinux mapping files in Stock: $rel_path"
-            
-            # Cria a árvore correspondente de destino no Port caso falte
-            mkdir -p "$current_port_path"
-
-            # Copia de forma forçada substituindo o que estiver no Port
-            cp -f "$current_stock_path"/*.cil "$current_port_path/"
-            
-            if [ $? -eq 0 ]; then
-                echo -e "  [+] Successfully patched .cil files in Port."
-                APPLIED_PATCH=true
-            else
-                echo -e "  [!] Error copying .cil files for: $rel_path"
-            fi
-        fi
-    done
-
-    # Se ao final do loop nenhuma pasta válida com .cil foi processada, ignora silenciosamente
-    if [ "$APPLIED_PATCH" = false ]; then
-        echo -e "- SELinux mapping folder or content not found in Stock. Skipping patch."
-    fi
-    return 0
-}
-
-
 PATCH_SELINUX() {
     echo " "
 
@@ -1338,20 +1286,65 @@ PATCH_SELINUX() {
         return 1
     fi
 
-	local EXTRACTED_FIRM_DIR="$1"
-	local TARGET_ROM_SYSTEM_EXT_DIR="$(GET_SYSTEM_EXT_DIR "$EXTRACTED_FIRM_DIR")"
+    local EXTRACTED_FIRM_DIR="$1"
+    local TARGET_ROM_SYSTEM_EXT_DIR="$(GET_SYSTEM_EXT_DIR "$EXTRACTED_FIRM_DIR")"
 
     echo -e "Patching selinux."
 
-	UNSUPPORTED_SELINUX=("audiomirroring" "fabriccrypto" "hal_dsms_default" "qb_id_prop" "hal_dsms_service" "proc_compaction_proactiveness" "sbauth" "ker_app" "kpp_app" "kpp_data" "attiqi_app" "kpoc_charger" "sec_diag" "mosey_app" "vendor_smcinvoke_device")
+    UNSUPPORTED_SELINUX=("audiomirroring" "fabriccrypto" "hal_dsms_default" "qb_id_prop" "hal_dsms_service" "proc_compaction_proactiveness" "sbauth" "ker_app" "kpp_app" "kpp_data" "attiqi_app" "kpoc_charger" "sec_diag" "mosey_app" "vendor_smcinvoke_device")
+
+    # ==============================================================================
+    # 1. System mapping injection (device stock -> port)
+    # ==============================================================================
+    if [ -d "${EXTRACTED_FIRM_DIR}/system" ]; then
+        local STOCK_SYSTEM_MAPPING="${DEVICES_DIR}/$STOCK_DEVICE/Stock/system/system/etc/selinux/mapping"
+        local DEST_SYSTEM_MAPPING="${EXTRACTED_FIRM_DIR}/system/system/etc/selinux/mapping"
+
+        echo "- Injecting System SELinux mapping from ($STOCK_DEVICE)..."
+        if [ -d "$STOCK_SYSTEM_MAPPING" ]; then
+            mkdir -p "$DEST_SYSTEM_MAPPING"
+            cp -rf "$STOCK_SYSTEM_MAPPING/." "$DEST_SYSTEM_MAPPING/"
+            echo "  - System mapping files injected successfully."
+        else
+            echo "  - Warning: Source system mapping folder not found."
+        fi
+    fi
+
+    # ==============================================================================
+    # 2. Injecting SYSTEM_EXT mapping (Device Stock -> Port)
+    # ==============================================================================
+    if [ -d "$TARGET_ROM_SYSTEM_EXT_DIR" ]; then
+        local STOCK_EXT_MAPPING="${DEVICES_DIR}/$STOCK_DEVICE/Stock/system/system/system_ext/etc/selinux/mapping"
+        local DEST_EXT_MAPPING="${TARGET_ROM_SYSTEM_EXT_DIR}/etc/selinux/mapping"
+
+        echo "- Injecting System_ext SELinux mapping from ($STOCK_DEVICE)..."
+        if [ -d "$STOCK_EXT_MAPPING" ]; then
+            mkdir -p "$DEST_EXT_MAPPING"
+            cp -rf "$STOCK_EXT_MAPPING/." "$DEST_EXT_MAPPING/"
+            echo "  - System_ext mapping files injected successfully."
+        else
+            echo "  - Warning: Source system_ext mapping folder not found."
+        fi
+    fi
+    # ==============================================================================
+
 
     if [ -d "${EXTRACTED_FIRM_DIR}/system" ]; then
-	    echo "- Patching selinux for system"
+        echo "- Patching selinux for system"
 
-	    REMOVE_LINE '(genfscon sysfs "/bus/usb/devices" (u object_r sysfs_usb ((s0) (s0))))' \
-		    "${EXTRACTED_FIRM_DIR}/system/system/etc/selinux/plat_sepolicy.cil" >/dev/null 2>&1
-		REMOVE_LINE '(genfscon proc "/sys/vm/compaction_proactiveness" (u object_r proc_compaction_proactiveness ((s0) (s0))))' \
-		    "${EXTRACTED_FIRM_DIR}/system/system/etc/selinux/plat_sepolicy.cil" >/dev/null 2>&1
+        REMOVE_LINE '(genfscon sysfs "/bus/usb/devices" (u object_r sysfs_usb ((s0) (s0))))' \
+            "${EXTRACTED_FIRM_DIR}/system/system/etc/selinux/plat_sepolicy.cil" >/dev/null 2>&1
+        REMOVE_LINE '(genfscon proc "/sys/vm/compaction_proactiveness" (u object_r proc_compaction_proactiveness ((s0) (s0))))' \
+            "${EXTRACTED_FIRM_DIR}/system/system/etc/selinux/plat_sepolicy.cil" >/dev/null 2>&1
+
+        # Limpeza preventiva nos arquivos injetados no system/system
+        find "${EXTRACTED_FIRM_DIR}/system/system/etc/selinux/mapping/" -type f -name "*.cil" 2>/dev/null | while read -r SELINUX_FILE; do
+            for keyword in "${UNSUPPORTED_SELINUX[@]}"; do
+                if grep -qF "$keyword" "$SELINUX_FILE"; then
+                    sed -i "/$keyword/d" "$SELINUX_FILE"
+                fi
+            done
+        done
     else
         echo -e "- No system directory found."
     fi
@@ -1359,6 +1352,7 @@ PATCH_SELINUX() {
     if [ -d "$TARGET_ROM_SYSTEM_EXT_DIR" ]; then
         echo -e "- Patching selinux for system_ext"
 
+        # O find aqui já vai pegar e limpar tanto os arquivos que já existiam quanto os que você acabou de injetar no system_ext
         find "${TARGET_ROM_SYSTEM_EXT_DIR}/etc/selinux/mapping/" -type f -name "*.0.cil" | while read -r SELINUX_FILE; do
             # echo "  - Processing: $SELINUX_FILE"
 
@@ -1370,13 +1364,13 @@ PATCH_SELINUX() {
             done
         done
 
-	    REMOVE_LINE '(genfscon proc "/sys/kernel/firmware_config" (u object_r proc_fmw ((s0) (s0))))' \
-	        "${TARGET_ROM_SYSTEM_EXT_DIR}/etc/selinux/system_ext_sepolicy.cil" >/dev/null 2>&1
-	    REMOVE_LINE '(genfscon proc "/sys/vm/compaction_proactiveness" (u object_r proc_compaction_proactiveness ((s0) (s0))))' \
-	        "${TARGET_ROM_SYSTEM_EXT_DIR}/etc/selinux/system_ext_sepolicy.cil" >/dev/null 2>&1
+        REMOVE_LINE '(genfscon proc "/sys/kernel/firmware_config" (u object_r proc_fmw ((s0) (s0))))' \
+            "${TARGET_ROM_SYSTEM_EXT_DIR}/etc/selinux/system_ext_sepolicy.cil" >/dev/null 2>&1
+        REMOVE_LINE '(genfscon proc "/sys/vm/compaction_proactiveness" (u object_r proc_compaction_proactiveness ((s0) (s0))))' \
+            "${TARGET_ROM_SYSTEM_EXT_DIR}/etc/selinux/system_ext_sepolicy.cil" >/dev/null 2>&1
         REMOVE_LINE 'init.svc.vendor.wvkprov_server_hal                           u:object_r:wvkprov_prop:s0' \
-	        "${TARGET_ROM_SYSTEM_EXT_DIR}/etc/selinux/system_ext_property_contexts" >/dev/null 2>&1
-	else
+            "${TARGET_ROM_SYSTEM_EXT_DIR}/etc/selinux/system_ext_property_contexts" >/dev/null 2>&1
+    else
         echo -e "- No system_ext directory found."
     fi
 }
