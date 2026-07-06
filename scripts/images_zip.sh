@@ -19,10 +19,13 @@
 #    ├── odm.img
 #    ├── boot.img
 #    ├── dtbo.img
-#    ├── flash.sh          ← fastboot flash script
-#    └── extras/           ← everything else from device extra/
-#        ├── 
-#        └── ...
+#    ├── bin/               ← fastboot binaries (Windows/Linux)
+#    │   ├── fastboot.exe
+#    │   ├── AdbWinApi.dll
+#    │   └── ...
+#    ├── flash.sh           ← fastboot flash script (Linux/Mac)
+#    ├── flash.bat          ← fastboot flash script (Windows)
+#    └── extras/            ← everything else from device extra/
 # =============================================================================
 
 set -euo pipefail
@@ -117,21 +120,16 @@ cp -f "$BOOT_TMP/dtbo.img" "$STAGING/dtbo.img"
 rm -rf "$BOOT_TMP"
 ok "boot.img and dtbo.img copied."
 
-# ── Copy extras ───────────────────────────────────────────────────────────────
-log "Copying extras from $EXTRA_DIR ..."
-mkdir -p "$STAGING/extras"
-
-# Copy everything from extra/ except the files already handled above
-while IFS= read -r -d '' f; do
-    fname="$(basename "$f")"
-    # Skip boot-dtbo zip, odm.img and vendor.img (already handled)
-    case "$fname" in
-        boot-dtbo.*.zip|odm.img|vendor.img) continue ;;
-    esac
-    cp -rf "$f" "$STAGING/extras/"
-done < <(find "$EXTRA_DIR" -maxdepth 1 -mindepth 1 -print0)
-
-ok "Extras copied."
+# ── Copy fastboot binaries for Windows ────────────────────────────────────────
+IMAGES_ZIP_DIR="$QT_DIR/QuantumROM/images_zip"
+BIN_DIR="$IMAGES_ZIP_DIR/bin"
+if [[ -d "$BIN_DIR" ]]; then
+    log "Copying fastboot binaries (Windows)..."
+    cp -r "$BIN_DIR" "$STAGING/bin"
+    ok "bin/ copied."
+else
+    warn "bin/ not found at $BIN_DIR — Windows batch will not work."
+fi
 
 # ── Generate flash.sh ─────────────────────────────────────────────────────────
 log "Generating flash.sh..."
@@ -187,6 +185,49 @@ EOF
 
 chmod +x "$STAGING/flash.sh"
 ok "flash.sh generated."
+
+# ── Generate flash.bat ─────────────────────────────────────────────────────────
+log "Generating flash.bat..."
+cat > "$STAGING/flash.bat" << EOF
+@echo off
+setlocal enabledelayedexpansion
+title QuantumROM Image Flasher
+
+echo =================================================
+echo   QuantumROM Image Flasher
+echo   Port: $TARGET_DEVICE -^> $STOCK_DEVICE
+echo   Built: $TODAY
+echo =================================================
+echo.
+
+:: Use bundled fastboot from /bin
+set "FB=%~dp0bin\\fastboot.exe"
+echo [FLASH] Checking fastboot device...
+!FB! devices | findstr "fastboot" >nul
+if errorlevel 1 (
+    echo [ERROR] No device found in fastboot mode.
+    pause
+    exit /b 1
+)
+
+echo [FLASH] Flashing super partitions...
+!FB! flash system  "%~dp0system.img"  && echo [OK]    system  flashed
+!FB! flash product "%~dp0product.img" && echo [OK]    product flashed
+!FB! flash vendor  "%~dp0vendor.img"  && echo [OK]    vendor  flashed
+!FB! flash odm     "%~dp0odm.img"     && echo [OK]    odm     flashed
+
+echo [FLASH] Flashing kernel partitions...
+!FB! flash boot    "%~dp0boot.img"    && echo [OK]    boot    flashed
+!FB! flash dtbo    "%~dp0dtbo.img"    && echo [OK]    dtbo    flashed
+
+echo.
+echo [OK] Flash complete, press ENTER to reboot...
+pause >nul
+!FB! reboot
+endlocal
+EOF
+
+ok "flash.bat generated."
 
 # ── Staging summary ───────────────────────────────────────────────────────────
 echo ""
