@@ -168,6 +168,9 @@ echo ""
 log "Checking fastboot device..."
 fastboot devices | grep -q "fastboot" || die "No device found in fastboot mode."
 
+log "Wiping data and cache..."
+fastboot -w && ok "Wipe complete" || die "Wipe failed."
+
 log "Flashing super partitions..."
 fastboot flash system  "\$SCRIPT_DIR/system.img"  && ok "system  flashed"
 fastboot flash product "\$SCRIPT_DIR/product.img" && ok "product flashed"
@@ -206,6 +209,14 @@ echo [FLASH] Checking fastboot device...
 !FB! devices | findstr "fastboot" >nul
 if errorlevel 1 (
     echo [ERROR] No device found in fastboot mode.
+    pause
+    exit /b 1
+)
+
+echo [FLASH] Wiping data and cache...
+!FB! -w
+if errorlevel 1 (
+    echo [ERROR] Wipe failed.
     pause
     exit /b 1
 )
