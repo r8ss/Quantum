@@ -935,6 +935,54 @@ PATCH_KNOX_GUARD() {
 }
 
 
+PATCH_FACTORY_TEST() {
+    echo " "
+
+    if [ "$#" -ne 1 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_SERVICES_DIRECTORY>"
+        return 1
+    fi
+
+    local EXTRACTED_SERVICES_DIR="$1"
+    local TARGET_SMALI="${EXTRACTED_SERVICES_DIR}/smali/com/android/server/SystemServer.smali"
+
+    echo -e "Patching FactoryTest bypass in SystemServer."
+
+    if [ -f "$TARGET_SMALI" ]; then
+        # Encontra o número da linha onde está a chamada do FactoryTest
+        local LINE_NUM=$(grep -n "invoke-static {}, Landroid/os/FactoryTest;->isFactoryBinary()Z" "$TARGET_SMALI" | cut -d: -f1)
+
+        if [ -n "$LINE_NUM" ]; then
+            # Escaneia as próximas 10 linhas em busca de um condicional válido
+            local SEARCH_BLOCK=$(tail -n +"$LINE_NUM" "$TARGET_SMALI" | head -n 10)
+            
+            if [[ "$SEARCH_BLOCK" =~ (if-[a-z]+)[[:space:]]+v[0-9]+,[[:space:]]+(:cond_[0-9a-fA-F]+) ]]; then
+                local COND_OPCODE="${BASH_REMATCH[1]}"
+                local COND_LABEL="${BASH_REMATCH[2]}"
+                
+                echo "  - Found target condition: $COND_OPCODE -> $COND_LABEL"
+                
+                # Aplica as modificações no escopo delimitado pelo sed
+                sed -i "/invoke-static {}, Landroid/os/FactoryTest;->isFactoryBinary()Z/,/:cond_/ {
+                    s/move-result v[0-9]\+//
+                    s/if-.*[[:space:]]\+:cond_[0-9a-fA-F]\+/goto $COND_LABEL/
+                }" "$TARGET_SMALI"
+
+                echo "  - Success: Bypassed via forced branch to $COND_LABEL."
+            else
+                echo "  - Error: No conditional opcode (if-nez/if-eqz) found within 10 lines after FactoryTest."
+                echo "  - Context debug:"
+                echo "$SEARCH_BLOCK" | sed 's/^/    > /' # Mostra o bloco exato de smali que falhou na leitura
+            fi
+        else
+            echo "  - Error: 'isFactoryBinary()' signature not found in file."
+        fi
+    else
+        echo "  - Error: Target file not found at: $TARGET_SMALI"
+    fi
+}
+
+
 UPDATE_SDHMS() {
     if [ "$#" -ne 1 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIRECTORY>"
@@ -2391,6 +2439,25 @@ GEN_FILE_CONTEXTS() {
     echo -e "- $PARTITION file_contexts generated"
 
     unset EXISTING
+}
+
+
+ENABLE_DEBUG_PORT() {
+    echo " "
+
+    local USB_RC="${TARGET_DIR}/system/system/etc/init/hw/init.usb.rc"
+    if [ -f "$USB_RC" ]; then
+        if ! grep -q "persist.vendor.radio.port_index" "$USB_RC"; then
+            echo "  - Patching init.usb.rc fallback trigger..."
+            {
+                echo ""
+                echo "on property:persist.vendor.radio.port_index=\"\""
+                echo "    setprop sys.usb.config adb"
+            } >> "$USB_RC"
+        fi
+    fi
+    
+    echo "  - Debug and seamless ADB patches applied successfully to system, product & system_ext."
 }
 
 

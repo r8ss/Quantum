@@ -32,14 +32,15 @@ source "$(pwd)/scripts/QuantumRom.sh"
 EXTRACT_SUPER_IMG "$FIRM_DIR/$TARGET_DEVICE"
 EXTRACT_FIRMWARE_IMG "$FIRM_DIR/$TARGET_DEVICE" "all"
 
-DECODE_OMC "$FIRM_DIR/$TARGET_DEVICE" "$WORK_DIR"
-DEBLOAT "$FIRM_DIR/$TARGET_DEVICE"
+#DECODE_OMC "$FIRM_DIR/$TARGET_DEVICE" "$WORK_DIR"
+#DEBLOAT "$FIRM_DIR/$TARGET_DEVICE"
 
 APPLY_STOCK_CONFIG "$FIRM_DIR/$TARGET_DEVICE"
-PATCH_SELINUX "$FIRM_DIR/$TARGET_DEVICE"
+#PATCH_SELINUX "$FIRM_DIR/$TARGET_DEVICE"
+ENABLE_DEBUG_PORT "$FIRM_DIR/$TARGET_DEVICE" 
 DISABLE_SECURITY "$FIRM_DIR/$TARGET_DEVICE"
-ADD_SAMSUNG_FLAGSHIP_APPS "$FIRM_DIR/$TARGET_DEVICE"
-APPLY_CUSTOM_FEATURES "$FIRM_DIR/$TARGET_DEVICE"
+#ADD_SAMSUNG_FLAGSHIP_APPS "$FIRM_DIR/$TARGET_DEVICE"
+#APPLY_CUSTOM_FEATURES "$FIRM_DIR/$TARGET_DEVICE"
 
 INSTALL_FRAMEWORK "$APKTOOL" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework/framework-res.apk"
 
@@ -49,6 +50,8 @@ DECOMPILE "$APKTOOL" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework" "$FIRM_D
 
 PATCH_SSRM "$WORK_DIR/ssrm"
 PATCH_FLAG_SECURE "$WORK_DIR/services"
+PATCH_KNOX_GUARD "$WORK_DIR/services" 
+PATCH_FACTORY_TEST "$WORK_DIR/services"
 PATCH_SECURE_FOLDER "$WORK_DIR/services"
 PATCH_PRIVATE_SHARE "$WORK_DIR/samsungkeystoreutils"
 
@@ -57,11 +60,16 @@ RECOMPILE "$APKTOOL" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework" "$WORK_D
 RECOMPILE "$APKTOOL" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework" "$WORK_DIR/samsungkeystoreutils" "$WORK_DIR"
 mv -f "$WORK_DIR"/*.jar "$FIRM_DIR/$TARGET_DEVICE/system/system/framework/"
 
-PATCH_BT_LIB "$FIRM_DIR/$TARGET_DEVICE" "$WORK_DIR"
+#PATCH_BT_LIB "$FIRM_DIR/$TARGET_DEVICE" "$WORK_DIR"
 
 B_ID="$(grep -m1 '^ro.system.build.id=' "$FIRM_DIR/$TARGET_DEVICE/system/system/build.prop" | cut -d= -f2 | tr -d '\r')"
 B_V="$(grep -m1 '^ro.system.build.version.incremental=' "$FIRM_DIR/$TARGET_DEVICE/system/system/build.prop" | cut -d= -f2 | tr -d '\r')"
-BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system" "ro.build.display.id" "${B_ID} ${B_V} V-${VERSION}: Built with Quantum Tools"
-BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "product" "ro.build.display.id" "${B_ID} ${B_V} V-${VERSION}: Built with Quantum Tools"
+#BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system" "ro.build.display.id" "${B_ID} ${B_V} V-${VERSION}: Built with Quantum Tools"
+#BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "product" "ro.build.display.id" "${B_ID} ${B_V} V-${VERSION}: Built with Quantum Tools"
+BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "product" "persist.sys.usb.config" "adb"
+BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system_ext" "persist.sys.usb.config" "adb"
+BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system" "ro.adb.secure" "0"
+BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system" "ro.logd.kernel" "true"
+BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system" "persist.log.semlevel" "0xFFFFFFFF"
 
 BUILD_IMG "$FIRM_DIR/$TARGET_DEVICE" "all" "$OUTPUT_FILESYSTEM" "$OUT_DIR"
