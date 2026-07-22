@@ -124,6 +124,8 @@ jobs:
 
       - name: Compress all .img & make zip file before upload.
         run: |
+          export STOCK_DEVICE="${{ github.event.inputs.STOCK_DEVICE }}"
+          export TARGET_DEVICE="${{ github.event.inputs.TARGET_DEVICE }}"
           bash scripts/images_zip.sh
 
       - name: Upload file in GoFile & Create Release.
