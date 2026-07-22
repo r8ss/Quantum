@@ -77,8 +77,8 @@ jobs:
           declare -A PIXELDRAIN_VENDOR_ID
 
           # ==== Add new devices here ====
-          PIXELDRAIN_ODM_ID["SM-G780F"]="kE2qK5Td"
-          PIXELDRAIN_VENDOR_ID["SM-G780F"]="VENDOR_FILE_ID_G780F"
+          PIXELDRAIN_ODM_ID["SM-G780F"]="8QZeZG9Z"
+          PIXELDRAIN_VENDOR_ID["SM-G780F"]="kE2qK5Td"
 
           PIXELDRAIN_ODM_ID["SM-G980F"]="ZkkSUr4T"
           PIXELDRAIN_VENDOR_ID["SM-G980F"]="PHHa2wGZ"
