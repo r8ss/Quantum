@@ -3,7 +3,7 @@
 #  QuantumROM — images_zip.sh
 #  Packages raw .img files + a fastboot flash script into a zip.
 #
-#  Called by build_quantum.sh when CREATE_IMAGES_ZIP="true".
+#  Called by build_quantum.sh when CREATE_FLASHABLE_ZIP="false".
 #  Required exported vars:
 #    QT_DIR        → root of the QuantumROM repo
 #    DEVICES_DIR   → path to device configs
@@ -13,19 +13,16 @@
 #
 #  Output zip structure:
 #    QuantumROM-SM-G980F-20260628-IMAGES.zip
-#    ├── system.img
-#    ├── product.img
-#    ├── vendor.img
-#    ├── odm.img
-#    ├── boot.img
-#    ├── dtbo.img
-#    ├── bin/               ← fastboot binaries (Windows/Linux)
-#    │   ├── fastboot.exe
-#    │   ├── AdbWinApi.dll
-#    │   └── ...
-#    ├── flash.sh           ← fastboot flash script (Linux/Mac)
-#    ├── flash.bat          ← fastboot flash script (Windows)
-#    └── extras/            ← everything else from device extra/
+#    ├── system.img          (always)
+#    ├── product.img         (always)
+#    ├── vendor.img          (optional)
+#    ├── odm.img             (optional)
+#    ├── boot.img            (optional, paired with dtbo)
+#    ├── dtbo.img            (optional, paired with boot)
+#    ├── bin/                (Windows fastboot binaries, if present)
+#    ├── flash.sh            (Linux/Mac — only includes present partitions)
+#    ├── flash.bat           (Windows — only includes present partitions)
+#    └── extras/             (everything else from device extra/)
 # =============================================================================
 
 set -euo pipefail
@@ -70,49 +67,51 @@ echo ""
 [[ -d "$DEVICE_DIR" ]] || die "Device directory not found: $DEVICE_DIR"
 [[ -d "$EXTRA_DIR"  ]] || die "Extra directory not found: $EXTRA_DIR"
 
-# ── Locate build partitions ───────────────────────────────────────────────────
+# ── Locate partitions ─────────────────────────────────────────────────────────
+# Required
 SYSTEM_IMG="$OUT_DIR/system.img"
 PRODUCT_IMG="$OUT_DIR/product.img"
-
-ODM_IMG="$OUT_DIR/odm.img"
-VENDOR_IMG="$OUT_DIR/vendor.img"
-
 [[ -f "$SYSTEM_IMG"  ]] || die "system.img not found at $SYSTEM_IMG"
 [[ -f "$PRODUCT_IMG" ]] || die "product.img not found at $PRODUCT_IMG"
-[[ -f "$ODM_IMG"     ]] || die "odm.img not found at $ODM_IMG"
-[[ -f "$VENDOR_IMG"  ]] || die "vendor.img not found at $VENDOR_IMG"
 
-ok "system.img  → $SYSTEM_IMG"
-ok "product.img → $PRODUCT_IMG"
-ok "odm.img     → $ODM_IMG"
-ok "vendor.img  → $VENDOR_IMG"
+# Optional — independent
+HAS_VENDOR=false
+HAS_ODM=false
+HAS_BOOT=false   # boot and dtbo are treated as a pair
 
-# ── Copy partition images ─────────────────────────────────────────────────────
-log "Copying partition images..."
-cp -f "$SYSTEM_IMG"  "$STAGING/system.img"
-cp -f "$PRODUCT_IMG" "$STAGING/product.img"
-cp -f "$ODM_IMG"     "$STAGING/odm.img"
-cp -f "$VENDOR_IMG"  "$STAGING/vendor.img"
-ok "Partitions copied."
+VENDOR_IMG="$OUT_DIR/vendor.img"
+ODM_IMG="$OUT_DIR/odm.img"
 
-# ── Extract boot and dtbo ─────────────────────────────────────────────────────
-log "Looking for boot-dtbo zip in $EXTRA_DIR ..."
-BOOT_DTBO_ZIP="$(find "$EXTRA_DIR" -maxdepth 2 -type f -name "boot-dtbo.*.zip" | head -n1)"
-[[ -n "$BOOT_DTBO_ZIP" ]] || die "No boot-dtbo.<codename>.zip found inside $EXTRA_DIR"
-ok "Found: $(basename "$BOOT_DTBO_ZIP")"
+[[ -f "$VENDOR_IMG" ]] && HAS_VENDOR=true || warn "vendor.img not found — skipping"
+[[ -f "$ODM_IMG"    ]] && HAS_ODM=true    || warn "odm.img not found — skipping"
 
-log "Extracting boot.img and dtbo.img..."
+# Boot + dtbo pair
 BOOT_TMP="$(mktemp -d)"
-7z e -y "$BOOT_DTBO_ZIP" -o"$BOOT_TMP" boot.img dtbo.img >/dev/null 2>&1 || \
-    unzip -o "$BOOT_DTBO_ZIP" boot.img dtbo.img -d "$BOOT_TMP" >/dev/null 2>&1
+BOOT_DTBO_ZIP="$(find "$EXTRA_DIR" -maxdepth 2 -type f -name "boot-dtbo.*.zip" | head -n1)"
+if [[ -n "$BOOT_DTBO_ZIP" ]]; then
+    log "Found boot-dtbo zip: $(basename "$BOOT_DTBO_ZIP")"
+    7z e -y "$BOOT_DTBO_ZIP" -o"$BOOT_TMP" boot.img dtbo.img >/dev/null 2>&1 || \
+        unzip -o "$BOOT_DTBO_ZIP" boot.img dtbo.img -d "$BOOT_TMP" >/dev/null 2>&1
+    if [[ -f "$BOOT_TMP/boot.img" && -f "$BOOT_TMP/dtbo.img" ]]; then
+        HAS_BOOT=true
+        ok "boot.img and dtbo.img extracted."
+    else
+        warn "boot-dtbo zip found but boot.img/dtbo.img missing inside — skipping kernel flash"
+    fi
+else
+    warn "No boot-dtbo.<codename>.zip found — skipping kernel flash"
+fi
 
-[[ -f "$BOOT_TMP/boot.img" ]] || die "boot.img not found inside $(basename "$BOOT_DTBO_ZIP")"
-[[ -f "$BOOT_TMP/dtbo.img" ]] || die "dtbo.img not found inside $(basename "$BOOT_DTBO_ZIP")"
-
-cp -f "$BOOT_TMP/boot.img" "$STAGING/boot.img"
-cp -f "$BOOT_TMP/dtbo.img" "$STAGING/dtbo.img"
+# ── Copy partitions to staging ────────────────────────────────────────────────
+log "Copying partition images..."
+cp -f "$SYSTEM_IMG"  "$STAGING/system.img"  && ok "system.img  copied"
+cp -f "$PRODUCT_IMG" "$STAGING/product.img" && ok "product.img copied"
+$HAS_VENDOR && cp -f "$VENDOR_IMG" "$STAGING/vendor.img" && ok "vendor.img  copied"
+$HAS_ODM    && cp -f "$ODM_IMG"    "$STAGING/odm.img"    && ok "odm.img     copied"
+$HAS_BOOT   && cp -f "$BOOT_TMP/boot.img" "$STAGING/boot.img" \
+            && cp -f "$BOOT_TMP/dtbo.img" "$STAGING/dtbo.img" \
+            && ok "boot.img + dtbo.img copied"
 rm -rf "$BOOT_TMP"
-ok "boot.img and dtbo.img copied."
 
 # ── Copy fastboot binaries for Windows ────────────────────────────────────────
 IMAGES_ZIP_DIR="$QT_DIR/QuantumROM/images_zip"
@@ -122,34 +121,44 @@ if [[ -d "$BIN_DIR" ]]; then
     cp -r "$BIN_DIR" "$STAGING/bin"
     ok "bin/ copied."
 else
-    warn "bin/ not found at $BIN_DIR — Windows batch will not work."
+    warn "bin/ not found at $BIN_DIR — Windows flash.bat will not work."
 fi
 
 # ── Generate flash.sh ─────────────────────────────────────────────────────────
 log "Generating flash.sh..."
+
+# Build super flash lines
+SUPER_LINES_SH='fastboot flash system  "$SCRIPT_DIR/system.img"  && ok "system  flashed"
+fastboot flash product "$SCRIPT_DIR/product.img" && ok "product flashed"'
+$HAS_VENDOR && SUPER_LINES_SH+='
+fastboot flash vendor  "$SCRIPT_DIR/vendor.img"  && ok "vendor  flashed"'
+$HAS_ODM    && SUPER_LINES_SH+='
+fastboot flash odm     "$SCRIPT_DIR/odm.img"     && ok "odm     flashed"'
+
+# Build kernel flash lines
+KERNEL_SECTION_SH=""
+if $HAS_BOOT; then
+    KERNEL_SECTION_SH='
+log "Flashing kernel partitions..."
+fastboot flash boot    "$SCRIPT_DIR/boot.img"    && ok "boot    flashed"
+fastboot flash dtbo    "$SCRIPT_DIR/dtbo.img"    && ok "dtbo    flashed"'
+fi
+
 cat > "$STAGING/flash.sh" << EOF
 #!/usr/bin/env bash
 # =============================================================================
 #  QuantumROM — flash.sh
-#  Flashes all partitions via fastboot.
-#  Port: $TARGET_DEVICE -> $STOCK_DEVICE
-#  Built: $TODAY
+#  Port: $TARGET_DEVICE -> $STOCK_DEVICE | Built: $TODAY
 # =============================================================================
 
 set -euo pipefail
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-CYAN='\033[0;36m'
-BOLD='\033[1m'
-RESET='\033[0m'
-
+RED='\033[0;31m'; GREEN='\033[0;32m'; CYAN='\033[0;36m'; BOLD='\033[1m'; RESET='\033[0m'
 log()  { echo -e "\${CYAN}[FLASH]\${RESET} \$*"; }
 ok()   { echo -e "\${GREEN}[OK]\${RESET}    \$*"; }
 die()  { echo -e "\${RED}[ERROR]\${RESET} \$*" >&2; exit 1; }
 
 SCRIPT_DIR="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
-
 command -v fastboot &>/dev/null || die "fastboot not found. Install android-tools-fastboot."
 
 echo ""
@@ -166,25 +175,36 @@ log "Wiping data and cache..."
 fastboot -w && ok "Wipe complete" || die "Wipe failed."
 
 log "Flashing super partitions..."
-fastboot flash system  "\$SCRIPT_DIR/system.img"  && ok "system  flashed"
-fastboot flash product "\$SCRIPT_DIR/product.img" && ok "product flashed"
-fastboot flash vendor  "\$SCRIPT_DIR/vendor.img"  && ok "vendor  flashed"
-fastboot flash odm     "\$SCRIPT_DIR/odm.img"     && ok "odm     flashed"
-
-log "Flashing kernel partitions..."
-fastboot flash boot    "\$SCRIPT_DIR/boot.img"    && ok "boot    flashed"
-fastboot flash dtbo    "\$SCRIPT_DIR/dtbo.img"    && ok "dtbo    flashed"
+$SUPER_LINES_SH
+$KERNEL_SECTION_SH
 
 echo ""
 echo -e "\${BOLD}\${GREEN}All done! Rebooting...\${RESET}"
 fastboot reboot
 EOF
-
 chmod +x "$STAGING/flash.sh"
 ok "flash.sh generated."
 
-# ── Generate flash.bat ─────────────────────────────────────────────────────────
+# ── Generate flash.bat ────────────────────────────────────────────────────────
 log "Generating flash.bat..."
+
+# Build super flash lines for bat
+SUPER_LINES_BAT='!FB! flash system  "%~dp0system.img"  && echo [OK] system  flashed
+!FB! flash product "%~dp0product.img" && echo [OK] product flashed'
+$HAS_VENDOR && SUPER_LINES_BAT+='
+!FB! flash vendor  "%~dp0vendor.img"  && echo [OK] vendor  flashed'
+$HAS_ODM    && SUPER_LINES_BAT+='
+!FB! flash odm     "%~dp0odm.img"     && echo [OK] odm     flashed'
+
+# Build kernel flash lines for bat
+KERNEL_SECTION_BAT=""
+if $HAS_BOOT; then
+    KERNEL_SECTION_BAT='
+echo [FLASH] Flashing kernel partitions...
+!FB! flash boot    "%~dp0boot.img"    && echo [OK] boot    flashed
+!FB! flash dtbo    "%~dp0dtbo.img"    && echo [OK] dtbo    flashed'
+fi
+
 cat > "$STAGING/flash.bat" << EOF
 @echo off
 setlocal enabledelayedexpansion
@@ -197,33 +217,19 @@ echo   Built: $TODAY
 echo =================================================
 echo.
 
-:: Use bundled fastboot from /bin
 set "FB=%~dp0bin\\fastboot.exe"
+
 echo [FLASH] Checking fastboot device...
 !FB! devices | findstr "fastboot" >nul
-if errorlevel 1 (
-    echo [ERROR] No device found in fastboot mode.
-    pause
-    exit /b 1
-)
+if errorlevel 1 ( echo [ERROR] No device in fastboot mode. & pause & exit /b 1 )
 
 echo [FLASH] Wiping data and cache...
 !FB! -w
-if errorlevel 1 (
-    echo [ERROR] Wipe failed.
-    pause
-    exit /b 1
-)
+if errorlevel 1 ( echo [ERROR] Wipe failed. & pause & exit /b 1 )
 
 echo [FLASH] Flashing super partitions...
-!FB! flash system  "%~dp0system.img"  && echo [OK]    system  flashed
-!FB! flash product "%~dp0product.img" && echo [OK]    product flashed
-!FB! flash vendor  "%~dp0vendor.img"  && echo [OK]    vendor  flashed
-!FB! flash odm     "%~dp0odm.img"     && echo [OK]    odm     flashed
-
-echo [FLASH] Flashing kernel partitions...
-!FB! flash boot    "%~dp0boot.img"    && echo [OK]    boot    flashed
-!FB! flash dtbo    "%~dp0dtbo.img"    && echo [OK]    dtbo    flashed
+$SUPER_LINES_BAT
+$KERNEL_SECTION_BAT
 
 echo.
 echo [OK] Flash complete, press ENTER to reboot...
@@ -231,7 +237,6 @@ pause >nul
 !FB! reboot
 endlocal
 EOF
-
 ok "flash.bat generated."
 
 # ── Staging summary ───────────────────────────────────────────────────────────
@@ -244,7 +249,7 @@ find "$STAGING" | sed "s|$STAGING||" | sort | while read -r f; do
 done
 echo ""
 
-# ── Pack zip ─────────────────────────────────────────────────────────────────
+# ── Pack zip ──────────────────────────────────────────────────────────────────
 log "Packing $ZIP_NAME ..."
 mkdir -p "$OUT_DIR"
 cd "$STAGING"
