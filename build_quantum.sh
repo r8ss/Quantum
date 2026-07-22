@@ -15,7 +15,7 @@
 # =============================================================================
 
 # Stock device model or "None"
-STOCK_DEVICE="SM-G980F"
+STOCK_DEVICE="SM-G780F"
 
 # Set to True if your kernel BPF version is 5.4 (lower than 5.10)
 USE_UI_8_TETHERING_APEX="True"
@@ -37,7 +37,7 @@ TARGET_FW_VERSION=""
 
 # Generate a flashable zip at the end of the build? (true/false)
 # If false, an images zip (raw .img + fastboot sh script) will be generated instead.
-CREATE_FLASHABLE_ZIP="true"
+CREATE_FLASHABLE_ZIP="false"
 
 # =============================================================================
 #                      END OF CONFIGURATION AREA
@@ -273,6 +273,7 @@ ok "Build complete."
 
 # ── Zip ───────────────────────────────────────────────────────────────────────
 BUILD_TIME="$(TZ='Asia/Dhaka' date '+%Y-%m-%d %I:%M:%S %p UTC+6')"
+ZIP_DATE="$(date '+%Y%m%d')"
 log "Build time (UTC+6): $BUILD_TIME"
 
 if [[ "$CREATE_FLASHABLE_ZIP" == "true" ]]; then
@@ -280,23 +281,25 @@ if [[ "$CREATE_FLASHABLE_ZIP" == "true" ]]; then
     FLASHABLE_SCRIPT="$SCRIPT_DIR/scripts/flashable_zip.sh"
     [[ -f "$FLASHABLE_SCRIPT" ]] || die "flashable_zip.sh not found at: $FLASHABLE_SCRIPT"
     export QT_DIR="$SCRIPT_DIR" DEVICES_DIR="$SCRIPT_DIR/QuantumROM/Devices" \
-           OUT_DIR STOCK_DEVICE TARGET_DEVICE lpmake BUILD_TIME
+           OUT_DIR STOCK_DEVICE TARGET_DEVICE lpmake BUILD_TIME ZIP_DATE
     bash "$FLASHABLE_SCRIPT"
+    ZIP_PATH="$OUT_DIR/QuantumROM-${STOCK_DEVICE}-${ZIP_DATE}.zip"
     ok "Flashable zip done."
 else
     log "Generating images zip..."
     IMAGES_SCRIPT="$SCRIPT_DIR/scripts/images_zip.sh"
     [[ -f "$IMAGES_SCRIPT" ]] || die "images_zip.sh not found at: $IMAGES_SCRIPT"
     export QT_DIR="$SCRIPT_DIR" DEVICES_DIR="$SCRIPT_DIR/QuantumROM/Devices" \
-           OUT_DIR STOCK_DEVICE TARGET_DEVICE BUILD_TIME
+           OUT_DIR STOCK_DEVICE TARGET_DEVICE BUILD_TIME ZIP_DATE
     bash "$IMAGES_SCRIPT"
+    ZIP_PATH="$OUT_DIR/QuantumROM-${STOCK_DEVICE}-${ZIP_DATE}-IMAGES.zip"
     ok "Images zip done."
 fi
 
 # ── Upload / Release ──────────────────────────────────────────────────────────
 if [[ "$DO_UPLOAD" == "true" ]]; then
     log "Starting GoFile upload and release creation..."
-    export STOCK_DEVICE TARGET_DEVICE OUTPUT_FILESYSTEM \
+    export ZIP_PATH STOCK_DEVICE TARGET_DEVICE OUTPUT_FILESYSTEM \
            USE_UI_8_TETHERING_APEX BUILD_TIME
     bash "$SCRIPT_DIR/release.sh"
     ok "Upload and release complete."

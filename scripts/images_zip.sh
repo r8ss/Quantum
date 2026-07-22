@@ -54,7 +54,7 @@ OUT_DIR="${OUT_DIR:-$QT_DIR/OUT}"
 
 DEVICE_DIR="$DEVICES_DIR/$STOCK_DEVICE"
 EXTRA_DIR="$DEVICE_DIR/extra"
-TODAY="$(date '+%Y%m%d')"
+TODAY="${ZIP_DATE:-$(date '+%Y%m%d')}"
 ZIP_NAME="QuantumROM-${STOCK_DEVICE}-${TODAY}-IMAGES.zip"
 FINAL_ZIP="$OUT_DIR/$ZIP_NAME"
 STAGING="$(mktemp -d)"
@@ -74,19 +74,13 @@ echo ""
 SYSTEM_IMG="$OUT_DIR/system.img"
 PRODUCT_IMG="$OUT_DIR/product.img"
 
-ODM_IMG=""
-VENDOR_IMG=""
-for c in "$EXTRA_DIR/odm.img" "$EXTRA_DIR/odm/odm.img"; do
-    [[ -f "$c" ]] && { ODM_IMG="$c"; break; }
-done
-for c in "$EXTRA_DIR/vendor.img" "$EXTRA_DIR/vendor/vendor.img"; do
-    [[ -f "$c" ]] && { VENDOR_IMG="$c"; break; }
-done
+ODM_IMG="$OUT_DIR/odm.img"
+VENDOR_IMG="$OUT_DIR/vendor.img"
 
 [[ -f "$SYSTEM_IMG"  ]] || die "system.img not found at $SYSTEM_IMG"
 [[ -f "$PRODUCT_IMG" ]] || die "product.img not found at $PRODUCT_IMG"
-[[ -n "$ODM_IMG"     ]] || die "odm.img not found inside $EXTRA_DIR"
-[[ -n "$VENDOR_IMG"  ]] || die "vendor.img not found inside $EXTRA_DIR"
+[[ -f "$ODM_IMG"     ]] || die "odm.img not found at $ODM_IMG"
+[[ -f "$VENDOR_IMG"  ]] || die "vendor.img not found at $VENDOR_IMG"
 
 ok "system.img  → $SYSTEM_IMG"
 ok "product.img → $PRODUCT_IMG"

@@ -22,25 +22,39 @@ export WORK_DIR="$(pwd)/WORK"
 export APKTOOL="$(pwd)/bin/java/apktool.jar"
 export DEVICES_DIR="$(pwd)/QuantumROM/Devices"
 export VNDKS_COLLECTION="$(pwd)/QuantumROM/vndks"
-export BUILD_PARTITIONS="product,system_ext,system"
+export BUILD_PARTITIONS="product,system_ext,system,vendor,odm"
 
 # Source
 source "$(pwd)/scripts/debloat.sh"
 source "$(pwd)/scripts/QuantumRom.sh"
 
-#EXTRACT_FIRMWARE "$FIRM_DIR/$TARGET_DEVICE"
+EXTRACT_FIRMWARE "$FIRM_DIR/$TARGET_DEVICE"
 EXTRACT_SUPER_IMG "$FIRM_DIR/$TARGET_DEVICE"
+
+# Override vendor.img and odm.img with stock device images (if in BUILD_PARTITIONS and present in extra/)
+if [[ ",$BUILD_PARTITIONS," == *",vendor,"* ]] && [ -f "${DEVICES_DIR}/${STOCK_DEVICE}/extra/vendor.img" ]; then
+    echo "Using stock vendor.img from ${STOCK_DEVICE}/extra"
+    cp -af "${DEVICES_DIR}/${STOCK_DEVICE}/extra/vendor.img" "${FIRM_DIR}/${TARGET_DEVICE}/vendor.img"
+fi
+if [[ ",$BUILD_PARTITIONS," == *",odm,"* ]] && [ -f "${DEVICES_DIR}/${STOCK_DEVICE}/extra/odm.img" ]; then
+    echo "Using stock odm.img from ${STOCK_DEVICE}/extra"
+    cp -af "${DEVICES_DIR}/${STOCK_DEVICE}/extra/odm.img" "${FIRM_DIR}/${TARGET_DEVICE}/odm.img"
+fi
+
 EXTRACT_FIRMWARE_IMG "$FIRM_DIR/$TARGET_DEVICE" "all"
 
-#DECODE_OMC "$FIRM_DIR/$TARGET_DEVICE" "$WORK_DIR"
-#DEBLOAT "$FIRM_DIR/$TARGET_DEVICE"
+DECODE_OMC "$FIRM_DIR/$TARGET_DEVICE" "$WORK_DIR"
+DEBLOAT "$FIRM_DIR/$TARGET_DEVICE"
 
 APPLY_STOCK_CONFIG "$FIRM_DIR/$TARGET_DEVICE"
-#PATCH_SELINUX "$FIRM_DIR/$TARGET_DEVICE"
+PATCH_SELINUX "$FIRM_DIR/$TARGET_DEVICE"
+PATCH_SYSTEM_EXT_VINTF "$FIRM_DIR/$TARGET_DEVICE"
 ENABLE_DEBUG_PORT "$FIRM_DIR/$TARGET_DEVICE" 
 DISABLE_SECURITY "$FIRM_DIR/$TARGET_DEVICE"
 #ADD_SAMSUNG_FLAGSHIP_APPS "$FIRM_DIR/$TARGET_DEVICE"
-#APPLY_CUSTOM_FEATURES "$FIRM_DIR/$TARGET_DEVICE"
+APPLY_CUSTOM_FEATURES "$FIRM_DIR/$TARGET_DEVICE"
+#PATCH_ARTISAN_ALIGNMENT_FEATURES "$FIRM_DIR/$TARGET_DEVICE"
+PATCH_VENDOR_INIT "$FIRM_DIR/$TARGET_DEVICE"
 
 INSTALL_FRAMEWORK "$APKTOOL" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework/framework-res.apk"
 
@@ -60,16 +74,23 @@ RECOMPILE "$APKTOOL" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework" "$WORK_D
 RECOMPILE "$APKTOOL" "$FIRM_DIR/$TARGET_DEVICE/system/system/framework" "$WORK_DIR/samsungkeystoreutils" "$WORK_DIR"
 mv -f "$WORK_DIR"/*.jar "$FIRM_DIR/$TARGET_DEVICE/system/system/framework/"
 
-#PATCH_BT_LIB "$FIRM_DIR/$TARGET_DEVICE" "$WORK_DIR"
+PATCH_BT_LIB "$FIRM_DIR/$TARGET_DEVICE" "$WORK_DIR"
+PATCH_SAMSUNG_CAMERA_LIBS "$FIRM_DIR/$TARGET_DEVICE"
+PATCH_SYSTEM_NFC_STACK "$FIRM_DIR/$TARGET_DEVICE"
+DISABLE_SECURITY "$FIRM_DIR/$TARGET_DEVICE"
+
+#FIX_QUANTUM_SECURITY_ALIGNMENT "$FIRM_DIR/$TARGET_DEVICE"
 
 B_ID="$(grep -m1 '^ro.system.build.id=' "$FIRM_DIR/$TARGET_DEVICE/system/system/build.prop" | cut -d= -f2 | tr -d '\r')"
 B_V="$(grep -m1 '^ro.system.build.version.incremental=' "$FIRM_DIR/$TARGET_DEVICE/system/system/build.prop" | cut -d= -f2 | tr -d '\r')"
-#BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system" "ro.build.display.id" "${B_ID} ${B_V} V-${VERSION}: Built with Quantum Tools"
-#BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "product" "ro.build.display.id" "${B_ID} ${B_V} V-${VERSION}: Built with Quantum Tools"
-BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "product" "persist.sys.usb.config" "adb"
-BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system_ext" "persist.sys.usb.config" "adb"
-BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system" "ro.adb.secure" "0"
-BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system" "ro.logd.kernel" "true"
-BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system" "persist.log.semlevel" "0xFFFFFFFF"
+BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system" "ro.build.display.id" "${B_ID} ${B_V} V-${VERSION}: QuantumROM Aurora"
+BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "product" "ro.build.display.id" "${B_ID} ${B_V} V-${VERSION}: QuantumROM Aurora"
+#BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system" "ro.sf.lcd_density" "420"
+#BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system" "ro.sf.lcd_height" "2400"
+#BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system" "ro.sf.lcd_width" "1080"
+#BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system" "ro.surface_flinger.max_virtual_display_dimension" "4096" 
 
 BUILD_IMG "$FIRM_DIR/$TARGET_DEVICE" "all" "$OUTPUT_FILESYSTEM" "$OUT_DIR"
+
+# Clean up stock vendor/odm images from firmware dir (already built to OUT)
+rm -f "$FIRM_DIR/$TARGET_DEVICE/vendor.img" "$FIRM_DIR/$TARGET_DEVICE/odm.img"

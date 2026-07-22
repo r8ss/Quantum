@@ -40,7 +40,7 @@ lpmake="${lpmake:-$QT_DIR/bin/lp/lpmake}"
 
 DEVICE_DIR="$DEVICES_DIR/$STOCK_DEVICE"
 EXTRA_DIR="$DEVICE_DIR/extra"
-TODAY="$(date '+%Y%m%d')"
+TODAY="${ZIP_DATE:-$(date '+%Y%m%d')}"
 ZIP_NAME="QuantumROM-${STOCK_DEVICE}-${TODAY}.zip"
 FINAL_ZIP="$OUT_DIR/$ZIP_NAME"
 
@@ -106,19 +106,13 @@ log "  Group size    : $STOCK_FLASHABLE_ZIP_GROUP_SIZE"
 SYSTEM_IMG="$OUT_DIR/system.img"
 PRODUCT_IMG="$OUT_DIR/product.img"
 
-ODM_IMG=""
-VENDOR_IMG=""
-for c in "$EXTRA_DIR/odm.img" "$EXTRA_DIR/odm/odm.img"; do
-    [[ -f "$c" ]] && { ODM_IMG="$c"; break; }
-done
-for c in "$EXTRA_DIR/vendor.img" "$EXTRA_DIR/vendor/vendor.img"; do
-    [[ -f "$c" ]] && { VENDOR_IMG="$c"; break; }
-done
+ODM_IMG="$OUT_DIR/odm.img"
+VENDOR_IMG="$OUT_DIR/vendor.img"
 
 [[ -f "$SYSTEM_IMG"  ]] || { die "system.img not found at $SYSTEM_IMG"; }
 [[ -f "$PRODUCT_IMG" ]] || { die "product.img not found at $PRODUCT_IMG"; }
-[[ -n "$ODM_IMG"     ]] || { die "odm.img not found inside $EXTRA_DIR"; }
-[[ -n "$VENDOR_IMG"  ]] || { die "vendor.img not found inside $EXTRA_DIR"; }
+[[ -f "$ODM_IMG"     ]] || { die "odm.img not found at $ODM_IMG"; }
+[[ -f "$VENDOR_IMG"  ]] || { die "vendor.img not found at $VENDOR_IMG"; }
 
 ok "system.img  → $SYSTEM_IMG"
 ok "product.img → $PRODUCT_IMG"
@@ -137,12 +131,8 @@ log "  product : $SZ_PRODUCT bytes"
 log "  odm     : $SZ_ODM bytes"
 log "  vendor  : $SZ_VENDOR bytes"
 
-# Validate total fits inside the group
+# Validate total fits inside the group (will be updated after alignment)
 TOTAL=$(( SZ_SYSTEM + SZ_PRODUCT + SZ_ODM + SZ_VENDOR ))
-if [[ "$TOTAL" -gt "$STOCK_FLASHABLE_ZIP_GROUP_SIZE" ]]; then
-    die "OS size ($TOTAL) is bigger than the target group size ($STOCK_FLASHABLE_ZIP_GROUP_SIZE)"
-fi
-ok "Size check passed ($TOTAL / $STOCK_FLASHABLE_ZIP_GROUP_SIZE bytes used)"
 
 # ── Prepare staging directory ─────────────────────────────────────────────────
 log "Cleaning up leftover files from previous runs..."
@@ -171,6 +161,13 @@ log "  system  : $SZ_SYSTEM → $SZ_SYSTEM_ALIGNED"
 log "  product : $SZ_PRODUCT → $SZ_PRODUCT_ALIGNED"
 log "  odm     : $SZ_ODM → $SZ_ODM_ALIGNED"
 log "  vendor  : $SZ_VENDOR → $SZ_VENDOR_ALIGNED"
+
+# Validate total fits inside the group (use aligned sizes)
+TOTAL_ALIGNED=$(( SZ_SYSTEM_ALIGNED + SZ_PRODUCT_ALIGNED + SZ_ODM_ALIGNED + SZ_VENDOR_ALIGNED ))
+if [[ "$TOTAL_ALIGNED" -gt "$STOCK_FLASHABLE_ZIP_GROUP_SIZE" ]]; then
+    die "OS size ($TOTAL_ALIGNED) is bigger than the target group size ($STOCK_FLASHABLE_ZIP_GROUP_SIZE)"
+fi
+ok "Size check passed ($TOTAL_ALIGNED / $STOCK_FLASHABLE_ZIP_GROUP_SIZE bytes used)"
 
 # ── Generate unsparse_super_empty.img via lpmake ──────────────────────────────
 log "Generating unsparse_super_empty.img..."
@@ -304,6 +301,11 @@ EOF
 
 # Append the dynamic parts (variables need to be expanded here)
 cat >> "$SCRIPT_FILE" << EOF
+# Unmount logical partitions before touching super metadata
+unmount("/system");
+unmount("/product");
+unmount("/vendor");
+unmount("/odm");
 # Update dynamic partition metadata
 assert(update_dynamic_partitions(package_extract_file("dynamic_partitions_op_list"), package_extract_file("unsparse_super_empty.img")));
 show_progress(1, 200);

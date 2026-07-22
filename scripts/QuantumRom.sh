@@ -551,6 +551,7 @@ DISABLE_FDE() {
         return 1
     fi
 
+
     if [ ! -d "${EXTRACTED_FIRM_DIR}/vendor/etc" ]; then
         return 1
     fi
@@ -567,7 +568,6 @@ DISABLE_FDE() {
         fi
     done
 }
-
 
 INSTALL_FRAMEWORK() {
     echo " "
@@ -1326,6 +1326,45 @@ GET_SYSTEM_EXT_DIR() {
 }
 
 
+PATCH_SYSTEM_EXT_VINTF() {
+    echo " "
+
+    if [ "$#" -ne 1 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        return 1
+    fi
+
+    local EXTRACTED_FIRM_DIR="$1"
+    
+    local TARGET_ROM_SYSTEM_EXT_DIR="$(GET_SYSTEM_EXT_DIR "$EXTRACTED_FIRM_DIR")"
+
+    echo " - Replacing system_ext VINTF manifests..."
+
+    local STOCK_VINTF_DIR="$DEVICES_DIR/$STOCK_DEVICE/Stock/system/system/system_ext/etc/vintf"
+    
+    local PORT_VINTF_DIR="${TARGET_ROM_SYSTEM_EXT_DIR}/etc/vintf"
+
+    if [ -d "$TARGET_ROM_SYSTEM_EXT_DIR" ]; then
+        if [ -d "$STOCK_VINTF_DIR" ]; then
+            echo "  - Found Stock VINTF directory. Replacing..."
+            
+            rm -rf "$PORT_VINTF_DIR"
+            
+            mkdir -p "$(dirname "$PORT_VINTF_DIR")"
+            
+            cp -rf "$STOCK_VINTF_DIR/." "$PORT_VINTF_DIR/"
+
+            echo "  - System_ext VINTF manifests injected successfully from ($STOCK_DEVICE)."
+        else
+            echo "  - Warning: Stock VINTF directory not found at $STOCK_VINTF_DIR"
+            echo "  - Skipping VINTF replacement."
+        fi
+    else
+        echo "  - Warning: Target system_ext directory not found in Port ROM."
+    fi
+}
+
+
 PATCH_SELINUX() {
     echo " "
 
@@ -1352,9 +1391,9 @@ PATCH_SELINUX() {
         if [ -d "$STOCK_SYSTEM_MAPPING" ]; then
             mkdir -p "$DEST_SYSTEM_MAPPING"
             cp -rf "$STOCK_SYSTEM_MAPPING/." "$DEST_SYSTEM_MAPPING/"
-            echo "  - System mapping files injected successfully."
+            echo "- System mapping files injected successfully."
         else
-            echo "  - Warning: Source system mapping folder not found."
+            echo "- Warning: Source system mapping folder not found."
         fi
     fi
 
@@ -1369,9 +1408,9 @@ PATCH_SELINUX() {
         if [ -d "$STOCK_EXT_MAPPING" ]; then
             mkdir -p "$DEST_EXT_MAPPING"
             cp -rf "$STOCK_EXT_MAPPING/." "$DEST_EXT_MAPPING/"
-            echo "  - System_ext mapping files injected successfully."
+            echo "- System_ext mapping files injected successfully."
         else
-            echo "  - Warning: Source system_ext mapping folder not found."
+            echo "- Warning: Source system_ext mapping folder not found."
         fi
     fi
     # ==============================================================================
@@ -1400,7 +1439,6 @@ PATCH_SELINUX() {
     if [ -d "$TARGET_ROM_SYSTEM_EXT_DIR" ]; then
         echo -e "- Patching selinux for system_ext"
 
-        # O find aqui já vai pegar e limpar tanto os arquivos que já existiam quanto os que você acabou de injetar no system_ext
         find "${TARGET_ROM_SYSTEM_EXT_DIR}/etc/selinux/mapping/" -type f -name "*.0.cil" | while read -r SELINUX_FILE; do
             # echo "  - Processing: $SELINUX_FILE"
 
@@ -1421,6 +1459,37 @@ PATCH_SELINUX() {
     else
         echo -e "- No system_ext directory found."
     fi
+}
+
+
+PATCH_VENDOR_INIT() {
+    echo " "
+
+    if [ "$#" -ne 1 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        return 1
+    fi
+
+    local TARGET_DIR="$1"
+    echo "- Swapping Vendor Init Configuration to Device Stock Baseline..."
+
+    local STOCK_DIR="${DEVICES_DIR}/$STOCK_DEVICE/Stock" 
+    local PORT_VENDOR_INIT="${TARGET_DIR}/vendor/etc/init"
+
+    # Verificação e substituição do arquivo de inicialização do Exynos 990
+    if [ -f "${STOCK_DIR}/vendor/etc/init/init.exynos990.rc" ]; then
+        echo "- Replacing init.exynos990.rc with internal stock reference..."
+        mkdir -p "$PORT_VENDOR_INIT"
+        cp -f "${STOCK_DIR}/vendor/etc/init/init.exynos990.rc" "${PORT_VENDOR_INIT}/init.exynos990.rc"
+        chmod 644 "${PORT_VENDOR_INIT}/init.exynos990.rc"
+    else
+        echo "- Warning: init.exynos990.rc not found inside Quantum's stock directory!"
+        echo "- Looking at: ${STOCK_DIR}/vendor/etc/init/init.exynos990.rc"
+    fi
+
+    echo "- Vendor Init patch step completed!"
+
+
 }
 
 
@@ -1538,6 +1607,46 @@ APPLY_CUSTOM_FLOATING_FEATURE() {
     UPDATE_FLOATING_FEATURE "$FLOATING_FEATURE_FILE_DIRECTORY" "SEC_FLOATING_FEATURE_GENAI_SUPPORT_SMART_LASSO" "TRUE"
     UPDATE_FLOATING_FEATURE "$FLOATING_FEATURE_FILE_DIRECTORY" "SEC_FLOATING_FEATURE_GENAI_SUPPORT_SPOT_FIXER" "TRUE"
     UPDATE_FLOATING_FEATURE "$FLOATING_FEATURE_FILE_DIRECTORY" "SEC_FLOATING_FEATURE_GENAI_SUPPORT_STYLE_TRANSFER" "TRUE"
+}
+
+
+PATCH_ARTISAN_ALIGNMENT_FEATURES() {
+    echo " "
+    if [ "$#" -ne 1 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        return 1
+    fi
+
+    local TARGET_DIR="$1"
+    echo "- Applying Artisan Feature Alignment & Resolution Fixes..."
+
+    local DUMP_DIR="/mnt/caddy/coisas_do_miguel/Port/MIO-KITCHEN-4.1.8-linux/oneui8parakangdelibs"
+    local PORT_SYS="${TARGET_DIR}/system/system"
+
+    # 1. Sincronizar permissões de recursos com o seu dump estável do S20
+    if [ -d "${DUMP_DIR}/system/system/etc/permissions" ]; then
+        echo "  -> Aligning Samsung core permissions (etc/permissions)..."
+        # Remove permissões exclusivas do S22 que causam conflitos
+        rm -f "${PORT_SYS}/etc/permissions/com.sec.feature"* 2>/dev/null
+        # Injeta as permissões corrigidas e mapeadas do seu dump do S20
+        cp -f "${DUMP_DIR}/system/system/etc/permissions/com.sec.feature"* "${PORT_SYS}/etc/permissions/"
+    fi
+
+    # 2. Correção de Mídia e Arquivos de Áudio (ALSA/Extractors)
+    # Garante que os caminhos de áudio conversem com as tabelas do mixer do kernel 4.19
+    if [ -d "${DUMP_DIR}/system/system/usr/share/alsa" ]; then
+        echo "  -> Copying ALSA audio configurations from stable dump..."
+        mkdir -p "${PORT_SYS}/usr/share/alsa"
+        cp -rf "${DUMP_DIR}/system/system/usr/share/alsa/"* "${PORT_SYS}/usr/share/alsa/"
+    fi
+
+    # 3. Forçar o controle dinâmico de resolução (WQHD/FHD/HD) via build.prop
+    # Isso simula o efeito do comando SET_FLOATING_FEATURE de forma global
+    echo "  -> Hardcoding Dynamic Resolution Control for Exynos 990..."
+    BUILD_PROP "$TARGET_DIR" "system" "ro.multimode.change" "true"
+UPDATE_FLOATING_FEATURE "SEC_FLOATING_FEATURE_COMMON_CONFIG_DYN_RESOLUTION_CONTROL" "WQHD,FHD,HD"
+
+    echo "    -> Feature alignment completed!"
 }
 
 
@@ -2241,6 +2350,154 @@ APPLY_CUSTOM_FEATURES() {
 }
 
 
+FIX_QUANTUM_SECURITY_ALIGNMENT() {
+    echo " "
+
+    if [ "$#" -ne 1 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        return 1
+    fi
+
+    local TARGET_DIR="$1"
+    echo "- Aligning Port Security Framework with Stock Vendor..."
+
+    # 2. Restore keystore hardware configuration permissions
+    if [ -f "${STOCK_SYS}/etc/permissions/android.hardware.keystore.xml" ]; then
+        mkdir -p "${PORT_SYS}/etc/permissions"
+        cp -f "${STOCK_SYS}/etc/permissions/android.hardware.keystore.xml" "${PORT_SYS}/etc/permissions/"
+    fi
+}
+
+
+PATCH_SYSTEM_NFC_STACK() {
+    echo " "
+
+    if [ "$#" -ne 1 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        return 1
+    fi
+
+    local TARGET_DIR="$1"
+    echo "- Syncing System-side NFC JNI Libraries and Configs from Stock..."
+
+    local STOCK_SYS="$DEVICES_DIR/$STOCK_DEVICE/Stock/system/system"
+    local PORT_SYS="${TARGET_DIR}/system/system"
+
+    # 1. Copiar as bibliotecas JNI nativas e pontes do NFC proprietário
+    local NFC_LIBS=(
+        "libnfc_sec_jni.so"
+        "libnfc_nci_jni.so"
+        "libsecnfc.so"
+    )
+
+    for lib in "${NFC_LIBS[@]}"; do
+        if [ -f "${STOCK_SYS}/lib64/${lib}" ]; then
+            mkdir -p "${PORT_SYS}/lib64"
+            cp -f "${STOCK_SYS}/lib64/${lib}" "${PORT_SYS}/lib64/${lib}"
+            echo "    -> Injected ${lib} into system/lib64"
+        fi
+        if [ -f "${STOCK_SYS}/lib/${lib}" ]; then
+            mkdir -p "${PORT_SYS}/lib"
+            cp -f "${STOCK_SYS}/lib/${lib}" "${PORT_SYS}/lib/${lib}"
+            echo "    -> Injected ${lib} into system/lib"
+        fi
+    done
+
+    # 2. Copiar as tabelas de calibração RF e mapas de chip do NFC Stock (Essencial para travar o ANR)
+    if [ -d "$STOCK_SYS/etc/nfc" ]; then
+        mkdir -p "$PORT_SYS/etc/nfc"
+        cp -rf "$STOCK_SYS/etc/nfc/." "$PORT_SYS/etc/nfc/"
+        echo "    -> Injected etc/nfc configuration stack"
+    fi
+
+    # Buscar firmwares complementares de NFC no system stock
+    if [ -d "$STOCK_SYS/etc/firmware" ]; then
+        mkdir -p "$PORT_SYS/etc/firmware"
+        find "$STOCK_SYS/etc/firmware/" -type f -name "*nfc*" | while read -r file; do
+            cp -f "$file" "$PORT_SYS/etc/firmware/$(basename "$file")"
+        done
+    fi
+
+    # 3. Mapear e restaurar permissões e sysconfigs do NFC da Samsung
+    mkdir -p "${PORT_SYS}/etc/permissions"
+    mkdir -p "${PORT_SYS}/etc/sysconfig"
+
+    find "$STOCK_SYS/etc/permissions/" -type f -name "*nfc*" | while read -r file; do
+        cp -f "$file" "$PORT_SYS/etc/permissions/$(basename "$file")"
+    done
+    
+    find "$STOCK_SYS/etc/sysconfig/" -type f -name "*nfc*" | while read -r file; do
+        cp -f "$file" "$PORT_SYS/etc/sysconfig/$(basename "$file")"
+    done
+}
+
+
+PATCH_SAMSUNG_CAMERA_LIBS() {
+    echo " "
+
+    if [ "$#" -ne 1 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        return 1
+    fi
+
+    local TARGET_DIR="$1"
+    echo "- Syncing Samsung Camera Libraries..."
+
+    # Define the stock device paths
+    local STOCK_ETC_DIR="$DEVICES_DIR/$STOCK_DEVICE/Stock/system/system/etc"
+    local STOCK_LIB_DIR="$DEVICES_DIR/$STOCK_DEVICE/Stock/system/system/lib"
+    local STOCK_LIB64_DIR="$DEVICES_DIR/$STOCK_DEVICE/Stock/system/system/lib64"
+    local LIB_LIST_FILE="${STOCK_ETC_DIR}/public.libraries-camera.samsung.txt"
+
+    # Define the target port destination paths
+    local PORT_ETC_DIR="${TARGET_DIR}/system/system/etc"
+    local PORT_LIB_DIR="${TARGET_DIR}/system/system/lib"
+    local PORT_LIB64_DIR="${TARGET_DIR}/system/system/lib64"
+
+    # Check if the stock configuration file exists
+    if [ ! -f "$LIB_LIST_FILE" ]; then
+        echo "  - Warning: $LIB_LIST_FILE not found in Stock device."
+        echo "  - Skipping Samsung camera libraries sync."
+        return 0
+    fi
+
+    echo "  - Reading library list from stock device..."
+
+    # Read the file line by line, ignoring empty lines or comments
+    grep -v '^#' "$LIB_LIST_FILE" | grep -v '^$' | tr -d '\r' | while read -r lib_name; do
+        # Ensure the filename has the .so extension if not explicitly present
+        if [[ "$lib_name" != *.so ]]; then
+            lib_name="${lib_name}.so"
+        fi
+
+        echo "  - Processing: $lib_name"
+
+        # 1. Check and sync 32-bit library (lib)
+        if [ -f "${STOCK_LIB_DIR}/${lib_name}" ]; then
+            mkdir -p "$PORT_LIB_DIR"
+            # Overwrite if it exists or copy if missing
+            cp -f "${STOCK_LIB_DIR}/${lib_name}" "${PORT_LIB_DIR}/${lib_name}"
+            echo "    -> Injected into system/lib (32-bit)"
+        fi
+
+        # 2. Check and sync 64-bit library (lib64)
+        if [ -f "${STOCK_LIB64_DIR}/${lib_name}" ]; then
+            mkdir -p "$PORT_LIB64_DIR"
+            # Overwrite if it exists or copy if missing
+            cp -f "${STOCK_LIB64_DIR}/${lib_name}" "${PORT_LIB64_DIR}/${lib_name}"
+            echo "    -> Injected into system/lib64 (64-bit)"
+        fi
+    done
+
+    # 3. Copy the configuration file itself to the port so the system knows what to load
+    echo "  - Copying camera libraries configuration file to port..."
+    mkdir -p "$PORT_ETC_DIR"
+    cp -f "$LIB_LIST_FILE" "${PORT_ETC_DIR}/public.libraries-camera.samsung.txt"
+
+    echo "  - Success: Samsung camera libraries synchronized successfully."
+}
+
+
 DECODE_OMC() {
     echo " "
 
@@ -2445,10 +2702,16 @@ GEN_FILE_CONTEXTS() {
 ENABLE_DEBUG_PORT() {
     echo " "
 
+    if [ "$#" -ne 1 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        return 1
+    fi
+
+        echo -e "Applying debug and seamless ADB patches to system, product & system_ext."
     local USB_RC="${TARGET_DIR}/system/system/etc/init/hw/init.usb.rc"
     if [ -f "$USB_RC" ]; then
         if ! grep -q "persist.vendor.radio.port_index" "$USB_RC"; then
-            echo "  - Patching init.usb.rc fallback trigger..."
+            echo "- Patching init.usb.rc fallback trigger"
             {
                 echo ""
                 echo "on property:persist.vendor.radio.port_index=\"\""
@@ -2456,8 +2719,13 @@ ENABLE_DEBUG_PORT() {
             } >> "$USB_RC"
         fi
     fi
-    
-    echo "  - Debug and seamless ADB patches applied successfully to system, product & system_ext."
+echo "- Patching build.prop"
+
+BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "product" "persist.sys.usb.config" "adb"
+BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system_ext" "persist.sys.usb.config" "adb"
+BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system" "ro.adb.secure" "0"
+BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system" "ro.logd.kernel" "true"
+BUILD_PROP "$FIRM_DIR/$TARGET_DEVICE" "system" "persist.log.semlevel" "0xFFFFFFFF"
 }
 
 
