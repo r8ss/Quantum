@@ -10,7 +10,7 @@ on:
       USE_UI_8_TETHERING_APEX:
         description: "Set True if your kernel BPF version is 5.4 (lower than 5.10)."
         required: true
-        default: true"
+        default: "true"
       TARGET_DEVICE:
         description: "TARGET_DEVICE_MODEL."
         required: true
