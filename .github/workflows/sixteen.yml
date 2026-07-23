@@ -128,13 +128,10 @@ jobs:
           export TARGET_DEVICE="${{ github.event.inputs.TARGET_DEVICE }}"
           bash scripts/images_zip.sh
 
-      - name: Upload file in GoFile & Create Release.
-        env:
-          GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
-          STOCK_DEVICE: ${{ github.event.inputs.STOCK_DEVICE }}
-          TARGET_DEVICE: ${{ github.event.inputs.TARGET_DEVICE }}
-          OUTPUT_FILESYSTEM: ${{ github.event.inputs.OUTPUT_FILESYSTEM }}
-          COMPRESS_IMG_TO_XZ: ${{ github.event.inputs.COMPRESS_IMG_TO_XZ }}
-          USE_UI_8_TETHERING_APEX: ${{ github.event.inputs.USE_UI_8_TETHERING_APEX }}
-        run: |
-           bash release.sh
+
+      - name: Upload ROM Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: QuantumROM-${{ github.event.inputs.STOCK_DEVICE }}
+          path: |
+            OUT/QuantumROM*.zip*
