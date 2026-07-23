@@ -35,7 +35,7 @@ OUTPUT_FILESYSTEM="erofs"
 # Specific target firmware version (leave empty to download the latest)
 TARGET_FW_VERSION=""
 
-# Generate a flashable zip at the end of the build? (true/false)
+# Generate a flashable zip at the end of the build? (EXPERIMENTAL)
 # If false, an images zip (raw .img + fastboot sh script) will be generated instead.
 CREATE_FLASHABLE_ZIP="false"
 
