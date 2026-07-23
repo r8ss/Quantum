@@ -1926,6 +1926,23 @@ FIX_CAMERA() {
 }
 
 
+OVERRIDE_STOCK_VENDOR_ODM() {
+    if [ "$#" -ne 1 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        return 1
+    fi
+
+    local EXTRACTED_FIRM_DIR="$1"
+    local part
+
+    for part in vendor odm; do
+        if [[ ",$BUILD_PARTITIONS," == *",${part},"* ]] && [ -f "${DEVICES_DIR}/${STOCK_DEVICE}/extra/${part}.img" ]; then
+            echo "Using stock ${part}.img from ${STOCK_DEVICE}/extra"
+            cp -af "${DEVICES_DIR}/${STOCK_DEVICE}/extra/${part}.img" "${EXTRACTED_FIRM_DIR}/${part}.img"
+        fi
+    done
+}
+
 APPLY_STOCK_CONFIG() {
     echo " "
 

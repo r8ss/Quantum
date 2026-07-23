@@ -31,15 +31,7 @@ source "$(pwd)/scripts/QuantumRom.sh"
 EXTRACT_FIRMWARE "$FIRM_DIR/$TARGET_DEVICE"
 EXTRACT_SUPER_IMG "$FIRM_DIR/$TARGET_DEVICE"
 
-# Override vendor.img and odm.img with stock device images (if in BUILD_PARTITIONS and present in extra/)
-if [ -f "${DEVICES_DIR}/${STOCK_DEVICE}/extra/vendor.img" ]; then
-    echo "Using stock vendor.img from ${STOCK_DEVICE}/extra"
-    cp -af "${DEVICES_DIR}/${STOCK_DEVICE}/extra/vendor.img" "${FIRM_DIR}/${TARGET_DEVICE}/vendor.img"
-fi
-if [ -f "${DEVICES_DIR}/${STOCK_DEVICE}/extra/odm.img" ]; then
-    echo "Using stock odm.img from ${STOCK_DEVICE}/extra"
-    cp -af "${DEVICES_DIR}/${STOCK_DEVICE}/extra/odm.img" "${FIRM_DIR}/${TARGET_DEVICE}/odm.img"
-fi
+OVERRIDE_STOCK_VENDOR_ODM "$FIRM_DIR/$TARGET_DEVICE"
 
 EXTRACT_FIRMWARE_IMG "$FIRM_DIR/$TARGET_DEVICE" "all"
 
