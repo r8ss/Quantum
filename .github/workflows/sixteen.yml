@@ -67,31 +67,32 @@ jobs:
           source scripts/QuantumRom.sh
           EXTRACT_FIRMWARE "FW/${{ github.event.inputs.TARGET_DEVICE }}"
 
-      - name: Download extra partition images (odm/vendor) via Pixeldrain
+      - name: Download extra partition images (odm/vendor) from GitHub Release
         env:
           STOCK_DEVICE: ${{ github.event.inputs.STOCK_DEVICE }}
+          GH_TOKEN: ${{ secrets.GIT_TOKEN }}
+          RELEASE_REPO: "miguelbarretoo/QuantumROM"   # repo where the release assets live
+          RELEASE_TAG: "extra-files"                        # tag of the release holding odm/vendor imgs
         run: |
           set -e
 
-          declare -A PIXELDRAIN_ODM_ID
-          declare -A PIXELDRAIN_VENDOR_ID
+          # ==== Devices that need extra odm/vendor files ====
+          SUPPORTED_DEVICES=("SM-G780F" "SM-G980F" "SM-G988B")
+          # Add new devices to the array above. As long as you upload
+          # "<DEVICE>-odm.img" and/or "<DEVICE>-vendor.img" as assets
+          # in the release, no further changes are needed here.
+          # =====================================================
 
-          # ==== Add new devices here ====
-          PIXELDRAIN_ODM_ID["SM-G780F"]="8QZeZG9Z"
-          PIXELDRAIN_VENDOR_ID["SM-G780F"]="kE2qK5Td"
+          IS_SUPPORTED=false
+          for d in "${SUPPORTED_DEVICES[@]}"; do
+            if [ "$d" == "$STOCK_DEVICE" ]; then
+              IS_SUPPORTED=true
+              break
+            fi
+          done
 
-          PIXELDRAIN_ODM_ID["SM-G980F"]="ZkkSUr4T"
-          PIXELDRAIN_VENDOR_ID["SM-G980F"]="PHHa2wGZ"
-
-          PIXELDRAIN_ODM_ID["SM-G988B"]="hm7YVEw2"
-          PIXELDRAIN_VENDOR_ID["SM-G988B"]="e3Rtkrsp"
-          # ===============================
-
-          ODM_ID="${PIXELDRAIN_ODM_ID[$STOCK_DEVICE]:-}"
-          VENDOR_ID="${PIXELDRAIN_VENDOR_ID[$STOCK_DEVICE]:-}"
-
-          if [ -z "$ODM_ID" ] && [ -z "$VENDOR_ID" ]; then
-            echo "ℹ️ $STOCK_DEVICE does not need extra odm/vendor files via Pixeldrain. Skipping."
+          if [ "$IS_SUPPORTED" = false ]; then
+            echo "ℹ️ $STOCK_DEVICE does not need extra odm/vendor files. Skipping."
             exit 0
           fi
 
@@ -101,19 +102,28 @@ jobs:
 
           mkdir -p "$TMP_ODM" "$TMP_VENDOR" "$EXTRAS_DIR"
 
-          if [ -n "$ODM_ID" ]; then
-            echo "⬇️  Downloading odm.img for $STOCK_DEVICE..."
-            curl -L "https://pixeldrain.com/api/file/${ODM_ID}" -o "$TMP_ODM/odm.img"
+          ODM_ASSET="${STOCK_DEVICE}-odm.img"
+          VENDOR_ASSET="${STOCK_DEVICE}-vendor.img"
+
+          BASE_URL="https://github.com/${RELEASE_REPO}/releases/download/${RELEASE_TAG}"
+
+          echo "⬇️  Downloading odm.img for $STOCK_DEVICE..."
+          if curl -f -L -H "Authorization: Bearer ${GH_TOKEN}" \
+              "${BASE_URL}/${ODM_ASSET}" -o "$TMP_ODM/odm.img"; then
             mv "$TMP_ODM/odm.img" "$EXTRAS_DIR/odm.img"
+            echo "✅ odm.img saved to $EXTRAS_DIR"
+          else
+            echo "⚠️  No odm.img asset found for $STOCK_DEVICE, skipping."
           fi
 
-          if [ -n "$VENDOR_ID" ]; then
-            echo "⬇️  Downloading vendor.img for $STOCK_DEVICE..."
-            curl -L "https://pixeldrain.com/api/file/${VENDOR_ID}" -o "$TMP_VENDOR/vendor.img"
+          echo "⬇️  Downloading vendor.img for $STOCK_DEVICE..."
+          if curl -f -L -H "Authorization: Bearer ${GH_TOKEN}" \
+              "${BASE_URL}/${VENDOR_ASSET}" -o "$TMP_VENDOR/vendor.img"; then
             mv "$TMP_VENDOR/vendor.img" "$EXTRAS_DIR/vendor.img"
+            echo "✅ vendor.img saved to $EXTRAS_DIR"
+          else
+            echo "⚠️  No vendor.img asset found for $STOCK_DEVICE, skipping."
           fi
-
-          echo "✅ Extra files ready in $EXTRAS_DIR"
 
       - name: Start Rom Build For ${{ github.event.inputs.STOCK_DEVICE }}
         run: |
