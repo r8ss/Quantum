@@ -82,6 +82,9 @@ jobs:
 
           PIXELDRAIN_ODM_ID["SM-G980F"]="ZkkSUr4T"
           PIXELDRAIN_VENDOR_ID["SM-G980F"]="PHHa2wGZ"
+
+          PIXELDRAIN_ODM_ID["SM-G988B"]="hm7YVEw2"
+          PIXELDRAIN_VENDOR_ID["SM-G988B"]="e3Rtkrsp"
           # ===============================
 
           ODM_ID="${PIXELDRAIN_ODM_ID[$STOCK_DEVICE]:-}"
@@ -92,7 +95,7 @@ jobs:
             exit 0
           fi
 
-          EXTRAS_DIR="QuantumROM/Devices/${STOCK_DEVICE}/extras"
+          EXTRAS_DIR="QuantumROM/Devices/${STOCK_DEVICE}/extra"
           TMP_ODM="extra-files/odm"
           TMP_VENDOR="extra-files/vendor"
 
