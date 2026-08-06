@@ -6,7 +6,7 @@ on:
       STOCK_DEVICE:
         description: "STOCK_DEVICE_MODEL or None"
         required: true
-        default: "SM-G980F"
+        default: "SM-G780F"
       USE_UI_8_TETHERING_APEX:
         description: "Set True if your kernel BPF version is 5.4 (lower than 5.10)."
         required: true
@@ -18,11 +18,11 @@ on:
       TARGET_DEVICE_CSC:
         description: "TARGET_DEVICE_CSC."
         required: true
-        default: "EUX"
+        default: "ZTO"
       TARGET_DEVICE_IMEI:
         description: "TARGET_DEVICE_IMEI."
         required: true
-        default: "350389910895757"
+        default: "358615315599616"
       OUTPUT_FILESYSTEM:
         description: "OUTPUT_FILESYSTEM. e.g erofs / ext4 / f2fs"
         required: true
@@ -164,58 +164,17 @@ jobs:
           export TARGET_DEVICE="${{ github.event.inputs.TARGET_DEVICE }}"
           bash scripts/flashable_zip.sh
 
-      - name: Upload to Pixeldrain
-        if: ${{ github.event.inputs.PIXELDRAIN_API_KEY != '' }}
-        env:
-          PIXELDRAIN_API_KEY: ${{ github.event.inputs.PIXELDRAIN_API_KEY }}
+      - name: Upload to GoFile
         run: |
-          ZIP_PATH="$(find OUT -name "QuantumROM*.zip" | head -n1)"
+          ZIP_FILE=$(find OUT -maxdepth 1 -type f -name "QuantumROM*.zip" | head -n 1)
 
-          if [ -z "$ZIP_PATH" ]; then
-            echo "❌ No zip found in OUT/ to upload."
-            exit 1
-          fi
+          RESPONSE=$(curl -s -F "file=@$ZIP_FILE" -F "token=${{ secrets.GOFILE_TOKEN }}" -F "folderId=${{ secrets.GOFILE_FOLDER_ID }}" "https://upload-eu-par.gofile.io/uploadFile")
 
-          ZIP_NAME="$(basename "$ZIP_PATH")"
-          echo "📤 Uploading $ZIP_NAME to Pixeldrain..."
+          echo "Uploaded successfully! Download link:"
+          echo "$RESPONSE" | jq -r '.data.downloadPage'
 
-          RESPONSE="$(curl -s \
-            -u ":${PIXELDRAIN_API_KEY}" \
-            -F "file=@${ZIP_PATH};filename=${ZIP_NAME}" \
-            "https://pixeldrain.com/api/file")"
+          echo "MD5:"
+          md5sum "$ZIP_FILE"
 
-          FILE_ID="$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin).get('id',''))")"
-
-          if [ -z "$FILE_ID" ]; then
-            echo "❌ Pixeldrain upload failed. Response: $RESPONSE"
-            exit 1
-          fi
-
-          PD_LINK="https://pixeldrain.com/u/${FILE_ID}"
-          echo ""
-          echo "✅ Upload successful!"
-          echo "🔗 Pixeldrain link: $PD_LINK"
-          echo ""
-          echo "PD_LINK=$PD_LINK" >> "$GITHUB_ENV"
-
-      - name: Print download links
-        run: |
-          echo ""
-          echo "========================================"
-          echo "         QuantumROM Build Complete"
-          echo "========================================"
-          ZIP_NAME="$(find OUT -name "QuantumROM*.zip" -printf '%f\n' | head -n1)"
-          echo "📦 ROM: $ZIP_NAME"
-          if [ -n "${PD_LINK:-}" ]; then
-            echo "🔗 Pixeldrain: $PD_LINK"
-          else
-            echo "ℹ️  Pixeldrain: skipped (no API key provided)"
-          fi
-          echo "========================================"
-
-      - name: Upload ROM Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: QuantumROM-${{ github.event.inputs.STOCK_DEVICE }}
-          path: |
-            OUT/QuantumROM*.zip*
+          echo "SHA256:"
+          sha256sum "$ZIP_FILE"
